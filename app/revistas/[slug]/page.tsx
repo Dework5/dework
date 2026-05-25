@@ -17,7 +17,7 @@ const PUBLICATIONS_FALLBACK = [
     name: 'San Diego La Revista',
     short_name: 'SDLR',
     shortName: 'SDLR',
-    description: 'La revista de la comunidad de San Diego y zona norte de Buenos Aires. Edición mensual desde 2014.',
+    description: 'La revista exclusiva del country San Diego. Edición mensual desde 2014.',
     is_active: true,
   },
   {

@@ -1,11 +1,13 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 export function HeroSection({ issue }: { issue: any }) {
   const issueNumber = issue?.issue_number || issue?.issueNumber || 139
   const slug = issue?.publication_slug || issue?.slug || 'san-diego-la-revista'
+  const coverUrl = issue?.cover_url || null
 
   return (
     <section className="relative min-h-screen flex flex-col bg-dw-black overflow-hidden">
@@ -22,15 +24,15 @@ export function HeroSection({ issue }: { issue: any }) {
         </span>
       </div>
 
-      {/* ── Spacer — pushes content to lower half, always respects navbar ── */}
+      {/* Spacer */}
       <div className="flex-1 min-h-[11rem]" aria-hidden />
 
-      {/* ── Main content ── */}
+      {/* Main content */}
       <div className="relative z-10 max-w-7xl mx-auto w-full px-8 md:px-16 pb-20">
 
         <div className="grid md:grid-cols-[1fr_220px] gap-12 items-end">
 
-          {/* LEFT — brand + copy + CTAs */}
+          {/* LEFT */}
           <div>
             {/* Badge */}
             <motion.div
@@ -38,7 +40,7 @@ export function HeroSection({ issue }: { issue: any }) {
               className="flex items-center gap-3 mb-10">
               <span className="w-5 h-px bg-dw-border" />
               <span className="text-dw-muted text-[10px] tracking-[0.28em] uppercase">
-                Dework · Agencia Editorial · Pilar, Buenos Aires
+                Dework &middot; Agencia Editorial &middot; Pilar, Buenos Aires
               </span>
             </motion.div>
 
@@ -56,7 +58,7 @@ export function HeroSection({ issue }: { issue: any }) {
             {/* Description */}
             <motion.p
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28, duration: 0.7 }}
-              className="text-dw-muted text-sm leading-[1.75] max-w-[400px] mb-10">
+              className="text-dw-sub text-sm leading-[1.75] max-w-[400px] mb-10">
               Diseñamos y publicamos las revistas de San Diego, Pilar y zona norte de Buenos Aires.
               Más de 11 años y 201 ediciones en circulación.
             </motion.p>
@@ -67,11 +69,11 @@ export function HeroSection({ issue }: { issue: any }) {
               className="flex flex-wrap items-center gap-5">
               <Link href="/#publicaciones"
                 className="bg-dw-white text-dw-black text-[11px] tracking-[0.18em] uppercase px-8 py-4 font-semibold hover:bg-dw-text transition-colors duration-200">
-                VER PUBLICACIONES →
+                VER PUBLICACIONES &rarr;
               </Link>
-              <Link href={`/revistas/${slug}/${issueNumber}`}
+              <Link href={/revistas//}
                 className="text-dw-sub text-[11px] tracking-[0.18em] uppercase hover:text-dw-white transition-colors border-b border-dw-border pb-px">
-                ÚLTIMA EDICIÓN #{issueNumber}
+                &Uacute;LTIMA EDICI&Oacute;N #{issueNumber}
               </Link>
             </motion.div>
           </div>
@@ -81,22 +83,43 @@ export function HeroSection({ issue }: { issue: any }) {
             initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.22, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="hidden md:block self-end">
-            <Link href={`/revistas/${slug}/${issueNumber}`} className="block group">
-              <div
-                className="aspect-[3/4] bg-dw-surface border border-dw-border relative overflow-hidden mb-4 group-hover:border-dw-sub transition-colors duration-300"
-                style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #111 0,#111 1px,transparent 0,transparent 14px)' }}>
-                <div className="absolute inset-0 flex flex-col justify-between p-5">
-                  <span className="text-dw-muted text-[9px] tracking-[0.25em] uppercase">San Diego</span>
-                  <div>
-                    <p className="font-display italic text-dw-border text-5xl leading-none mb-1.5 group-hover:text-dw-muted transition-colors">
-                      #{issueNumber}
-                    </p>
-                    <p className="text-dw-muted text-[9px] tracking-widest uppercase">Edición actual</p>
-                  </div>
-                </div>
+            <Link href={/revistas//} className="block group">
+              <div className="aspect-[3/4] bg-dw-surface border border-dw-border relative overflow-hidden mb-4 group-hover:border-dw-sub transition-colors duration-300">
+                {coverUrl ? (
+                  <>
+                    <Image
+                      src={coverUrl}
+                      alt={San Diego La Revista #}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="220px"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="font-display italic text-white/50 text-5xl leading-none mb-1.5 group-hover:text-white/75 transition-colors">
+                        #{issueNumber}
+                      </p>
+                      <p className="text-white/50 text-[9px] tracking-widest uppercase">Edición actual</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="absolute inset-0"
+                      style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #111 0,#111 1px,transparent 0,transparent 14px)' }} />
+                    <div className="absolute inset-0 flex flex-col justify-between p-5">
+                      <span className="text-dw-muted text-[9px] tracking-[0.25em] uppercase">San Diego</span>
+                      <div>
+                        <p className="font-display italic text-dw-border text-5xl leading-none mb-1.5 group-hover:text-dw-muted transition-colors">
+                          #{issueNumber}
+                        </p>
+                        <p className="text-dw-muted text-[9px] tracking-widest uppercase">Edición actual</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
               <p className="text-dw-muted text-[10px] tracking-[0.2em] uppercase group-hover:text-dw-sub transition-colors">
-                Leer ahora →
+                Leer ahora &rarr;
               </p>
             </Link>
           </motion.div>
