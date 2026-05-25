@@ -91,6 +91,7 @@ export function HeroSection({ issue }: { issue: any }) {
                       src={coverUrl}
                       alt={`San Diego La Revista #${issueNumber}`}
                       fill
+                      unoptimized
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="220px"
                     />

@@ -32,6 +32,7 @@ export function CoverImage({ src, alt, issueNumber, shortName }: CoverImageProps
       alt={alt}
       fill
       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+      unoptimized
       className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
       onError={() => setFailed(true)}
     />

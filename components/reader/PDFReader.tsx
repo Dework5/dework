@@ -12,11 +12,10 @@ interface PDFReaderProps {
   totalPages?: number
 }
 
-type FlipPhase = 'idle' | 'exit' | 'enter-start' | 'enter'
+type FlipPhase = 'idle' | 'lifting' | 'settling'
 
-const HALF = 170 // ms per half-flip
+const LIFT_MS = 360
 
-// Synthetic paper-rustle via Web Audio API
 function playPageSound() {
   try {
     const ctx  = new AudioContext()
@@ -25,36 +24,30 @@ function playPageSound() {
     const len  = Math.floor(sr * dur)
     const buf  = ctx.createBuffer(1, len, sr)
     const data = buf.getChannelData(0)
-
     for (let i = 0; i < len; i++) {
       const t   = i / len
       const env = Math.pow(1 - t, 2.2) * (1 + Math.sin(t * Math.PI * 2) * 0.15)
       data[i]   = (Math.random() * 2 - 1) * env * 0.38
     }
-
     const src = ctx.createBufferSource()
     src.buffer = buf
-
     const bpf = ctx.createBiquadFilter()
     bpf.type            = 'bandpass'
     bpf.frequency.value = 3000
     bpf.Q.value         = 0.7
-
     const gain      = ctx.createGain()
     gain.gain.value = 0.65
-
     src.connect(bpf)
     bpf.connect(gain)
     gain.connect(ctx.destination)
     src.start()
     src.onended = () => ctx.close().catch(() => {})
-  } catch {
-    // AudioContext blocked or unavailable - silent fallback
-  }
+  } catch { /* silent */ }
 }
 
 export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
-  const canvasRef     = useRef<HTMLCanvasElement>(null)
+  const canvasFrontRef      = useRef<HTMLCanvasElement>(null)
+  const canvasBackRef       = useRef<HTMLCanvasElement>(null)
   const [pdf,          setPdf]          = useState<pdfjsLib.PDFDocumentProxy | null>(null)
   const [currentPage,  setCurrentPage]  = useState(1)
   const [numPages,     setNumPages]     = useState(totalPages || 0)
@@ -63,16 +56,23 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
   const [flipPhase,    setFlipPhase]    = useState<FlipPhase>('idle')
   const [flipDir,      setFlipDir]      = useState<'forward' | 'backward'>('forward')
   const [error,        setError]        = useState<string | null>(null)
-  const renderTaskRef  = useRef<pdfjsLib.RenderTask | null>(null)
-  const pageDims       = useRef({ w: 595, h: 842 })
+  const [loadSlow,     setLoadSlow]     = useState(false)
+  const isFlipping     = useRef(false)
+  const scaleRef       = useRef(1)
+  const renderTaskFront = useRef<pdfjsLib.RenderTask | null>(null)
+  const renderTaskBack  = useRef<pdfjsLib.RenderTask | null>(null)
+  const pageDims        = useRef({ w: 595, h: 842 })
 
+  // ── Scale calculation ───────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
-    const TOP = 56, BOTTOM = 56, PAD_V = 24, PAD_H = 48
+    const TOP = 56, BOTTOM = 56, PAD_V = 24, PAD_H = 40
     const availH = window.innerHeight - TOP - BOTTOM - PAD_V * 2
     const availW = window.innerWidth  - PAD_H * 2
     const { w, h } = pageDims.current
-    setScale(Math.max(0.3, Math.min(availH / h, availW / w, 3)))
+    const s = Math.max(0.3, Math.min(availH / h, availW / w, 3))
+    setScale(s)
+    scaleRef.current = s
   }, [])
 
   useEffect(() => {
@@ -81,6 +81,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     return () => window.removeEventListener('resize', calcScale)
   }, [calcScale])
 
+  // ── Track view ──────────────────────────────────────────────────────
   useEffect(() => {
     let sid = sessionStorage.getItem('dework_session')
     if (!sid) { sid = crypto.randomUUID(); sessionStorage.setItem('dework_session', sid) }
@@ -90,16 +91,23 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     }).catch(() => {})
   }, [issueId])
 
+  // ── Load PDF ────────────────────────────────────────────────────────
   useEffect(() => {
     setIsLoading(true)
     setError(null)
+    setLoadSlow(false)
+
+    const slowTimer = setTimeout(() => setLoadSlow(true), 18000)
+
     const task = pdfjsLib.getDocument({
       url: pdfUrl,
       cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
       cMapPacked: true,
+      rangeChunkSize: 65536,
     })
     task.promise
       .then(async doc => {
+        clearTimeout(slowTimer)
         setPdf(doc)
         setNumPages(doc.numPages)
         const p1 = await doc.getPage(1)
@@ -107,57 +115,87 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
         pageDims.current = { w: vp.width, h: vp.height }
         calcScale()
         setIsLoading(false)
+        setLoadSlow(false)
       })
-      .catch(() => { setError('No se pudo cargar el PDF.'); setIsLoading(false) })
-    return () => { task.destroy().catch(() => {}) }
+      .catch(() => {
+        clearTimeout(slowTimer)
+        setError('No se pudo cargar el PDF.')
+        setIsLoading(false)
+      })
+    return () => { clearTimeout(slowTimer); task.destroy().catch(() => {}) }
   }, [pdfUrl, calcScale])
 
-  const renderPage = useCallback(async (pageNum: number, s: number) => {
-    if (!pdf || !canvasRef.current) return
-    if (renderTaskRef.current) { renderTaskRef.current.cancel() }
+  // ── Render a page to a specific canvas ─────────────────────────────
+  const renderToCanvas = useCallback(async (
+    pageNum: number,
+    s: number,
+    canvas: HTMLCanvasElement | null,
+    taskRef: React.MutableRefObject<pdfjsLib.RenderTask | null>
+  ) => {
+    if (!pdf || !canvas) return
+    if (taskRef.current) taskRef.current.cancel()
     try {
       const page     = await pdf.getPage(pageNum)
       const viewport = page.getViewport({ scale: s })
-      const canvas   = canvasRef.current
-      if (!canvas) return
       const ctx = canvas.getContext('2d')
       if (!ctx) return
       canvas.height = viewport.height
       canvas.width  = viewport.width
       const t = page.render({ canvasContext: ctx, viewport, canvas })
-      renderTaskRef.current = t
+      taskRef.current = t
       await t.promise
-      const sid = sessionStorage.getItem('dework_session') || ''
-      fetch('/api/track-page', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ issueId, sessionId: sid, pageNumber: pageNum }),
-      }).catch(() => {})
     } catch (e: unknown) {
       if ((e as { name?: string })?.name !== 'RenderingCancelledException') console.error(e)
     }
-  }, [pdf, issueId])
+  }, [pdf])
 
+  // ── Initial + scale-change render to front canvas ───────────────────
   useEffect(() => {
-    if (pdf) renderPage(currentPage, scale)
-  }, [pdf, currentPage, scale, renderPage])
+    if (pdf && (flipPhase === 'idle') && !isFlipping.current) {
+      renderToCanvas(currentPage, scale, canvasFrontRef.current, renderTaskFront)
+    }
+  }, [pdf, currentPage, scale, flipPhase, renderToCanvas])
 
-  const goTo = useCallback((p: number) => {
-    if (p < 1 || p > numPages || isLoading || flipPhase !== 'idle') return
-    const dir: 'forward' | 'backward' = p > currentPage ? 'forward' : 'backward'
-    playPageSound()
-    setFlipDir(dir)
-    setFlipPhase('exit')
-    setTimeout(() => {
-      setCurrentPage(p)
-      setFlipPhase('enter-start')
+  // ── Transition end: front has peeled away → swap content → snap back ─
+  const handleTransitionEnd = useCallback((e: React.TransitionEvent) => {
+    if (e.propertyName !== 'transform' || flipPhase !== 'lifting') return
+    setFlipPhase('settling')
+
+    // Copy pre-rendered back canvas onto front canvas
+    const front = canvasFrontRef.current
+    const back  = canvasBackRef.current
+    if (front && back) {
+      front.width  = back.width
+      front.height = back.height
+      front.getContext('2d')?.drawImage(back, 0, 0)
+    }
+
+    // Two rAFs: let React commit the 'settling' style (rotateY 0 / no transition) first
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setFlipPhase('enter')
-          setTimeout(() => setFlipPhase('idle'), HALF)
-        })
+        isFlipping.current = false
+        setFlipPhase('idle')
+        const sid = sessionStorage.getItem('dework_session') || ''
+        fetch('/api/track-page', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ issueId, sessionId: sid, pageNumber: currentPage }),
+        }).catch(() => {})
       })
-    }, HALF)
-  }, [numPages, isLoading, currentPage, flipPhase])
+    })
+  }, [flipPhase, currentPage, issueId])
+
+  // ── Navigate to page ────────────────────────────────────────────────
+  const goTo = useCallback(async (p: number) => {
+    if (!pdf || p < 1 || p > numPages || isLoading || isFlipping.current) return
+    const dir: 'forward' | 'backward' = p > currentPage ? 'forward' : 'backward'
+    isFlipping.current = true
+    setFlipDir(dir)
+    // Pre-render destination to back canvas while front is still showing
+    await renderToCanvas(p, scaleRef.current, canvasBackRef.current, renderTaskBack)
+    setCurrentPage(p)
+    playPageSound()
+    setFlipPhase('lifting')
+  }, [pdf, numPages, isLoading, currentPage, renderToCanvas])
 
   const prevPage = useCallback(() => goTo(currentPage - 1), [goTo, currentPage])
   const nextPage = useCallback(() => goTo(currentPage + 1), [goTo, currentPage])
@@ -178,26 +216,40 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     if (Math.abs(dx) > 45) { dx > 0 ? nextPage() : prevPage() }
   }
 
-  const canvasWrapStyle = (): React.CSSProperties => {
-    const P = 'perspective(1400px)'
-    switch (flipPhase) {
-      case 'exit':
-        return { transition: `transform ${HALF}ms cubic-bezier(.55,.0,1,.45)`,
-                 transform:  `${P} rotateY(${flipDir === 'forward' ? -90 : 90}deg)` }
-      case 'enter-start':
-        return { transition: 'none',
-                 transform:  `${P} rotateY(${flipDir === 'forward' ? 90 : -90}deg)` }
-      case 'enter':
-        return { transition: `transform ${HALF}ms cubic-bezier(.0,.55,.45,1)`,
-                 transform:  `${P} rotateY(0deg)` }
-      default:
-        return { transition: 'none', transform: `${P} rotateY(0deg)` }
+  // ── Front canvas CSS: peels from bound edge ──────────────────────────
+  const frontStyle = (): React.CSSProperties => {
+    const origin = flipDir === 'forward' ? '0% 50%' : '100% 50%'
+    const angle  = flipDir === 'forward' ? -90 : 90
+    if (flipPhase === 'lifting') {
+      return {
+        transformOrigin: origin,
+        transition: `transform ${LIFT_MS}ms cubic-bezier(.4,0,.9,.6)`,
+        transform: `rotateY(${angle}deg)`,
+        willChange: 'transform',
+      }
+    }
+    return {
+      transformOrigin: origin,
+      transition: 'none',
+      transform: 'rotateY(0deg)',
+      willChange: 'auto',
     }
   }
 
+  const frameStyle: React.CSSProperties = {
+    borderRadius: 2,
+    borderLeft:   '3px solid rgba(100,80,55,0.18)',
+    borderRight:  '1px solid rgba(180,160,130,0.25)',
+    borderTop:    '1px solid rgba(180,160,130,0.20)',
+    borderBottom: '1px solid rgba(120,100,70,0.25)',
+    background:   '#FEFDFB',
+    boxShadow:    '0 1px 2px rgba(0,0,0,0.06),0 4px 10px rgba(0,0,0,0.10),0 12px 30px rgba(0,0,0,0.16),0 35px 70px rgba(0,0,0,0.22),inset 0 1px 0 rgba(255,255,255,0.95),inset -3px 0 8px rgba(0,0,0,0.04)',
+    overflow:     'hidden',
+  }
+
   const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
-  const estW = Math.round(pageDims.current.w * scale) || 300
-  const estH = Math.round(pageDims.current.h * scale) || 424
+  const estW     = Math.round(pageDims.current.w * scale) || 300
+  const estH     = Math.round(pageDims.current.h * scale) || 424
 
   if (error) {
     return (
@@ -225,6 +277,8 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
       onTouchEnd={onTouchEnd}
     >
       <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 0 }}>
+
+        {/* Navigation hotspots */}
         {!isLoading && currentPage > 1 && (
           <button onClick={prevPage} aria-label="Anterior"
             style={{ position: 'absolute', left: 0, top: 0, width: '22%', height: '100%', zIndex: 10, background: 'transparent', border: 'none', cursor: 'w-resize', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 14 }}
@@ -245,14 +299,15 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
             </div>
           </button>
         )}
+
         {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, zIndex: 2 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, zIndex: 2, padding: '0 20px', maxWidth: '100%', textAlign: 'center' }}>
             <div className="animate-pulse" style={{
-              width: estW, height: estH,
+              width: estW, height: estH, maxWidth: '85vw',
               background: 'linear-gradient(160deg,#F2EDE6 25%,#F8F5F1 50%,#F2EDE6 75%)',
               borderRadius: 2,
               border: '1px solid rgba(180,155,120,0.3)',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.10), 0 8px 20px rgba(0,0,0,0.14), 0 30px 60px rgba(0,0,0,0.20), inset 0 0 0 1px rgba(255,255,255,0.85)',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.10),0 8px 20px rgba(0,0,0,0.14),0 30px 60px rgba(0,0,0,0.20)',
             }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {[0, 150, 300].map(d => (
@@ -260,32 +315,40 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
                   style={{ animationDelay: `${d}ms` }} />
               ))}
             </div>
-            <p style={{ color: '#A89880', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Cargando revista...</p>
+            <p style={{ color: '#A89880', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase' }}>
+              Cargando revista...
+            </p>
+            {loadSlow && (
+              <p style={{ color: '#B8A090', fontSize: 12, maxWidth: 260, lineHeight: 1.7, marginTop: 4 }}>
+                Las ediciones son de alta resolución. En conexiones lentas puede tardar unos minutos.
+              </p>
+            )}
           </div>
         ) : (
-          <div style={{ position: 'relative', zIndex: 2, ...canvasWrapStyle() }}>
-            <div style={{
-              borderRadius: 2,
-              borderLeft: '3px solid rgba(100,80,55,0.18)',
-              borderRight: '1px solid rgba(180,160,130,0.25)',
-              borderTop: '1px solid rgba(180,160,130,0.20)',
-              borderBottom: '1px solid rgba(120,100,70,0.25)',
-              background: '#FEFDFB',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.06), 0 4px 10px rgba(0,0,0,0.10), 0 12px 30px rgba(0,0,0,0.16), 0 35px 70px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.95), inset -3px 0 8px rgba(0,0,0,0.04)',
-              overflow: 'hidden',
-            }}>
-              <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%' }} />
+          /* ── Dual-canvas page peel ── */
+          <div style={{ position: 'relative', zIndex: 2, perspective: '1800px' }}>
+
+            {/* BACK: pre-rendered destination, always underneath at z=0 */}
+            <div style={{ ...frameStyle, position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
+              <canvas ref={canvasBackRef} style={{ display: 'block' }} />
             </div>
+
+            {/* FRONT: current page, peels from bound edge */}
+            <div
+              style={{ ...frameStyle, position: 'relative', zIndex: 1, ...frontStyle() }}
+              onTransitionEnd={handleTransitionEnd}
+            >
+              <canvas ref={canvasFrontRef} style={{ display: 'block', maxWidth: '100%' }} />
+            </div>
+
+            {/* Page number tab */}
             <div style={{
               position: 'absolute', bottom: 0, left: '50%',
-              transform: 'translate(-50%, 100%)',
-              background: 'rgba(255,255,255,0.72)',
-              backdropFilter: 'blur(4px)',
+              transform: 'translate(-50%,100%)',
+              background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(4px)',
               border: '1px solid rgba(0,0,0,0.08)',
-              padding: '1px 10px 2px',
-              borderRadius: '0 0 4px 4px',
-              fontSize: 9, letterSpacing: '0.22em',
-              color: '#888', textTransform: 'uppercase',
+              padding: '1px 10px 2px', borderRadius: '0 0 4px 4px',
+              fontSize: 9, letterSpacing: '0.22em', color: '#888', textTransform: 'uppercase',
               boxShadow: '0 2px 6px rgba(0,0,0,0.10)',
             }}>
               {currentPage}
@@ -293,6 +356,8 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
           </div>
         )}
       </div>
+
+      {/* Bottom bar */}
       <div style={{ flexShrink: 0, position: 'relative', zIndex: 5 }}>
         <div style={{ height: 2, background: 'rgba(0,0,0,0.12)' }}>
           <div style={{ height: '100%', background: 'linear-gradient(90deg,#B8882A,#E0B860)', width: `${progress}%`, transition: 'width 0.55s ease' }} />
@@ -327,6 +392,5 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     </div>
   )
 }
-
 
 export default PDFReader

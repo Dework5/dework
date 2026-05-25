@@ -59,6 +59,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     src={main.latest_issue.cover_url}
                     alt={`Portada ${main.name}`}
                     fill
+                    unoptimized
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 33vw"
                   />
@@ -110,6 +111,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     src={pub.latest_issue.cover_url}
                     alt={`Portada ${pub.name}`}
                     fill
+                    unoptimized
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 768px) 50vw, 33vw"
                   />
