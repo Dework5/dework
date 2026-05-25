@@ -1,14 +1,9 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-
-// PDF Reader sin SSR — PDF.js es client-only (default export)
-const PDFReader = dynamic(() => import('@/components/reader/PDFReader'), {
-  ssr: false,
-})
+import { PDFReaderWrapper } from '@/components/reader/PDFReaderWrapper'
 
 interface Props {
   params: Promise<{ slug: string; numero: string }>
@@ -77,7 +72,7 @@ export default async function ReaderPage({ params }: Props) {
 
       {/* Reader — sin Navbar ni Footer del sitio */}
       <div className="pt-12">
-        <PDFReader
+        <PDFReaderWrapper
           pdfUrl={issue.pdf_url}
           issueId={issue.id}
           totalPages={issue.page_count}
