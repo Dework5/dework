@@ -39,7 +39,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, numero } = await params
   const result = await getIssue(slug, numero)
   if (!result) return {}
-
   const { issue, publication } = result
   return {
     title: `${issue.title || publication.name + ' #' + issue.issue_number} — Dework`,
@@ -57,45 +56,47 @@ export default async function ReaderPage({ params }: Props) {
 
   if (!result) {
     return (
-      <>
-        <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/98 backdrop-blur border-b border-white/8 h-14 flex items-center px-5 gap-4">
+      <div style={{ background: '#F0EDE8', minHeight: '100vh' }}>
+        <div className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center px-5"
+          style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <Link href={`/revistas/${slug}`}
-            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors text-[11px] tracking-[0.15em] uppercase">
-            <ArrowLeft size={14} />
-            Volver
+            className="flex items-center gap-2 text-[11px] tracking-[0.15em] uppercase transition-colors"
+            style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <ArrowLeft size={13} />Volver
           </Link>
         </div>
-        <div className="bg-[#0d0d0d] min-h-screen pt-14 flex items-center justify-center">
+        <div className="flex items-center justify-center" style={{ height: '100vh' }}>
           <div className="text-center px-6">
-            <p className="font-display italic text-[#C5A56B] text-4xl mb-4">Próximamente</p>
-            <p className="text-white/40 text-sm mb-8">Esta edición estará disponible pronto.</p>
+            <p className="font-display italic text-4xl mb-4" style={{ color: '#C5A56B' }}>Próximamente</p>
+            <p className="text-sm mb-8" style={{ color: 'rgba(0,0,0,0.4)' }}>Esta edición estará disponible pronto.</p>
             <Link href={`/revistas/${slug}`}
-              className="text-white/40 text-xs tracking-[0.2em] uppercase hover:text-white transition-colors border-b border-white/10 pb-px">
+              className="text-xs tracking-[0.2em] uppercase transition-colors border-b pb-px"
+              style={{ color: 'rgba(0,0,0,0.35)', borderColor: 'rgba(0,0,0,0.15)' }}>
               ← Todas las ediciones
             </Link>
           </div>
         </div>
-      </>
+      </div>
     )
   }
 
   const { issue, publication } = result
-  const title = issue.title || `${publication.shortName || publication.name} #${issue.issue_number}`
+  const shortName = publication.short_name || publication.shortName ||
+    publication.name.split(' ').map((w: string) => w[0]).join('')
+  const title = issue.title || `${shortName} #${issue.issue_number}`
 
   return (
-    <>
+    <div style={{ background: '#111', overflow: 'hidden' }}>
       <h1 className="sr-only">{title}</h1>
 
-      {/* Top bar */}
+      {/* ── TOP BAR (fixed, 56px) ── */}
       <div className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center px-5 gap-4"
-        style={{ background: '#111111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* Volver */}
-        <Link
-          href={`/revistas/${slug}`}
+        style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+
+        <Link href={`/revistas/${slug}`}
           className="flex items-center gap-1.5 shrink-0 group"
           style={{ color: 'rgba(255,255,255,0.4)' }}
-          aria-label="Volver a todas las ediciones"
-        >
+          aria-label="Volver a todas las ediciones">
           <ArrowLeft size={14} className="group-hover:text-white transition-colors" />
           <span className="text-[10px] tracking-[0.2em] uppercase group-hover:text-white transition-colors hidden sm:block">
             Volver
@@ -104,27 +105,21 @@ export default async function ReaderPage({ params }: Props) {
 
         <div className="w-px h-4 shrink-0" style={{ background: 'rgba(255,255,255,0.08)' }} />
 
-        {/* Título */}
         <div className="flex-1 min-w-0 flex items-center gap-2.5">
           <span className="text-[9px] tracking-[0.35em] uppercase shrink-0 font-medium"
             style={{ color: '#C5A56B' }}>
-            {publication.short_name || publication.shortName || publication.name.split(' ').map((w: string) => w[0]).join('')}
+            {shortName}
           </span>
-          <span className="text-[11px] tracking-[0.04em] truncate"
-            style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <span className="text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
             {title}
           </span>
         </div>
 
-        {/* Descargar */}
         {issue.pdf_url && (
-          <a
-            href={issue.pdf_url}
-            download
+          <a href={issue.pdf_url} download
             className="flex items-center gap-1.5 shrink-0 group"
             style={{ color: 'rgba(255,255,255,0.35)' }}
-            aria-label="Descargar PDF"
-          >
+            aria-label="Descargar PDF">
             <Download size={14} className="group-hover:text-white transition-colors" />
             <span className="text-[10px] tracking-[0.2em] uppercase group-hover:text-white transition-colors hidden sm:block">
               Descargar
@@ -133,14 +128,14 @@ export default async function ReaderPage({ params }: Props) {
         )}
       </div>
 
-      {/* Reader */}
-      <div className="pt-14 min-h-screen" style={{ background: '#F0EDE8' }}>
+      {/* ── LECTOR (ocupa exactamente lo que queda debajo del top bar) ── */}
+      <div style={{ paddingTop: 56 }}>
         <PDFReaderWrapper
           pdfUrl={issue.pdf_url}
           issueId={issue.id}
           totalPages={issue.page_count}
         />
       </div>
-    </>
+    </div>
   )
 }

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
-import { ReaderControls } from './ReaderControls'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
@@ -13,23 +12,31 @@ interface PDFReaderProps {
   totalPages?: number
 }
 
+type SlideDir = 'forward' | 'backward' | null
+
 export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
   const canvasRef    = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [pdf,          setPdf]          = useState<pdfjsLib.PDFDocumentProxy | null>(null)
-  const [currentPage,  setCurrentPage]  = useState(1)
-  const [numPages,     setNumPages]     = useState(totalPages || 0)
-  const [scale,        setScale]        = useState(1.5)
-  const [isLoading,    setIsLoading]    = useState(true)
-  const [pageChanging, setPageChanging] = useState(false)
-  const [error,        setError]        = useState<string | null>(null)
+  const [pdf,         setPdf]         = useState<pdfjsLib.PDFDocumentProxy | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [numPages,    setNumPages]    = useState(totalPages || 0)
+  const [scale,       setScale]       = useState(1)
+  const [isLoading,   setIsLoading]   = useState(true)
+  const [slideDir,    setSlideDir]    = useState<SlideDir>(null)
+  const [error,       setError]       = useState<string | null>(null)
   const renderTaskRef = useRef<pdfjsLib.RenderTask | null>(null)
+  const pageDims      = useRef({ w: 595, h: 842 })
 
-  // ── Scale automático al ancho del viewport ──────────────────────
+  // ── Escala basada en el ALTO disponible (elimina scroll vertical) ──
   const calcScale = useCallback(() => {
-    const maxW = Math.min(window.innerWidth, 900)
-    const s    = Math.max(0.4, (maxW - 40) / 595)
-    setScale(Math.min(s, 2.4))
+    const TOP    = 56
+    const BOTTOM = 56
+    const PAD_V  = 20
+    const PAD_H  = 40
+    const availH = window.innerHeight - TOP - BOTTOM - PAD_V * 2
+    const availW = window.innerWidth  - PAD_H * 2
+    const { w, h } = pageDims.current
+    const s = Math.min(availH / h, availW / w, 3)
+    setScale(Math.max(0.3, s))
   }, [])
 
   useEffect(() => {
@@ -38,18 +45,17 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     return () => window.removeEventListener('resize', calcScale)
   }, [calcScale])
 
-  // ── Session tracking ─────────────────────────────────────────────
+  // ── Session tracking ──────────────────────────────────────────────
   useEffect(() => {
     let sid = sessionStorage.getItem('dework_session')
     if (!sid) { sid = crypto.randomUUID(); sessionStorage.setItem('dework_session', sid) }
     fetch('/api/track-view', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ issueId, sessionId: sid }),
     }).catch(() => {})
   }, [issueId])
 
-  // ── Cargar PDF ───────────────────────────────────────────────────
+  // ── Cargar PDF ────────────────────────────────────────────────────
   useEffect(() => {
     setIsLoading(true)
     setError(null)
@@ -59,12 +65,20 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
       cMapPacked: true,
     })
     task.promise
-      .then(doc => { setPdf(doc); setNumPages(doc.numPages); setIsLoading(false) })
-      .catch(() => { setError('No se pudo cargar el PDF. Intentá de nuevo.'); setIsLoading(false) })
+      .then(async doc => {
+        setPdf(doc)
+        setNumPages(doc.numPages)
+        const p1 = await doc.getPage(1)
+        const vp = p1.getViewport({ scale: 1 })
+        pageDims.current = { w: vp.width, h: vp.height }
+        calcScale()
+        setIsLoading(false)
+      })
+      .catch(() => { setError('No se pudo cargar el PDF.'); setIsLoading(false) })
     return () => { task.destroy().catch(() => {}) }
-  }, [pdfUrl])
+  }, [pdfUrl, calcScale])
 
-  // ── Renderizar página ────────────────────────────────────────────
+  // ── Renderizar página ─────────────────────────────────────────────
   const renderPage = useCallback(async (pageNum: number, s: number) => {
     if (!pdf || !canvasRef.current) return
     if (renderTaskRef.current) { renderTaskRef.current.cancel() }
@@ -77,13 +91,12 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
       if (!ctx) return
       canvas.height = viewport.height
       canvas.width  = viewport.width
-      const task = page.render({ canvasContext: ctx, viewport, canvas })
-      renderTaskRef.current = task
-      await task.promise
+      const t = page.render({ canvasContext: ctx, viewport, canvas })
+      renderTaskRef.current = t
+      await t.promise
       const sid = sessionStorage.getItem('dework_session') || ''
       fetch('/api/track-page', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ issueId, sessionId: sid, pageNumber: pageNum }),
       }).catch(() => {})
     } catch (e: unknown) {
@@ -95,51 +108,55 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     if (pdf) renderPage(currentPage, scale)
   }, [pdf, currentPage, scale, renderPage])
 
-  // ── Navegación ───────────────────────────────────────────────────
+  // ── Navegación ────────────────────────────────────────────────────
+  const ANIM = 170
+
   const goTo = useCallback((p: number) => {
-    if (p < 1 || p > numPages || isLoading) return
-    setPageChanging(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    setTimeout(() => { setCurrentPage(p); setPageChanging(false) }, 140)
-  }, [numPages, isLoading])
+    if (p < 1 || p > numPages || isLoading || slideDir !== null) return
+    const dir: SlideDir = p > currentPage ? 'forward' : 'backward'
+    setSlideDir(dir)
+    setTimeout(() => { setCurrentPage(p); setSlideDir(null) }, ANIM)
+  }, [numPages, isLoading, currentPage, slideDir])
 
-  const prevPage = () => goTo(currentPage - 1)
-  const nextPage = () => goTo(currentPage + 1)
-  const zoomIn   = () => setScale(s => Math.min(s + 0.25, 3))
-  const zoomOut  = () => setScale(s => Math.max(s - 0.25, 0.5))
+  const prevPage = useCallback(() => goTo(currentPage - 1), [goTo, currentPage])
+  const nextPage = useCallback(() => goTo(currentPage + 1), [goTo, currentPage])
 
-  // ── Teclado ──────────────────────────────────────────────────────
+  // ── Teclado ───────────────────────────────────────────────────────
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
+    const h = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextPage() }
       if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevPage() }
-      if (e.key === '+' || e.key === '=') zoomIn()
-      if (e.key === '-')                  zoomOut()
     }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [currentPage, numPages, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [nextPage, prevPage])
 
-  // ── Swipe mobile ─────────────────────────────────────────────────
-  const touchStartX = useRef(0)
-  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
+  // ── Swipe ─────────────────────────────────────────────────────────
+  const touchX = useRef(0)
+  const onTouchStart = (e: React.TouchEvent) => { touchX.current = e.touches[0].clientX }
   const onTouchEnd   = (e: React.TouchEvent) => {
-    const dx = touchStartX.current - e.changedTouches[0].clientX
-    if (Math.abs(dx) > 48) { dx > 0 ? nextPage() : prevPage() }
+    const dx = touchX.current - e.changedTouches[0].clientX
+    if (Math.abs(dx) > 45) { dx > 0 ? nextPage() : prevPage() }
   }
 
   const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
 
-  // ── Error ────────────────────────────────────────────────────────
+  const slideStyle: React.CSSProperties = {
+    transition: `transform ${ANIM}ms cubic-bezier(.4,0,.2,1), opacity ${ANIM}ms ease`,
+    transform: slideDir === 'forward'  ? 'translateX(-56px) scale(0.97)'
+             : slideDir === 'backward' ? 'translateX(56px)  scale(0.97)'
+             : 'translateX(0) scale(1)',
+    opacity:   slideDir ? 0 : 1,
+    willChange: 'transform, opacity',
+  }
+
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F0EDE8]">
+      <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 56px)', background: '#F0EDE8' }}>
         <div className="text-center space-y-4 px-6">
-          <p className="text-gray-500 text-base">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-[#111] text-sm tracking-widest uppercase border-b border-[#111]/20 hover:border-[#111] transition-colors"
-          >
+          <p className="text-gray-500">{error}</p>
+          <button onClick={() => window.location.reload()}
+            className="text-sm tracking-widest uppercase border-b border-gray-400 hover:text-gray-900 transition-colors">
             Reintentar
           </button>
         </div>
@@ -147,86 +164,100 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     )
   }
 
+  const estW = Math.round(pageDims.current.w * scale) || 300
+  const estH = Math.round(pageDims.current.h * scale) || 424
+
   return (
     <div
-      ref={containerRef}
-      className="relative min-h-screen flex flex-col select-none"
-      style={{ background: '#F0EDE8' }}
+      style={{ height: 'calc(100vh - 56px)', overflow: 'hidden', background: '#F0EDE8', display: 'flex', flexDirection: 'column', userSelect: 'none' }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* ── Barra de progreso de lectura ── */}
-      <div className="fixed top-14 left-0 right-0 z-40 h-[3px] bg-black/5">
-        <div
-          className="h-full transition-all duration-700 ease-out"
-          style={{ width: `${progress}%`, background: '#C5A56B' }}
-        />
-      </div>
+      {/* ── ÁREA DE LECTURA (ocupa todo el espacio disponible) ──── */}
+      <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 0 }}>
 
-      {/* ── Área de lectura ── */}
-      <div className="flex-1 flex items-start justify-center px-4 py-10 pb-28">
-        {isLoading ? (
-          <div className="flex flex-col items-center gap-5 pt-16 w-full max-w-[640px]">
-            <div
-              className="w-full animate-pulse rounded-sm"
-              style={{
-                aspectRatio: '595/842',
-                background: 'linear-gradient(135deg, #E8E4DF 25%, #EBE8E3 50%, #E8E4DF 75%)',
-                backgroundSize: '400% 400%',
-                maxWidth: Math.min(595 * scale, (typeof window !== 'undefined' ? window.innerWidth : 600) - 40),
-              }}
-            />
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '300ms' }} />
+        {/* Zona click ← */}
+        {!isLoading && currentPage > 1 && (
+          <button onClick={prevPage} aria-label="Página anterior"
+            style={{ position: 'absolute', left: 0, top: 0, width: '22%', height: '100%', zIndex: 10, background: 'transparent', border: 'none', cursor: 'w-resize', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 12 }}
+            className="group"
+          >
+            <div className="w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200"
+              style={{ background: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(4px)' }}>
+              <span style={{ fontSize: 22, color: 'rgba(0,0,0,0.6)', lineHeight: 1 }}>‹</span>
             </div>
-            <p className="text-gray-400 text-[11px] tracking-[0.3em] uppercase">
-              Cargando revista…
-            </p>
+          </button>
+        )}
+
+        {/* Zona click → */}
+        {!isLoading && currentPage < numPages && (
+          <button onClick={nextPage} aria-label="Página siguiente"
+            style={{ position: 'absolute', right: 0, top: 0, width: '22%', height: '100%', zIndex: 10, background: 'transparent', border: 'none', cursor: 'e-resize', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 12 }}
+            className="group"
+          >
+            <div className="w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200"
+              style={{ background: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(4px)' }}>
+              <span style={{ fontSize: 22, color: 'rgba(0,0,0,0.6)', lineHeight: 1 }}>›</span>
+            </div>
+          </button>
+        )}
+
+        {/* Página */}
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-5">
+            <div className="animate-pulse"
+              style={{ width: Math.min(estW, window.innerWidth - 80), height: Math.min(estH, window.innerHeight - 140), background: 'linear-gradient(135deg,#E8E4DF 25%,#EBE8E3 50%,#E8E4DF 75%)', boxShadow: '0 4px 32px rgba(0,0,0,0.1)' }} />
+            <div className="flex items-center gap-2">
+              {[0,150,300].map(d => (
+                <div key={d} className="w-2 h-2 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: `${d}ms` }} />
+              ))}
+            </div>
+            <p className="text-gray-400 text-[11px] tracking-[0.3em] uppercase">Cargando revista…</p>
           </div>
         ) : (
-          <div
-            className="transition-opacity duration-150"
-            style={{ opacity: pageChanging ? 0 : 1 }}
-          >
-            <canvas
-              ref={canvasRef}
-              className="max-w-full block"
-              style={{
-                borderRadius: '1px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08), 0 8px 40px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.06)',
-              }}
-            />
+          <div style={slideStyle}>
+            <canvas ref={canvasRef}
+              style={{ display: 'block', maxWidth: '100%', boxShadow: '0 2px 6px rgba(0,0,0,0.06), 0 10px 40px rgba(0,0,0,0.13)' }} />
           </div>
         )}
       </div>
 
-      {/* ── Zoom (lado derecho, solo desktop) ── */}
-      {!isLoading && (
-        <div className="fixed right-4 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-1.5 z-50">
-          <button
-            onClick={zoomIn}
-            className="w-8 h-8 bg-white/80 backdrop-blur-sm border border-black/8 text-gray-500 hover:text-gray-900 hover:bg-white transition-all text-base flex items-center justify-center rounded shadow-sm"
-            aria-label="Zoom in"
-          >+</button>
-          <button
-            onClick={zoomOut}
-            className="w-8 h-8 bg-white/80 backdrop-blur-sm border border-black/8 text-gray-500 hover:text-gray-900 hover:bg-white transition-all text-base flex items-center justify-center rounded shadow-sm"
-            aria-label="Zoom out"
-          >−</button>
+      {/* ── BARRA INFERIOR ──────────────────────────────────────── */}
+      <div style={{ flexShrink: 0 }}>
+        {/* Progreso */}
+        <div style={{ height: 2, background: 'rgba(0,0,0,0.06)' }}>
+          <div style={{ height: '100%', background: '#C5A56B', width: `${progress}%`, transition: 'width 0.6s ease' }} />
         </div>
-      )}
+        {/* Nav */}
+        <div style={{ height: 54, background: '#fff', borderTop: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', boxShadow: '0 -4px 20px rgba(0,0,0,0.05)' }}>
+          <button onClick={prevPage} disabled={currentPage <= 1 || isLoading}
+            className="flex items-center gap-2 transition-colors"
+            style={{ color: currentPage <= 1 ? '#ccc' : '#555', minWidth: 90, cursor: currentPage <= 1 ? 'default' : 'pointer' }}>
+            <span style={{ fontSize: 20, lineHeight: 1 }}>‹</span>
+            <span className="text-[11px] tracking-[0.15em] uppercase hidden sm:block">Anterior</span>
+          </button>
 
-      {/* ── Controles de navegación ── */}
-      <ReaderControls
-        currentPage={currentPage}
-        numPages={numPages}
-        onPrev={prevPage}
-        onNext={nextPage}
-        onGoTo={goTo}
-        isLoading={isLoading}
-      />
+          {isLoading ? (
+            <span style={{ color: '#ccc', fontSize: 14 }}>· · ·</span>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1, gap: 3 }}>
+              <span style={{ fontSize: 15, color: '#111', fontWeight: 300, letterSpacing: '0.03em' }}>
+                {currentPage}
+                <span style={{ color: '#ddd', margin: '0 5px' }}>/</span>
+                <span style={{ color: '#aaa', fontSize: 13 }}>{numPages}</span>
+              </span>
+              <span style={{ fontSize: 9, letterSpacing: '0.25em', textTransform: 'uppercase', color: '#bbb' }}>página</span>
+            </div>
+          )}
+
+          <button onClick={nextPage} disabled={!numPages || currentPage >= numPages || isLoading}
+            className="flex items-center gap-2 justify-end transition-colors"
+            style={{ color: currentPage >= numPages ? '#ccc' : '#555', minWidth: 90, cursor: currentPage >= numPages ? 'default' : 'pointer' }}>
+            <span className="text-[11px] tracking-[0.15em] uppercase hidden sm:block">Siguiente</span>
+            <span style={{ fontSize: 20, lineHeight: 1 }}>›</span>
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
