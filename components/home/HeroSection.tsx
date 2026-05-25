@@ -25,10 +25,10 @@ export function HeroSection({ issue }: { issue: any }) {
       </div>
 
       {/* Spacer */}
-      <div className="flex-1 min-h-[11rem]" aria-hidden />
+      <div className="flex-1 min-h-[5rem] md:min-h-[11rem]" aria-hidden />
 
       {/* Main content */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-8 md:px-16 pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pb-10 md:pb-20">
 
         <div className="grid md:grid-cols-[1fr_220px] gap-12 items-end">
 
@@ -37,7 +37,7 @@ export function HeroSection({ issue }: { issue: any }) {
             {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-              className="flex items-center gap-3 mb-10">
+              className="flex items-center gap-3 mb-6 md:mb-10">
               <span className="w-5 h-px bg-dw-border" />
               <span className="text-dw-muted text-[10px] tracking-[0.28em] uppercase">
                 Dework · Agencia Editorial · Pilar, Buenos Aires
@@ -58,7 +58,7 @@ export function HeroSection({ issue }: { issue: any }) {
             {/* Description */}
             <motion.p
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28, duration: 0.7 }}
-              className="text-dw-sub text-sm leading-[1.75] max-w-[400px] mb-10">
+              className="text-dw-sub text-sm leading-[1.75] max-w-[400px] mb-7 md:mb-10">
               Diseñamos y publicamos las revistas de San Diego, Pilar y zona norte de Buenos Aires.
               Más de 11 años y 201 ediciones en circulación.
             </motion.p>
@@ -130,7 +130,7 @@ export function HeroSection({ issue }: { issue: any }) {
         <motion.div
           initial={{ scaleX: 0, opacity: 0 }} animate={{ scaleX: 1, opacity: 1 }}
           transition={{ delay: 0.65, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-14 h-px bg-dw-border origin-left" />
+          className="mt-8 md:mt-14 h-px bg-dw-border origin-left" />
       </div>
     </section>
   )

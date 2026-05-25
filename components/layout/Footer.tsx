@@ -11,8 +11,8 @@ const PUBS = [
 
 export function Footer() {
   return (
-    <footer className="bg-dw-black border-t border-dw-border pt-16 pb-8 px-6 md:px-10">
-      <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-12 mb-16">
+    <footer className="bg-dw-black border-t border-dw-border pt-10 pb-5 md:pt-16 md:pb-8 px-5 md:px-10">
+      <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 mb-10 md:gap-12 md:mb-14">
         <div>
           <Image src="/logo-dework.png" alt="Dework" width={120} height={40} className="object-contain mb-4" />
           <p className="text-dw-muted text-xs leading-relaxed max-w-[200px]">
@@ -42,7 +42,7 @@ export function Footer() {
           </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto border-t border-dw-border pt-8">
+      <div className="max-w-7xl mx-auto border-t border-dw-border pt-6 md:pt-8">
         <p className="text-dw-muted text-xs">© 2026 Dework Editorial. Todos los derechos reservados.</p>
       </div>
     </footer>

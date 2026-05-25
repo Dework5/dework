@@ -24,15 +24,15 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
   const [main, ...rest] = publications
 
   return (
-    <section id="publicaciones" className="bg-dw-black py-28 px-6 md:px-10">
+    <section id="publicaciones" className="bg-dw-black py-14 md:py-28 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
 
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6 }}
-          className="mb-16">
-          <div className="flex items-baseline gap-5 mb-4">
+          className="mb-8 md:mb-16">
+          <div className="flex items-baseline gap-4 mb-3">
             <span className="text-dw-muted text-[10px] tracking-[0.3em] uppercase">01 /</span>
             <h2 className="font-display text-4xl md:text-5xl text-dw-white font-bold">Publicaciones</h2>
           </div>

@@ -4,15 +4,15 @@ import { motion } from 'framer-motion'
 
 export function ContactSection() {
   return (
-    <section id="contacto" className="bg-dw-black border-t border-dw-border py-28 px-6 md:px-10">
+    <section id="contacto" className="bg-dw-black border-t border-dw-border py-14 md:py-28 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.6 }}
-          className="mb-16">
-          <div className="flex items-baseline gap-5 mb-4">
+          className="mb-8 md:mb-16">
+          <div className="flex items-baseline gap-4 mb-3">
             <span className="text-dw-muted text-[10px] tracking-[0.3em] uppercase">03 /</span>
             <h2 className="font-display text-4xl md:text-5xl text-dw-white font-bold">Contacto</h2>
           </div>
@@ -22,7 +22,7 @@ export function ContactSection() {
         </motion.div>
 
         {/* Two-column layout */}
-        <div className="grid md:grid-cols-2 gap-16">
+        <div className="grid md:grid-cols-2 gap-10 md:gap-16">
 
           {/* Form */}
           <motion.form
@@ -47,7 +47,7 @@ export function ContactSection() {
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-col justify-between">
-            <div className="space-y-8">
+            <div className="space-y-5 md:space-y-8">
               <div>
                 <p className="text-dw-muted text-[10px] tracking-[0.25em] uppercase mb-2">Teléfono</p>
                 <p className="text-dw-text text-base">011 3361-6566</p>
@@ -62,7 +62,7 @@ export function ContactSection() {
               </div>
             </div>
 
-            <div className="flex gap-8 border-t border-dw-border pt-8 mt-10">
+            <div className="flex gap-8 border-t border-dw-border pt-6 mt-8 md:pt-8 md:mt-10">
               <a href="https://www.instagram.com/dework.arg/" target="_blank" rel="noopener noreferrer"
                 className="text-dw-muted text-sm hover:text-dw-white transition-colors">
                 Instagram

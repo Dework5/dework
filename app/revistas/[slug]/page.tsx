@@ -120,7 +120,7 @@ export default async function RevistasSlugPage({ params }: Props) {
     <main className="min-h-screen bg-dw-black">
 
       {/* ── HEADER ── */}
-      <div className="relative pt-28 pb-14 px-6 md:px-12 overflow-hidden">
+      <div className="relative pt-20 pb-10 md:pt-28 md:pb-14 px-5 md:px-12 overflow-hidden">
 
         {/* Número decorativo de fondo */}
         {issues.length > 0 && (
@@ -137,7 +137,7 @@ export default async function RevistasSlugPage({ params }: Props) {
           {/* Breadcrumb */}
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-dw-muted text-[10px] tracking-[0.25em] uppercase hover:text-dw-text transition-colors mb-10"
+            className="inline-flex items-center gap-2 text-dw-muted text-[10px] tracking-[0.25em] uppercase hover:text-dw-text transition-colors mb-6 md:mb-10"
           >
             <span>←</span>
             <span>Inicio</span>
@@ -178,7 +178,7 @@ export default async function RevistasSlugPage({ params }: Props) {
       </div>
 
       {/* ── GRID ── */}
-      <div className="px-6 md:px-12 pb-24">
+      <div className="px-5 md:px-12 pb-14 md:pb-24">
         <div className="max-w-6xl mx-auto">
           {!issues || issues.length === 0 ? (
             <div className="text-center py-32">

@@ -39,13 +39,13 @@ const STATS = [
 
 export function StatsSection() {
   return (
-    <section className="bg-dw-surface border-y border-dw-border py-24 px-6 md:px-10">
+    <section className="bg-dw-surface border-y border-dw-border py-12 md:py-24 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.6 }}
-          className="mb-16">
-          <div className="flex items-baseline gap-5 mb-4">
+          className="mb-8 md:mb-16">
+          <div className="flex items-baseline gap-4 mb-3">
             <span className="text-dw-muted text-[10px] tracking-[0.3em] uppercase">02 /</span>
             <h2 className="font-display text-4xl md:text-5xl text-dw-white font-bold">En números</h2>
           </div>
@@ -59,7 +59,7 @@ export function StatsSection() {
             <motion.div key={s.label}
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.7, delay: i * 0.1 }}
-              className="bg-dw-black px-10 py-16">
+              className="bg-dw-black px-6 py-10 md:px-10 md:py-16">
               <div
                 className={`font-display text-dw-white leading-none mb-3 ${s.italic ? 'italic' : ''}`}
                 style={{ fontSize: 'clamp(52px, 6vw, 80px)' }}>
