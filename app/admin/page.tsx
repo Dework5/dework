@@ -334,10 +334,19 @@ export default function AdminPage() {
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 {/* Sync descriptions button */}
-                <button onClick={syncDescriptions} disabled={syncing}
-                  className="text-[#444] border border-[#E5E5E5] bg-white text-xs px-4 py-2.5 rounded-lg hover:border-[#080808] transition-colors disabled:opacity-50">
-                  {syncing ? 'Sincronizando...' : syncMsg || 'Sync descripciones'}
-                </button>
+                <div className="relative">
+                  <button onClick={syncDescriptions} disabled={syncing}
+                    title="Actualiza nombres y descripciones de publicaciones en la DB"
+                    className="text-[#444] border border-[#E5E5E5] bg-white text-xs px-4 py-2.5 rounded-lg hover:border-[#080808] transition-colors disabled:opacity-50 flex items-center gap-2">
+                    {syncing && <span className="w-3 h-3 border border-[#AAA] border-t-transparent rounded-full animate-spin" />}
+                    {syncing ? 'Sincronizando...' : 'Sync descripciones'}
+                  </button>
+                  {syncMsg && (
+                    <div className={`absolute top-full right-0 mt-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap shadow-lg z-20 ${syncMsg.includes('Error') ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
+                      {syncMsg.includes('Error') ? '✗ ' : '✓ '}{syncMsg}
+                    </div>
+                  )}
+                </div>
                 <button onClick={() => setActiveTab('upload')}
                   className="bg-[#080808] text-white text-xs px-5 py-2.5 rounded-lg hover:bg-[#333] transition-colors">
                   + Subir nueva edición
