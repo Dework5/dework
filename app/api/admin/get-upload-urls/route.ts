@@ -14,12 +14,16 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // ── Auto-crear buckets si no existen (idempotente) ──────────────────────
-  await Promise.all([
-    supabase.storage.createBucket('covers', { public: true, allowedMimeTypes: ['image/jpeg','image/png','image/webp'] }),
-    supabase.storage.createBucket('pdfs',   { public: true, allowedMimeTypes: ['application/pdf'] }),
-  ])
-  // Los errores "already exists" se ignoran — solo nos importa que existan
+  // ── Crear bucket covers si no existe Y asegurar que sea público ─────────
+  // createBucket falla silenciosamente si ya existe → updateBucket fuerza public: true
+  await supabase.storage.createBucket('covers', {
+    public: true,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+  })
+  await supabase.storage.updateBucket('covers', {
+    public: true,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+  })
 
   const timestamp = Date.now()
   const coverPath = `${publicationId}/${issueNumber}-${timestamp}.${coverExt || 'jpg'}`

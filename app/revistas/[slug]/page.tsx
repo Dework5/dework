@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { createServerClient } from '@/lib/supabase-server'
 import Link from 'next/link'
-import Image from 'next/image'
+import { CoverImage } from '@/components/issues/CoverImage'
 
 export const dynamic = 'force-dynamic'
 
@@ -197,24 +197,12 @@ export default async function RevistasSlugPage({ params }: Props) {
                 >
                   {/* Portada */}
                   <div className="aspect-[3/4] relative overflow-hidden bg-dw-card shadow-[0_2px_20px_rgba(0,0,0,0.5)]">
-                    {issue.cover_url ? (
-                      <Image
-                        src={issue.cover_url}
-                        alt={issue.title || `Edición #${issue.issue_number}`}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-dw-surface flex flex-col items-center justify-center gap-1">
-                        <span className="font-display italic text-dw-border text-4xl">
-                          #{issue.issue_number}
-                        </span>
-                        <span className="text-dw-muted text-[9px] tracking-widest uppercase">
-                          {shortName}
-                        </span>
-                      </div>
-                    )}
+                    <CoverImage
+                      src={issue.cover_url}
+                      alt={issue.title || `Edición #${issue.issue_number}`}
+                      issueNumber={issue.issue_number}
+                      shortName={shortName}
+                    />
 
                     {/* Overlay al hover */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
