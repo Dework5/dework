@@ -5,7 +5,7 @@ import { AdminLogin } from '@/components/admin/AdminLogin'
 import { UploadForm } from '@/components/admin/UploadForm'
 import { supabase } from '@/lib/supabase'
 import { Publication, Issue } from '@/lib/types'
-import { Eye, EyeOff, Camera, Check } from 'lucide-react'
+import { Eye, EyeOff, Camera, Check, Pencil, Trash2, X } from 'lucide-react'
 
 type Tab = 'upload' | 'stats' | 'issues'
 
@@ -31,6 +31,12 @@ export default function AdminPage() {
   const [syncing, setSyncing] = useState(false)
   const [syncMsg, setSyncMsg] = useState('')
   const coverInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const [editIssue, setEditIssue] = useState<(Issue & { views?: number }) | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editNumber, setEditNumber] = useState('')
+  const [editPublished, setEditPublished] = useState(true)
+  const [editSaving, setEditSaving] = useState(false)
+  const [deleting, setDeleting] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     const auth = sessionStorage.getItem('adminAuth')
@@ -110,6 +116,51 @@ export default function AdminPage() {
       alert(e instanceof Error ? e.message : 'Error inesperado')
     }
     setCoverUpdating(prev => ({ ...prev, [issue.id]: false }))
+  }
+
+
+  // ── Edit issue ─────────────────────────────────────────────────────
+  const openEdit = (issue: Issue & { views?: number }) => {
+    setEditIssue(issue)
+    setEditTitle(issue.title || '')
+    setEditNumber(String(issue.issue_number))
+    setEditPublished(issue.is_published)
+  }
+
+  const saveEdit = async () => {
+    if (!editIssue) return
+    setEditSaving(true)
+    try {
+      const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+      const res = await fetch('/api/admin/update-issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: pw },
+        body: JSON.stringify({ issueId: editIssue.id, title: editTitle, issueNumber: parseInt(editNumber), isPublished: editPublished }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setIssues(prev => prev.map(i => i.id === editIssue.id ? { ...i, title: editTitle, issue_number: parseInt(editNumber), is_published: editPublished } : i))
+      setEditIssue(null)
+    } catch (e) { alert(e instanceof Error ? e.message : 'Error') }
+    setEditSaving(false)
+  }
+
+  // ── Delete issue ────────────────────────────────────────────────────
+  const deleteIssue = async (issue: Issue) => {
+    if (!confirm(`Eliminar ${issue.title || '#' + issue.issue_number}? Esta accion no se puede deshacer.`)) return
+    setDeleting(prev => ({ ...prev, [issue.id]: true }))
+    try {
+      const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+      const res = await fetch('/api/admin/delete-issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: pw },
+        body: JSON.stringify({ issueId: issue.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setIssues(prev => prev.filter(i => i.id !== issue.id))
+    } catch (e) { alert(e instanceof Error ? e.message : 'Error') }
+    setDeleting(prev => ({ ...prev, [issue.id]: false }))
   }
 
   // ── Sync publication descriptions ─────────────────────────────────
@@ -361,6 +412,24 @@ export default function AdminPage() {
                               e.target.value = ''
                             }}
                           />
+                          {/* Edit button */}
+                          <button
+                            onClick={() => openEdit(issue)}
+                            className="text-[#AAA] hover:text-[#080808] transition-colors"
+                            title="Editar">
+                            <Pencil size={14} />
+                          </button>
+                          {/* Delete button */}
+                          <button
+                            onClick={() => deleteIssue(issue)}
+                            disabled={deleting[issue.id]}
+                            className="text-[#AAA] hover:text-red-500 transition-colors disabled:opacity-40"
+                            title="Eliminar">
+                            {deleting[issue.id]
+                              ? <span className="w-3.5 h-3.5 border border-red-400 border-t-transparent rounded-full animate-spin inline-block" />
+                              : <Trash2 size={14} />
+                            }
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -371,6 +440,59 @@ export default function AdminPage() {
           </div>
         )}
 
+
+      {/* ── Edit modal ── */}
+      {editIssue && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-[#080808]">Editar edicion</h3>
+              <button onClick={() => setEditIssue(null)} className="text-[#AAA] hover:text-[#080808]">
+                <X size={18} />
+              </button>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#333] mb-1.5">Titulo</label>
+              <input
+                value={editTitle}
+                onChange={e => setEditTitle(e.target.value)}
+                className="w-full border border-[#E5E5E5] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#080808]"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#333] mb-1.5">Numero de edicion</label>
+              <input
+                type="number"
+                value={editNumber}
+                onChange={e => setEditNumber(e.target.value)}
+                className="w-full border border-[#E5E5E5] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#080808]"
+              />
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editPublished}
+                onChange={e => setEditPublished(e.target.checked)}
+                className="w-4 h-4 accent-[#080808]"
+              />
+              <span className="text-sm text-[#444]">Publicada</span>
+            </label>
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={saveEdit}
+                disabled={editSaving}
+                className="flex-1 bg-[#080808] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#333] transition-colors disabled:opacity-50">
+                {editSaving ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+              <button
+                onClick={() => setEditIssue(null)}
+                className="px-5 border border-[#E5E5E5] rounded-lg text-sm text-[#444] hover:bg-[#F5F5F5] transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </main>
     </div>
   )

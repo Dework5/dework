@@ -40,13 +40,13 @@ function playPageSound() {
 
 // ── Keyframes injected once ────────────────────────────────────────────────
 const SLIDE_CSS = `
-  @keyframes dw-out-left  { from{transform:translateX(0);opacity:1} to{transform:translateX(-6%);opacity:0} }
-  @keyframes dw-in-right  { from{transform:translateX(6%);opacity:0} to{transform:translateX(0);opacity:1} }
-  @keyframes dw-out-right { from{transform:translateX(0);opacity:1} to{transform:translateX(6%);opacity:0} }
-  @keyframes dw-in-left   { from{transform:translateX(-6%);opacity:0} to{transform:translateX(0);opacity:1} }
+  @keyframes dw-out-left  { from{transform:translateX(0)}    to{transform:translateX(-100%)} }
+  @keyframes dw-in-right  { from{transform:translateX(100%)}  to{transform:translateX(0)} }
+  @keyframes dw-out-right { from{transform:translateX(0)}    to{transform:translateX(100%)} }
+  @keyframes dw-in-left   { from{transform:translateX(-100%)} to{transform:translateX(0)} }
 `
 
-const ANIM_MS = 290
+const ANIM_MS = 260
 
 export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderProps) {
   const canvasFrontRef  = useRef<HTMLCanvasElement>(null)
@@ -74,7 +74,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderPr
   // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
-    const TOP = 56, BOTTOM = 56, PAD_V = 24, PAD_H = 40
+    const TOP = 56, BOTTOM = 48, PAD_V = 6, PAD_H = 8
     const availH = window.innerHeight - TOP - BOTTOM - PAD_V * 2
     const availW = window.innerWidth  - PAD_H * 2
     const { w, h } = pageDims.current
@@ -411,7 +411,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderPr
         <div style={{ height: 2, background: 'rgba(0,0,0,0.12)' }}>
           <div style={{ height: '100%', background: 'linear-gradient(90deg,#B8882A,#E0B860)', width: `${progress}%`, transition: 'width 0.55s ease' }} />
         </div>
-        <div style={{ height: 54, background: '#fff', borderTop: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
+        <div style={{ height: 48, background: '#fff', borderTop: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
           <button onClick={prevPage} disabled={currentPage <= 1 || isLoading}
             className="flex items-center gap-2 transition-colors"
             style={{ color: currentPage <= 1 ? '#ccc' : '#555', minWidth: 90, cursor: currentPage <= 1 ? 'default' : 'pointer' }}>
