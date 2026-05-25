@@ -211,8 +211,9 @@ export default function PDFReader({
     const estH = Math.round(pageDims.current.h * scaleRef.current)
 
     // Dynamically import page-flip (browser only)
-    import('page-flip').then(mod => {
-      const PageFlip = mod.PageFlip || mod.default?.PageFlip || mod.default
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    import('page-flip').then((mod: any) => {
+      const PageFlip = mod.PageFlip ?? mod.default?.PageFlip ?? mod.default
       if (!PageFlip || !containerRef.current) return
 
       const pf = new PageFlip(containerRef.current, {
