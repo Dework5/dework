@@ -2,6 +2,8 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+
+export const dynamic = 'force-dynamic'
 import { PDFReaderWrapper } from '@/components/reader/PDFReaderWrapper'
 import { ArrowLeft, Download } from 'lucide-react'
 
