@@ -4,7 +4,8 @@ import { createServerClient } from '@/lib/supabase-server'
 import Link from 'next/link'
 import { CoverImage } from '@/components/issues/CoverImage'
 
-export const dynamic = 'force-dynamic'
+// ISR: revalidate every 60 s so new issues/covers appear quickly without re-fetching on every hit
+export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -189,7 +190,7 @@ export default async function RevistasSlugPage({ params }: Props) {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 md:gap-7">
-              {issues.map((issue: any) => (
+              {issues.map((issue: any, idx: number) => (
                 <Link
                   key={issue.id}
                   href={`/revistas/${publication.slug}/${issue.issue_number}`}
@@ -202,6 +203,7 @@ export default async function RevistasSlugPage({ params }: Props) {
                       alt={issue.title || `Edición #${issue.issue_number}`}
                       issueNumber={issue.issue_number}
                       shortName={shortName}
+                      priority={idx < 2}
                     />
 
                     {/* Overlay al hover */}

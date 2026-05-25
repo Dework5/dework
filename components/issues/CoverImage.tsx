@@ -8,9 +8,10 @@ interface CoverImageProps {
   alt: string
   issueNumber: number
   shortName: string
+  priority?: boolean
 }
 
-export function CoverImage({ src, alt, issueNumber, shortName }: CoverImageProps) {
+export function CoverImage({ src, alt, issueNumber, shortName, priority }: CoverImageProps) {
   const [failed, setFailed] = useState(false)
 
   if (!src || failed) {
@@ -33,6 +34,7 @@ export function CoverImage({ src, alt, issueNumber, shortName }: CoverImageProps
       fill
       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
       unoptimized
+      priority={priority}
       className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
       onError={() => setFailed(true)}
     />

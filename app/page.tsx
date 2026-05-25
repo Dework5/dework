@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic'
+// ISR: revalidate every 5 min — home page doesn't change often
+export const revalidate = 300
 
 import { createServerClient } from '@/lib/supabase-server'
 import { HeroSection } from '@/components/home/HeroSection'

@@ -41,6 +41,16 @@ export async function POST(req: NextRequest) {
 
     const { data: { publicUrl } } = supabase.storage.from('covers').getPublicUrl(path)
 
+    // Update cover_url in DB using service-role key (anon key is blocked by RLS)
+    const { error: dbErr } = await supabase
+      .from('issues')
+      .update({ cover_url: publicUrl })
+      .eq('id', issueId)
+    if (dbErr) {
+      console.error('[update-issue-cover] DB update failed:', dbErr.message)
+      // Still return the URL so the client can update local state
+    }
+
     return NextResponse.json({ ok: true, coverUrl: publicUrl })
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 })

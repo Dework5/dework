@@ -5,7 +5,8 @@ import { createServerClient } from '@/lib/supabase-server'
 import { PDFReaderWrapper } from '@/components/reader/PDFReaderWrapper'
 import { ArrowLeft, Download } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
+// ISR: cache reader pages for 60 s — HTML loads faster so PDF download starts sooner
+export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string; numero: string }>

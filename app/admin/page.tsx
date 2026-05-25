@@ -82,8 +82,20 @@ export default function AdminPage() {
   }
 
   const togglePublish = async (issue: Issue) => {
-    await supabase.from('issues').update({ is_published: !issue.is_published }).eq('id', issue.id)
-    setIssues((prev) => prev.map((i) => (i.id === issue.id ? { ...i, is_published: !i.is_published } : i)))
+    const newVal = !issue.is_published
+    // Use server API with service-role key — anon key is blocked by RLS
+    const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+    const res = await fetch('/api/admin/toggle-publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: pw },
+      body: JSON.stringify({ issueId: issue.id, isPublished: newVal }),
+    })
+    if (res.ok) {
+      setIssues((prev) => prev.map((i) => (i.id === issue.id ? { ...i, is_published: newVal } : i)))
+    } else {
+      const data = await res.json()
+      alert('Error al cambiar estado: ' + (data.error || 'desconocido'))
+    }
   }
 
   // ── Update cover for an existing issue ────────────────────────────
@@ -102,12 +114,7 @@ export default function AdminPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error subiendo archivo')
-      // 2. Update DB client-side — same pattern as togglePublish (works with anon key)
-      const { error: dbErr } = await supabase
-        .from('issues')
-        .update({ cover_url: data.coverUrl })
-        .eq('id', issue.id)
-      if (dbErr) throw new Error('Error actualizando DB: ' + dbErr.message)
+      // DB update is now done server-side in the API (service-role key bypasses RLS)
       // 3. Reload issues list so table reflects new cover
       setIssues(prev => prev.map(i => i.id === issue.id ? { ...i, cover_url: data.coverUrl } : i))
       setCoverDone(prev => ({ ...prev, [issue.id]: true }))
