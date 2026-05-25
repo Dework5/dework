@@ -15,6 +15,10 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
+  // Ensure pdfs bucket exists and is public
+  await supabase.storage.createBucket('pdfs', { public: true }).catch(() => {})
+  await supabase.storage.updateBucket('pdfs', { public: true }).catch(() => {})
+
   const { data: coverPublic } = supabase.storage.from('covers').getPublicUrl(coverPath)
 
   // Si llega pdfUrl directo (R2) lo usa, sino construye la URL de Supabase Storage
@@ -26,14 +30,14 @@ export async function POST(req: NextRequest) {
 
   const { data: issue, error: dbError } = await supabase
     .from('issues')
-    .insert({
+    .upsert({
       publication_id: publicationId,
       issue_number:   issueNumber,
       title,
       cover_url:      coverPublic.publicUrl,
       pdf_url:        resolvedPdfUrl,
       is_published:   isPublished,
-    })
+    }, { onConflict: 'publication_id,issue_number', ignoreDuplicates: false })
     .select()
     .single()
 

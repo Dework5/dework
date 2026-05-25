@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import { Publication } from '@/lib/types'
 import { supabase as supabasePublic } from '@/lib/supabase'
+import * as tus from 'tus-js-client'
 
 interface UploadFormProps {
   publications: Publication[]
@@ -12,22 +13,36 @@ interface UploadFormProps {
 const inputCls = 'w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#080808] text-sm focus:outline-none focus:border-[#080808] transition-colors bg-white'
 const labelCls = 'block text-[#333] text-xs font-semibold uppercase tracking-wider mb-2'
 
-/** Sube archivo directo a R2 via URL firmada, con progreso real. */
-function uploadToR2(file: File, signedUrl: string, onProgress: (pct: number) => void): Promise<void> {
+/** Upload PDF via TUS through our server proxy → Supabase Storage (no CORS issues, any file size) */
+function uploadPdfTus(
+  file: File,
+  path: string,
+  pw: string,
+  supabaseUrl: string,
+  onProgress: (pct: number) => void
+): Promise<string> {
   return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
+    const upload = new tus.Upload(file, {
+      endpoint: '/api/admin/tus',
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      headers: { 'x-dw-admin': pw },
+      metadata: {
+        bucketName:   'pdfs',
+        objectName:   path,
+        contentType:  'application/pdf',
+        cacheControl: '3600',
+      },
+      chunkSize: 6 * 1024 * 1024,
+      onError:   (err) => reject(err),
+      onProgress: (loaded, total) => {
+        if (total) onProgress(Math.round((loaded / total) * 100))
+      },
+      onSuccess: () => {
+        const publicUrl = `${supabaseUrl}/storage/v1/object/public/pdfs/${path}`
+        resolve(publicUrl)
+      },
     })
-    xhr.addEventListener('load', () => {
-      xhr.status >= 200 && xhr.status < 300
-        ? resolve()
-        : reject(new Error(`Error subiendo el PDF (${xhr.status})`))
-    })
-    xhr.addEventListener('error', () => reject(new Error('Error de red al subir el PDF')))
-    xhr.open('PUT', signedUrl)
-    xhr.setRequestHeader('Content-Type', 'application/pdf')
-    xhr.send(file)
+    upload.start()
   })
 }
 
@@ -59,35 +74,25 @@ export function UploadForm({ publications }: UploadFormProps) {
     setProgress(5)
     setProgressLabel('Preparando subida...')
 
-    const pw       = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
-    const coverExt = coverFile.name.split('.').pop() || 'jpg'
-    const timestamp = Date.now()
-    const pdfPath   = `${publicationId}/${issueNumber}-${timestamp}.pdf`
+    const pw          = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL   || ''
+    const coverExt    = coverFile.name.split('.').pop() || 'jpg'
+    const timestamp   = Date.now()
+    const pdfPath     = `${publicationId}/${issueNumber}-${timestamp}.pdf`
 
     try {
-      // 1. Pedir URLs firmadas: portada → Supabase, PDF → R2
+      // 1. Get signed URL for cover (Supabase Storage)
       setProgressLabel('Obteniendo URLs de subida...')
-      const [urlsRes, r2Res] = await Promise.all([
-        fetch('/api/admin/get-upload-urls', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: pw },
-          body: JSON.stringify({ publicationId, issueNumber, coverExt }),
-        }),
-        fetch('/api/admin/r2-upload-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: pw },
-          body: JSON.stringify({ path: pdfPath }),
-        }),
-      ])
-
+      const urlsRes = await fetch('/api/admin/get-upload-urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: pw },
+        body: JSON.stringify({ publicationId, issueNumber, coverExt }),
+      })
       if (!urlsRes.ok) { const e = await urlsRes.json(); throw new Error(e.error || 'Error URLs portada') }
-      if (!r2Res.ok)   { const e = await r2Res.json();   throw new Error(e.error || 'Error URL PDF') }
+      const { cover: coverUpload } = await urlsRes.json()
+      setProgress(10)
 
-      const { cover: coverUpload }                        = await urlsRes.json()
-      const { signedUrl: r2Signed, fileUrl: pdfFileUrl } = await r2Res.json()
-      setProgress(15)
-
-      // 2. Portada → Supabase Storage
+      // 2. Upload cover → Supabase Storage (signed URL, works fine client-side)
       setProgressLabel('Subiendo portada...')
       const { error: coverErr } = await supabasePublic.storage
         .from('covers')
@@ -96,17 +101,17 @@ export function UploadForm({ publications }: UploadFormProps) {
           upsert: true,
         })
       if (coverErr) throw new Error('Error subiendo la portada: ' + coverErr.message)
-      setProgress(50)
+      setProgress(25)
 
-      // 3. PDF → Cloudflare R2 (sin límite de tamaño, con progreso real)
+      // 3. Upload PDF → Supabase Storage via TUS proxy (no CORS, any file size)
       setProgressLabel('Subiendo PDF...')
-      await uploadToR2(pdfFile, r2Signed, (pct) => {
-        setProgress(50 + Math.round(pct * 0.32))
+      const pdfUrl = await uploadPdfTus(pdfFile, pdfPath, pw, supabaseUrl, (pct) => {
+        setProgress(25 + Math.round(pct * 0.55))
         setProgressLabel(`Subiendo PDF... ${pct}%`)
       })
       setProgress(82)
 
-      // 4. Guardar en DB con la URL pública de R2
+      // 4. Save to DB
       setProgressLabel('Guardando edicion...')
       const createRes = await fetch('/api/admin/create-issue', {
         method: 'POST',
@@ -116,7 +121,7 @@ export function UploadForm({ publications }: UploadFormProps) {
           issueNumber: parseInt(issueNumber),
           title,
           coverPath: coverUpload.path,
-          pdfUrl: pdfFileUrl,
+          pdfUrl,
           isPublished,
         }),
       })
@@ -163,7 +168,7 @@ export function UploadForm({ publications }: UploadFormProps) {
         <input ref={pdfInputRef} type="file" accept="application/pdf"
           onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
           className="w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#444] text-sm focus:outline-none focus:border-[#080808] file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#F0F0F0] file:text-xs file:cursor-pointer" required />
-        <p className="text-[#AAA] text-xs mt-1">PDF — Sin limite de tamanio (Cloudflare R2)</p>
+        <p className="text-[#AAA] text-xs mt-1">PDF — Cualquier tamanio (subida por chunks)</p>
       </div>
       <div>
         <label className={labelCls}>Imagen de portada *</label>
