@@ -1,7 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@theme {
+  /* ── Monochrome editorial palette ── */
+  --color-dw-black:   #080808;
+  --color-dw-surface: #0F0F0F;
+  --color-dw-card:    #141414;
+  --color-dw-border:  #1E1E1E;
+  --color-dw-hover:   #2A2A2A;
+  --color-dw-muted:   #555555;
+  --color-dw-sub:     #888888;
+  --color-dw-text:    #EBEBEB;
+  --color-dw-white:   #FFFFFF;
+
+  /* ── Typography ── */
+  --font-family-display: var(--font-display), Georgia, serif;
+  --font-family-body:    var(--font-body), system-ui, sans-serif;
+}
+
+/* ── Marquee animations ── */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
