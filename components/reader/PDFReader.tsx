@@ -90,11 +90,11 @@ export default function PDFReader({
   // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
-    const BOTTOM = 36, PAD_V = 30, PAD_H = 80
+    const BOTTOM = 36, PAD_V = 20, PAD_H = 32
     const { w, h } = pageDims.current
     const s = Math.max(0.25, Math.min(
       (window.innerHeight - BOTTOM - PAD_V * 2) / h,
-      (window.innerWidth  - PAD_H * 2)          / w,
+      (window.innerWidth  - PAD_H * 2)          / (w * 2),  // two pages side by side
       3
     ))
     setScale(s); scaleRef.current = s
@@ -220,8 +220,8 @@ export default function PDFReader({
         size:               'fixed',
         drawShadow:         true,
         flippingTime:       700,
-        usePortrait:        true,    // single-page view (like aflip.in)
-        showCover:          true,
+        usePortrait:        false,   // two-page book spread
+        showCover:          true,    // cover shown as single page centered
         useMouseEvents:     true,
         swipeDistance:      30,
         clickEventForward:  true,
@@ -283,6 +283,7 @@ export default function PDFReader({
   // ── Derived ────────────────────────────────────────────────────────────
   const estW     = Math.round(pageDims.current.w * scale) || 300
   const estH     = Math.round(pageDims.current.h * scale) || 424
+  const bookW    = estW * 2   // full book width (two pages side by side)
   const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
 
   const iconBtn: React.CSSProperties = {
@@ -349,7 +350,7 @@ export default function PDFReader({
         {coverUrl && !pdfReady && (
           <div style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ padding: 3, background: `linear-gradient(145deg, #E8C040, #C8921A, #A87010, #D4A830)`, boxShadow: '0 6px 36px rgba(0,0,0,0.22)' }}>
-              <div style={{ position: 'relative', width: estW, height: estH, overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: estW, height: estH, overflow: 'hidden' }}>  {/* cover = one page wide */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={coverUrl} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 28 }}>
@@ -397,7 +398,7 @@ export default function PDFReader({
             ref={containerRef}
             style={{
               position: 'relative',
-              width:    estW,
+              width:    bookW,
               height:   estH,
               overflow: 'hidden',
             }}
