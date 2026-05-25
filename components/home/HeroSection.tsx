@@ -8,7 +8,7 @@ export function HeroSection({ issue }: { issue: any }) {
   const slug = issue?.publication_slug || issue?.slug || 'san-diego-la-revista'
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-end pb-20 bg-dw-black overflow-hidden">
+    <section className="relative min-h-screen flex flex-col bg-dw-black overflow-hidden">
 
       {/* Ambient radial background */}
       <div className="absolute inset-0 pointer-events-none"
@@ -22,22 +22,27 @@ export function HeroSection({ issue }: { issue: any }) {
         </span>
       </div>
 
+      {/* ── Spacer — pushes content to lower half, always respects navbar ── */}
+      <div className="flex-1 min-h-[11rem]" aria-hidden />
+
       {/* ── Main content ── */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-8 md:px-16">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-8 md:px-16 pb-20">
 
         <div className="grid md:grid-cols-[1fr_220px] gap-12 items-end">
 
           {/* LEFT — brand + copy + CTAs */}
           <div>
+            {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-              className="flex items-center gap-3 mb-12">
+              className="flex items-center gap-3 mb-10">
               <span className="w-5 h-px bg-dw-border" />
               <span className="text-dw-muted text-[10px] tracking-[0.28em] uppercase">
                 Dework · Agencia Editorial · Pilar, Buenos Aires
               </span>
             </motion.div>
 
+            {/* Heading */}
             <motion.h1
               initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.06 }}
@@ -45,9 +50,10 @@ export function HeroSection({ issue }: { issue: any }) {
               style={{ fontSize: 'clamp(58px, 9vw, 114px)' }}>
               Revistas<br />
               <em className="font-display italic font-normal text-dw-sub"
-                style={{ fontSize: '0.65em' }}>de zona norte</em>
+                style={{ fontSize: '0.65em' }}>agencia de zona norte / oeste</em>
             </motion.h1>
 
+            {/* Description */}
             <motion.p
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28, duration: 0.7 }}
               className="text-dw-muted text-sm leading-[1.75] max-w-[400px] mb-10">
@@ -55,6 +61,7 @@ export function HeroSection({ issue }: { issue: any }) {
               Más de 11 años y 201 ediciones en circulación.
             </motion.p>
 
+            {/* CTAs */}
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.6 }}
               className="flex flex-wrap items-center gap-5">
@@ -100,7 +107,7 @@ export function HeroSection({ issue }: { issue: any }) {
         <motion.div
           initial={{ scaleX: 0, opacity: 0 }} animate={{ scaleX: 1, opacity: 1 }}
           transition={{ delay: 0.65, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-16 h-px bg-dw-border origin-left" />
+          className="mt-14 h-px bg-dw-border origin-left" />
       </div>
     </section>
   )
