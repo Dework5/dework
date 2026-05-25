@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 const PUBS = [
   { slug: 'san-diego-la-revista', name: 'San Diego La Revista' },
@@ -13,7 +14,7 @@ export function Footer() {
     <footer className="bg-dw-black border-t border-dw-border pt-16 pb-8 px-6 md:px-10">
       <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-12 mb-16">
         <div>
-          <p className="font-display italic text-dw-white text-xl mb-4">DEWORK</p>
+          <Image src="/logo-dework.png" alt="Dework" width={120} height={40} className="object-contain mb-4" />
           <p className="text-dw-muted text-xs leading-relaxed max-w-[200px]">
             Agencia de Diseño Editorial.<br />Pilar, Buenos Aires, Argentina.
           </p>

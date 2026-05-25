@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const LINKS = [
@@ -25,8 +26,8 @@ export function Navbar() {
         scrolled ? 'bg-dw-black/90 backdrop-blur-md border-b border-dw-border' : ''
       }`}>
         <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
-          <Link href="/" className="font-display italic text-dw-white text-lg tracking-tight">
-            DEWORK
+          <Link href="/" className="flex items-center">
+            <Image src="/logo-dework.png" alt="Dework" width={110} height={36} className="object-contain" priority />
           </Link>
           <div className="hidden md:flex items-center gap-10">
             {LINKS.map(l => (
