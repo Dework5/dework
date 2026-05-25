@@ -23,13 +23,13 @@ export async function POST(req: NextRequest) {
     )
 
     const ext    = (file.name.split('.').pop() || 'jpg').toLowerCase()
-    const path   = `${issueId}-${Date.now()}.${ext}`
+    const storagePath = `${issueId}-${Date.now()}.${ext}`
     const buffer = Buffer.from(await file.arrayBuffer())
 
     // Upload to Supabase Storage with service-role key
     const { error: uploadError } = await supabase.storage
       .from('covers')
-      .upload(path, buffer, {
+      .upload(storagePath, buffer, {
         contentType: file.type || 'image/jpeg',
         upsert: true,
       })
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Upload failed: ' + uploadError.message }, { status: 500 })
     }
 
-    const { data: { publicUrl } } = supabase.storage.from('covers').getPublicUrl(path)
+    const { data: { publicUrl } } = supabase.storage.from('covers').getPublicUrl(storagePath)
 
     // Update cover_url in DB using service-role key (anon key is blocked by RLS)
     const { error: dbErr } = await supabase
@@ -50,22 +50,29 @@ export async function POST(req: NextRequest) {
       console.error('[update-issue-cover] DB update failed:', dbErr.message)
     }
 
-    // Look up the publication slug so we can purge the right ISR pages
-    const { data: issue } = await supabase
-      .from('issues')
-      .select('issue_number, publications(slug)')
-      .eq('id', issueId)
-      .single()
+    // Purge ISR cache: look up publication slug via two simple queries (no join)
+    try {
+      const { data: issueRow } = await supabase
+        .from('issues')
+        .select('issue_number, publication_id')
+        .eq('id', issueId)
+        .single()
 
-    if (issue) {
-      const pub = issue.publications as { slug: string } | null
-      const slug = pub?.slug
-      if (slug) {
-        // Immediately invalidate ISR cache for all affected pages
-        revalidatePath('/')                                          // home (hero cover)
-        revalidatePath(`/revistas/${slug}`)                         // listing grid
-        revalidatePath(`/revistas/${slug}/${issue.issue_number}`)   // reader page
+      if (issueRow?.publication_id) {
+        const { data: pubRow } = await supabase
+          .from('publications')
+          .select('slug')
+          .eq('id', issueRow.publication_id)
+          .single()
+
+        if (pubRow?.slug) {
+          revalidatePath('/')
+          revalidatePath(`/revistas/${pubRow.slug}`)
+          revalidatePath(`/revistas/${pubRow.slug}/${issueRow.issue_number}`)
+        }
       }
+    } catch {
+      // Revalidation is best-effort — don't fail the upload if this errors
     }
 
     return NextResponse.json({ ok: true, coverUrl: publicUrl })

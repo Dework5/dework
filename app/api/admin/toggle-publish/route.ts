@@ -28,21 +28,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Look up publication slug to purge the right pages
-    const { data: issue } = await supabase
-      .from('issues')
-      .select('issue_number, publications(slug)')
-      .eq('id', issueId)
-      .single()
+    // Purge ISR cache: two simple queries, no join syntax
+    try {
+      const { data: issueRow } = await supabase
+        .from('issues')
+        .select('issue_number, publication_id')
+        .eq('id', issueId)
+        .single()
 
-    if (issue) {
-      const pub = issue.publications as { slug: string } | null
-      const slug = pub?.slug
-      if (slug) {
-        revalidatePath('/')
-        revalidatePath(`/revistas/${slug}`)
-        revalidatePath(`/revistas/${slug}/${issue.issue_number}`)
+      if (issueRow?.publication_id) {
+        const { data: pubRow } = await supabase
+          .from('publications')
+          .select('slug')
+          .eq('id', issueRow.publication_id)
+          .single()
+
+        if (pubRow?.slug) {
+          revalidatePath('/')
+          revalidatePath(`/revistas/${pubRow.slug}`)
+          revalidatePath(`/revistas/${pubRow.slug}/${issueRow.issue_number}`)
+        }
       }
+    } catch {
+      // Revalidation is best-effort — don't fail the publish toggle if this errors
     }
 
     return NextResponse.json({ ok: true })
