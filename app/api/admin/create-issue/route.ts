@@ -7,7 +7,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { publicationId, issueNumber, title, coverPath, pdfPath, isPublished } = await req.json()
+  // pdfUrl: URL publica directa (R2) o pdfPath: path en Supabase Storage (legacy)
+  const { publicationId, issueNumber, title, coverPath, pdfUrl, pdfPath, isPublished } = await req.json()
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,7 +16,13 @@ export async function POST(req: NextRequest) {
   )
 
   const { data: coverPublic } = supabase.storage.from('covers').getPublicUrl(coverPath)
-  const { data: pdfPublic }   = supabase.storage.from('pdfs').getPublicUrl(pdfPath)
+
+  // Si llega pdfUrl directo (R2) lo usa, sino construye la URL de Supabase Storage
+  let resolvedPdfUrl = pdfUrl
+  if (!resolvedPdfUrl && pdfPath) {
+    const { data: pdfPublic } = supabase.storage.from('pdfs').getPublicUrl(pdfPath)
+    resolvedPdfUrl = pdfPublic.publicUrl
+  }
 
   const { data: issue, error: dbError } = await supabase
     .from('issues')
@@ -24,7 +31,7 @@ export async function POST(req: NextRequest) {
       issue_number:   issueNumber,
       title,
       cover_url:      coverPublic.publicUrl,
-      pdf_url:        pdfPublic.publicUrl,
+      pdf_url:        resolvedPdfUrl,
       is_published:   isPublished,
     })
     .select()
