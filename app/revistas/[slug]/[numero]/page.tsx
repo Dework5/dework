@@ -1,11 +1,9 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase-server'
 import { PDFReaderWrapper } from '@/components/reader/PDFReaderWrapper'
-import { ArrowLeft, Download } from 'lucide-react'
 
-// ISR: cache reader pages for 60 s — HTML loads faster so PDF download starts sooner
+// ISR: cache reader pages for 60 s
 export const revalidate = 60
 
 interface Props {
@@ -55,89 +53,20 @@ export default async function ReaderPage({ params }: Props) {
   const { slug, numero } = await params
   const result = await getIssue(slug, numero)
 
-  if (!result) {
-    return (
-      <div style={{ background: '#F0EDE8', minHeight: '100vh' }}>
-        <div className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center px-5"
-          style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <Link href={`/revistas/${slug}`}
-            className="flex items-center gap-2 text-[11px] tracking-[0.15em] uppercase transition-colors"
-            style={{ color: 'rgba(255,255,255,0.4)' }}>
-            <ArrowLeft size={13} />Volver
-          </Link>
-        </div>
-        <div className="flex items-center justify-center" style={{ height: '100vh' }}>
-          <div className="text-center px-6">
-            <p className="font-display italic text-4xl mb-4" style={{ color: '#C5A56B' }}>Próximamente</p>
-            <p className="text-sm mb-8" style={{ color: 'rgba(0,0,0,0.4)' }}>Esta edición estará disponible pronto.</p>
-            <Link href={`/revistas/${slug}`}
-              className="text-xs tracking-[0.2em] uppercase transition-colors border-b pb-px"
-              style={{ color: 'rgba(0,0,0,0.35)', borderColor: 'rgba(0,0,0,0.15)' }}>
-              ← Todas las ediciones
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  if (!result) notFound()
 
   const { issue, publication } = result
-  const shortName = publication.short_name || publication.shortName ||
-    publication.name.split(' ').map((w: string) => w[0]).join('')
-  const title = issue.title || `${shortName} #${issue.issue_number}`
 
   return (
-    <div style={{ background: '#111', overflow: 'hidden' }}>
-      <h1 className="sr-only">{title}</h1>
-
-      {/* ── TOP BAR (fixed, 56px) ── */}
-      <div className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center px-5 gap-4"
-        style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-
-        <Link href={`/revistas/${slug}`}
-          className="flex items-center gap-1.5 shrink-0 group"
-          style={{ color: 'rgba(255,255,255,0.4)' }}
-          aria-label="Volver a todas las ediciones">
-          <ArrowLeft size={14} className="group-hover:text-white transition-colors" />
-          <span className="text-[10px] tracking-[0.2em] uppercase group-hover:text-white transition-colors hidden sm:block">
-            Volver
-          </span>
-        </Link>
-
-        <div className="w-px h-4 shrink-0" style={{ background: 'rgba(255,255,255,0.08)' }} />
-
-        <div className="flex-1 min-w-0 flex items-center gap-2.5">
-          <span className="text-[9px] tracking-[0.35em] uppercase shrink-0 font-medium"
-            style={{ color: '#C5A56B' }}>
-            {shortName}
-          </span>
-          <span className="text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            {title}
-          </span>
-        </div>
-
-        {issue.pdf_url && (
-          <a href={issue.pdf_url} download
-            className="flex items-center gap-1.5 shrink-0 group"
-            style={{ color: 'rgba(255,255,255,0.35)' }}
-            aria-label="Descargar PDF">
-            <Download size={14} className="group-hover:text-white transition-colors" />
-            <span className="text-[10px] tracking-[0.2em] uppercase group-hover:text-white transition-colors hidden sm:block">
-              Descargar
-            </span>
-          </a>
-        )}
-      </div>
-
-      {/* ── LECTOR (ocupa exactamente lo que queda debajo del top bar) ── */}
-      <div style={{ paddingTop: 56 }}>
-        <PDFReaderWrapper
-          pdfUrl={issue.pdf_url}
-          issueId={issue.id}
-          totalPages={issue.page_count}
-          coverUrl={issue.cover_url || undefined}
-        />
-      </div>
-    </div>
+    <PDFReaderWrapper
+      pdfUrl={issue.pdf_url}
+      issueId={issue.id}
+      totalPages={issue.page_count}
+      coverUrl={issue.cover_url || undefined}
+      backUrl={`/revistas/${slug}`}
+      downloadUrl={issue.pdf_url || undefined}
+      publicationName={publication.short_name || publication.name}
+      issueTitle={issue.title || `#${issue.issue_number}`}
+    />
   )
 }
