@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AdminLogin } from '@/components/admin/AdminLogin'
 import { UploadForm } from '@/components/admin/UploadForm'
 import { supabase } from '@/lib/supabase'
 import { Publication, Issue } from '@/lib/types'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Camera, Check } from 'lucide-react'
 
 type Tab = 'upload' | 'stats' | 'issues'
 
@@ -26,6 +26,11 @@ export default function AdminPage() {
   const [selectedPub, setSelectedPub] = useState('')
   const [selectedIssue, setSelectedIssue] = useState('')
   const [stats, setStats] = useState<{ totalViews: number; topPages: { page_number: number; count: number }[] } | null>(null)
+  const [coverUpdating, setCoverUpdating] = useState<Record<string, boolean>>({})
+  const [coverDone, setCoverDone] = useState<Record<string, boolean>>({})
+  const [syncing, setSyncing] = useState(false)
+  const [syncMsg, setSyncMsg] = useState('')
+  const coverInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   useEffect(() => {
     const auth = sessionStorage.getItem('adminAuth')
@@ -35,121 +40,112 @@ export default function AdminPage() {
   useEffect(() => {
     if (!isAuth) return
     setPubsLoading(true)
-
     const loadPublications = async () => {
-      // Try without is_active filter to get all publications
-      const { data } = await supabase
-        .from('publications')
-        .select('*')
-        .order('created_at', { ascending: true })
-
+      const { data } = await supabase.from('publications').select('*').order('created_at', { ascending: true })
       if (data && data.length > 0) {
         setPublications(data)
         setPubsLoading(false)
       } else {
-        // Publications table is empty → auto-seed the 5 default publications
         try {
           const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
-          const res = await fetch('/api/admin/seed-publications', {
-            method: 'POST',
-            headers: { Authorization: pw },
-          })
-          if (res.ok) {
-            const json = await res.json()
-            if (json.publications) setPublications(json.publications)
-          }
-        } catch {
-          // silent — form will show empty
-        }
+          const res = await fetch('/api/admin/seed-publications', { method: 'POST', headers: { Authorization: pw } })
+          if (res.ok) { const json = await res.json(); if (json.publications) setPublications(json.publications) }
+        } catch { /* silent */ }
         setPubsLoading(false)
       }
     }
-
     loadPublications()
   }, [isAuth])
 
   useEffect(() => {
     if (!isAuth) return
-    supabase
-      .from('issues')
-      .select('*, publications(name, slug)')
-      .order('published_at', { ascending: false })
-      .then(({ data }) => {
-        if (data) setIssues(data as (Issue & { views?: number })[])
-      })
+    supabase.from('issues').select('*, publications(name, slug)').order('published_at', { ascending: false })
+      .then(({ data }) => { if (data) setIssues(data as (Issue & { views?: number })[]) })
   }, [isAuth])
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('adminAuth')
-    setIsAuth(false)
-  }
+  const handleLogout = () => { sessionStorage.removeItem('adminAuth'); setIsAuth(false) }
 
   const loadStats = async () => {
     if (!selectedIssue) return
-    const { data: viewsData } = await supabase
-      .from('issue_views')
-      .select('id', { count: 'exact' })
-      .eq('issue_id', selectedIssue)
-
-    const { data: pagesData } = await supabase
-      .from('page_views')
-      .select('page_number')
-      .eq('issue_id', selectedIssue)
-      .order('page_number')
-
+    const { data: viewsData } = await supabase.from('issue_views').select('id', { count: 'exact' }).eq('issue_id', selectedIssue)
+    const { data: pagesData } = await supabase.from('page_views').select('page_number').eq('issue_id', selectedIssue).order('page_number')
     const pageCounts: Record<number, number> = {}
-    pagesData?.forEach((p) => {
-      pageCounts[p.page_number] = (pageCounts[p.page_number] || 0) + 1
-    })
-    const topPages = Object.entries(pageCounts)
-      .map(([page, count]) => ({ page_number: Number(page), count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10)
-
+    pagesData?.forEach((p) => { pageCounts[p.page_number] = (pageCounts[p.page_number] || 0) + 1 })
+    const topPages = Object.entries(pageCounts).map(([page, count]) => ({ page_number: Number(page), count })).sort((a, b) => b.count - a.count).slice(0, 10)
     setStats({ totalViews: viewsData?.length || 0, topPages })
   }
 
   const togglePublish = async (issue: Issue) => {
-    await supabase
-      .from('issues')
-      .update({ is_published: !issue.is_published })
-      .eq('id', issue.id)
-    setIssues((prev) =>
-      prev.map((i) => (i.id === issue.id ? { ...i, is_published: !i.is_published } : i))
-    )
+    await supabase.from('issues').update({ is_published: !issue.is_published }).eq('id', issue.id)
+    setIssues((prev) => prev.map((i) => (i.id === issue.id ? { ...i, is_published: !i.is_published } : i)))
   }
 
-  if (!isAuth) {
-    return <AdminLogin onLogin={() => setIsAuth(true)} />
+  // ── Update cover for an existing issue ────────────────────────────
+  const handleCoverUpdate = async (issue: Issue, file: File) => {
+    setCoverUpdating(prev => ({ ...prev, [issue.id]: true }))
+    try {
+      const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+      const coverExt = file.name.split('.').pop() || 'jpg'
+      // 1. Get signed upload URL
+      const urlsRes = await fetch('/api/admin/get-upload-urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: pw },
+        body: JSON.stringify({ publicationId: issue.publication_id, issueNumber: issue.issue_number, coverExt }),
+      })
+      if (!urlsRes.ok) throw new Error('Error obteniendo URL')
+      const { cover } = await urlsRes.json()
+      // 2. Upload image to Supabase Storage
+      const { error: uploadErr } = await supabase.storage.from('covers')
+        .uploadToSignedUrl(cover.path, cover.token, file, { contentType: file.type || 'image/jpeg', upsert: true })
+      if (uploadErr) throw new Error('Error subiendo imagen: ' + uploadErr.message)
+      // 3. Update cover_url in DB
+      const updateRes = await fetch('/api/admin/update-issue-cover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: pw },
+        body: JSON.stringify({ issueId: issue.id, coverPath: cover.path }),
+      })
+      if (!updateRes.ok) throw new Error('Error actualizando DB')
+      setCoverDone(prev => ({ ...prev, [issue.id]: true }))
+      setTimeout(() => setCoverDone(prev => ({ ...prev, [issue.id]: false })), 3000)
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Error inesperado')
+    }
+    setCoverUpdating(prev => ({ ...prev, [issue.id]: false }))
   }
+
+  // ── Sync publication descriptions ─────────────────────────────────
+  const syncDescriptions = async () => {
+    setSyncing(true)
+    setSyncMsg('')
+    try {
+      const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+      const res = await fetch('/api/admin/seed-publications', { method: 'POST', headers: { Authorization: pw } })
+      if (res.ok) { setSyncMsg('Descripciones actualizadas correctamente.') }
+      else        { setSyncMsg('Error al sincronizar.') }
+    } catch { setSyncMsg('Error al sincronizar.') }
+    setSyncing(false)
+    setTimeout(() => setSyncMsg(''), 4000)
+  }
+
+  if (!isAuth) return <AdminLogin onLogin={() => setIsAuth(true)} />
 
   const sidebarPubs = publications.length > 0
-    ? publications.map((p: any) => ({
-        slug: p.slug,
-        name: p.name,
-        shortName: p.short_name || p.shortName || p.name?.slice(0, 2),
-        issueCount: issues.filter(i => i.publication_id === p.id).length,
-      }))
+    ? publications.map((p: any) => ({ slug: p.slug, name: p.name, shortName: p.short_name || p.shortName || p.name?.slice(0, 2), issueCount: issues.filter(i => i.publication_id === p.id).length }))
     : PUBLICATIONS_SIDEBAR
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex">
 
-      {/* ── SIDEBAR ── */}
+      {/* SIDEBAR */}
       <aside className="w-64 bg-white border-r border-[#E5E5E5] flex flex-col fixed h-full z-10">
-
-        {/* Logo */}
         <div className="p-6 border-b border-[#E5E5E5]">
           <span className="font-display font-bold text-[#080808] text-lg tracking-tight">DEWORK</span>
           <p className="text-[#888] text-xs mt-0.5">Administración</p>
         </div>
-
-        {/* Nav */}
         <nav className="flex-1 p-4 overflow-y-auto">
           <p className="text-[#AAA] text-[10px] tracking-widest uppercase mb-3 px-3">Publicaciones</p>
           {sidebarPubs.map((pub) => (
-            <button key={pub.slug}
-              onClick={() => setActiveTab('issues')}
+            <button key={pub.slug} onClick={() => setActiveTab('issues')}
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#F5F5F5] hover:text-[#080808] text-sm mb-1 transition-colors group w-full text-left">
               <span className="w-7 h-7 bg-[#F0F0F0] rounded text-[10px] font-bold text-[#666] flex items-center justify-center flex-shrink-0 group-hover:bg-[#080808] group-hover:text-white transition-colors">
                 {(pub.shortName || 'DW').slice(0, 2).toUpperCase()}
@@ -158,28 +154,23 @@ export default function AdminPage() {
               <span className="text-[#CCC] text-xs flex-shrink-0">{pub.issueCount || ''}</span>
             </button>
           ))}
-
           <div className="mt-4 pt-4 border-t border-[#E5E5E5]">
             <p className="text-[#AAA] text-[10px] tracking-widest uppercase mb-3 px-3">Herramientas</p>
-
             <button onClick={() => setActiveTab('upload')}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mb-1 transition-colors w-full text-left ${activeTab === 'upload' ? 'bg-[#080808] text-white' : 'text-[#444] hover:bg-[#F5F5F5]'}`}>
               <span className="w-7 h-7 bg-[#F0F0F0] rounded flex items-center justify-center text-base leading-none flex-shrink-0">↑</span>
               Subir edición
             </button>
-
             <button onClick={() => setActiveTab('stats')}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mb-1 transition-colors w-full text-left ${activeTab === 'stats' ? 'bg-[#080808] text-white' : 'text-[#444] hover:bg-[#F5F5F5]'}`}>
               <span className="w-7 h-7 bg-[#F0F0F0] rounded flex items-center justify-center text-xs flex-shrink-0">▦</span>
               Estadísticas
             </button>
-
             <button onClick={() => setActiveTab('issues')}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mb-1 transition-colors w-full text-left ${activeTab === 'issues' ? 'bg-[#080808] text-white' : 'text-[#444] hover:bg-[#F5F5F5]'}`}>
               <span className="w-7 h-7 bg-[#F0F0F0] rounded flex items-center justify-center text-xs flex-shrink-0">☰</span>
               Ediciones
             </button>
-
             <a href="/"
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#F5F5F5] text-sm transition-colors">
               <span className="w-7 h-7 bg-[#F0F0F0] rounded flex items-center justify-center text-xs flex-shrink-0">↗</span>
@@ -187,8 +178,6 @@ export default function AdminPage() {
             </a>
           </div>
         </nav>
-
-        {/* Logout */}
         <div className="p-4 border-t border-[#E5E5E5]">
           <button onClick={handleLogout}
             className="w-full text-left px-3 py-2 text-[#888] text-sm hover:text-[#080808] rounded-lg hover:bg-[#F5F5F5] transition-colors">
@@ -197,7 +186,7 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      {/* ── CONTENT AREA ── */}
+      {/* CONTENT */}
       <main className="flex-1 ml-64 p-8 overflow-y-auto min-h-screen">
 
         {/* Upload */}
@@ -208,11 +197,7 @@ export default function AdminPage() {
               <p className="text-[#888] text-sm mt-1">Completá los datos y subí el PDF de la edición.</p>
             </div>
             <div className="bg-white rounded-xl border border-[#E5E5E5] p-8 max-w-2xl">
-              {pubsLoading ? (
-                <p className="text-[#888] text-sm">Cargando publicaciones…</p>
-              ) : (
-                <UploadForm publications={publications} />
-              )}
+              {pubsLoading ? <p className="text-[#888] text-sm">Cargando publicaciones…</p> : <UploadForm publications={publications} />}
             </div>
           </div>
         )}
@@ -224,7 +209,6 @@ export default function AdminPage() {
               <h1 className="text-2xl font-bold text-[#080808]">Estadísticas</h1>
               <p className="text-[#888] text-sm mt-1">Lecturas y páginas más vistas por edición.</p>
             </div>
-
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="bg-white rounded-xl border border-[#E5E5E5] p-6">
                 <p className="text-[#888] text-xs uppercase tracking-wider mb-2">Total ediciones</p>
@@ -239,7 +223,6 @@ export default function AdminPage() {
                 <p className="text-3xl font-bold text-[#080808]">10.000+</p>
               </div>
             </div>
-
             <div className="bg-white rounded-xl border border-[#E5E5E5] p-8">
               <h2 className="font-semibold text-[#080808] mb-6">Estadísticas de lectura</h2>
               <div className="flex flex-col sm:flex-row gap-4 mb-6 max-w-lg">
@@ -249,8 +232,7 @@ export default function AdminPage() {
                   {publications.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
                 <select value={selectedIssue} onChange={(e) => setSelectedIssue(e.target.value)}
-                  className="flex-1 border border-[#E5E5E5] rounded-lg px-4 py-2.5 text-[#080808] text-sm focus:outline-none focus:border-[#080808] bg-white"
-                  disabled={!selectedPub}>
+                  className="flex-1 border border-[#E5E5E5] rounded-lg px-4 py-2.5 text-[#080808] text-sm focus:outline-none focus:border-[#080808] bg-white" disabled={!selectedPub}>
                   <option value="">Seleccioná edición</option>
                   {issues.filter((i) => i.publication_id === selectedPub).map((i) => (
                     <option key={i.id} value={i.id}>#{i.issue_number} — {i.title}</option>
@@ -261,7 +243,6 @@ export default function AdminPage() {
                   Ver stats
                 </button>
               </div>
-
               {stats && (
                 <div className="space-y-4">
                   <div className="border border-[#E5E5E5] rounded-lg p-6">
@@ -296,15 +277,22 @@ export default function AdminPage() {
         {/* Issues */}
         {activeTab === 'issues' && (
           <div>
-            <div className="mb-8 flex items-center justify-between">
+            <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-[#080808]">Ediciones</h1>
                 <p className="text-[#888] text-sm mt-1">Gestión de publicaciones y ediciones.</p>
               </div>
-              <button onClick={() => setActiveTab('upload')}
-                className="bg-[#080808] text-white text-xs px-5 py-2.5 rounded-lg hover:bg-[#333] transition-colors">
-                + Subir nueva edición
-              </button>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                {/* Sync descriptions button */}
+                <button onClick={syncDescriptions} disabled={syncing}
+                  className="text-[#444] border border-[#E5E5E5] bg-white text-xs px-4 py-2.5 rounded-lg hover:border-[#080808] transition-colors disabled:opacity-50">
+                  {syncing ? 'Sincronizando...' : syncMsg || 'Sync descripciones'}
+                </button>
+                <button onClick={() => setActiveTab('upload')}
+                  className="bg-[#080808] text-white text-xs px-5 py-2.5 rounded-lg hover:bg-[#333] transition-colors">
+                  + Subir nueva edición
+                </button>
+              </div>
             </div>
 
             <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
@@ -350,6 +338,30 @@ export default function AdminPage() {
                             title={issue.is_published ? 'Despublicar' : 'Publicar'}>
                             {issue.is_published ? <EyeOff size={15} /> : <Eye size={15} />}
                           </button>
+                          {/* Update cover button */}
+                          <button
+                            onClick={() => coverInputRefs.current[issue.id]?.click()}
+                            disabled={coverUpdating[issue.id]}
+                            className="text-[#AAA] hover:text-[#080808] transition-colors disabled:opacity-40"
+                            title="Cambiar portada">
+                            {coverDone[issue.id]
+                              ? <Check size={15} className="text-green-500" />
+                              : coverUpdating[issue.id]
+                                ? <span className="w-3.5 h-3.5 border border-[#AAA] border-t-transparent rounded-full animate-spin inline-block" />
+                                : <Camera size={15} />
+                            }
+                          </button>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            ref={el => { coverInputRefs.current[issue.id] = el }}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) handleCoverUpdate(issue, file)
+                              e.target.value = ''
+                            }}
+                          />
                         </div>
                       </td>
                     </tr>

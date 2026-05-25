@@ -25,7 +25,7 @@ export function HeroSection({ issue }: { issue: any }) {
       </div>
 
       {/* Spacer */}
-      <div className="flex-1 min-h-[5rem] md:min-h-[11rem]" aria-hidden />
+      <div className="flex-1 min-h-[2rem] md:min-h-[11rem]" aria-hidden />
 
       {/* Main content */}
       <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pb-10 md:pb-20">
