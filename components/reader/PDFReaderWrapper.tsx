@@ -31,11 +31,12 @@ const PDFReader = dynamic(() => import('./PDFReader'), {
 })
 
 interface Props {
+  coverUrl?: string
   pdfUrl: string
   issueId: string
   totalPages?: number
 }
 
-export function PDFReaderWrapper({ pdfUrl, issueId, totalPages }: Props) {
-  return <PDFReader pdfUrl={pdfUrl} issueId={issueId} totalPages={totalPages} />
+export function PDFReaderWrapper({ pdfUrl, issueId, totalPages, coverUrl }: Props) {
+  return <PDFReader pdfUrl={pdfUrl} issueId={issueId} totalPages={totalPages} coverUrl={coverUrl} />
 }

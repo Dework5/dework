@@ -317,7 +317,7 @@ export default function AdminPage() {
                     <tr key={issue.id}
                       className={`border-b border-[#F0F0F0] hover:bg-[#FAFAFA] transition-colors ${i === issues.length - 1 ? 'border-0' : ''}`}>
                       <td className="px-6 py-4 text-[#888] truncate max-w-[140px]">
-                        {(issue as Issue & { publications?: { name: string } }).publications?.name || '—'}
+                        {(publications.find(p => p.id === issue.publication_id))?.name || '—'}
                       </td>
                       <td className="px-6 py-4 text-[#080808] font-medium">#{issue.issue_number}</td>
                       <td className="px-6 py-4 text-[#444] truncate max-w-[200px]">{issue.title}</td>
@@ -328,7 +328,7 @@ export default function AdminPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <a href={`/revistas/${(issue as any).publications?.slug || issue.publication_id}/${issue.issue_number}`}
+                          <a href={`/revistas/${(publications.find(p => p.id === issue.publication_id))?.slug || ''}/${issue.issue_number}`}
                             target="_blank" rel="noreferrer"
                             className="text-[#AAA] hover:text-[#080808] transition-colors" title="Ver">
                             <Eye size={15} />

@@ -3,67 +3,75 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+// Use local worker served from /public to avoid CDN round-trip
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
 interface PDFReaderProps {
   pdfUrl:      string
   issueId:     string
   totalPages?: number
+  coverUrl?:   string
 }
 
-type FlipPhase = 'idle' | 'lifting' | 'settling'
-
-const LIFT_MS = 360
-
+// ── Sound ──────────────────────────────────────────────────────────────────
 function playPageSound() {
   try {
     const ctx  = new AudioContext()
     const sr   = ctx.sampleRate
-    const dur  = 0.11
+    const dur  = 0.10
     const len  = Math.floor(sr * dur)
     const buf  = ctx.createBuffer(1, len, sr)
     const data = buf.getChannelData(0)
     for (let i = 0; i < len; i++) {
       const t   = i / len
-      const env = Math.pow(1 - t, 2.2) * (1 + Math.sin(t * Math.PI * 2) * 0.15)
-      data[i]   = (Math.random() * 2 - 1) * env * 0.38
+      const env = Math.pow(1 - t, 2.5) * (1 + Math.sin(t * Math.PI * 2) * 0.12)
+      data[i]   = (Math.random() * 2 - 1) * env * 0.36
     }
-    const src = ctx.createBufferSource()
+    const src  = ctx.createBufferSource()
     src.buffer = buf
-    const bpf = ctx.createBiquadFilter()
-    bpf.type            = 'bandpass'
-    bpf.frequency.value = 3000
-    bpf.Q.value         = 0.7
-    const gain      = ctx.createGain()
-    gain.gain.value = 0.65
-    src.connect(bpf)
-    bpf.connect(gain)
-    gain.connect(ctx.destination)
+    const bpf  = ctx.createBiquadFilter()
+    bpf.type   = 'bandpass'; bpf.frequency.value = 3200; bpf.Q.value = 0.75
+    const gain = ctx.createGain(); gain.gain.value = 0.60
+    src.connect(bpf); bpf.connect(gain); gain.connect(ctx.destination)
     src.start()
     src.onended = () => ctx.close().catch(() => {})
   } catch { /* silent */ }
 }
 
-export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
-  const canvasFrontRef      = useRef<HTMLCanvasElement>(null)
-  const canvasBackRef       = useRef<HTMLCanvasElement>(null)
+// ── Keyframes injected once ────────────────────────────────────────────────
+const SLIDE_CSS = `
+  @keyframes dw-out-left  { from{transform:translateX(0);opacity:1} to{transform:translateX(-6%);opacity:0} }
+  @keyframes dw-in-right  { from{transform:translateX(6%);opacity:0} to{transform:translateX(0);opacity:1} }
+  @keyframes dw-out-right { from{transform:translateX(0);opacity:1} to{transform:translateX(6%);opacity:0} }
+  @keyframes dw-in-left   { from{transform:translateX(-6%);opacity:0} to{transform:translateX(0);opacity:1} }
+`
+
+const ANIM_MS = 290
+
+export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderProps) {
+  const canvasFrontRef  = useRef<HTMLCanvasElement>(null)
+  const canvasBackRef   = useRef<HTMLCanvasElement>(null)
+  const containerRef    = useRef<HTMLDivElement>(null)
+
   const [pdf,          setPdf]          = useState<pdfjsLib.PDFDocumentProxy | null>(null)
   const [currentPage,  setCurrentPage]  = useState(1)
   const [numPages,     setNumPages]     = useState(totalPages || 0)
   const [scale,        setScale]        = useState(1)
   const [isLoading,    setIsLoading]    = useState(true)
-  const [flipPhase,    setFlipPhase]    = useState<FlipPhase>('idle')
+  const [pdfPageReady, setPdfPageReady] = useState(false)
+  const [isAnimating,  setIsAnimating]  = useState(false)
   const [flipDir,      setFlipDir]      = useState<'forward' | 'backward'>('forward')
   const [error,        setError]        = useState<string | null>(null)
   const [loadSlow,     setLoadSlow]     = useState(false)
-  const isFlipping     = useRef(false)
-  const scaleRef       = useRef(1)
+
+  const isFlipping      = useRef(false)
+  const scaleRef        = useRef(1)
   const renderTaskFront = useRef<pdfjsLib.RenderTask | null>(null)
   const renderTaskBack  = useRef<pdfjsLib.RenderTask | null>(null)
   const pageDims        = useRef({ w: 595, h: 842 })
+  const touchX          = useRef(0)
 
-  // ── Scale calculation ───────────────────────────────────────────────
+  // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
     const TOP = 56, BOTTOM = 56, PAD_V = 24, PAD_H = 40
@@ -81,7 +89,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     return () => window.removeEventListener('resize', calcScale)
   }, [calcScale])
 
-  // ── Track view ──────────────────────────────────────────────────────
+  // ── Track view ────────────────────────────────────────────────────────
   useEffect(() => {
     let sid = sessionStorage.getItem('dework_session')
     if (!sid) { sid = crypto.randomUUID(); sessionStorage.setItem('dework_session', sid) }
@@ -91,20 +99,24 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     }).catch(() => {})
   }, [issueId])
 
-  // ── Load PDF ────────────────────────────────────────────────────────
+  // ── Load PDF ──────────────────────────────────────────────────────────
   useEffect(() => {
     setIsLoading(true)
     setError(null)
     setLoadSlow(false)
+    setPdfPageReady(false)
 
-    const slowTimer = setTimeout(() => setLoadSlow(true), 18000)
+    const slowTimer = setTimeout(() => setLoadSlow(true), 12000)
 
     const task = pdfjsLib.getDocument({
       url: pdfUrl,
       cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
       cMapPacked: true,
       rangeChunkSize: 65536,
+      disableRange: false,
+      disableStream: false,
     })
+
     task.promise
       .then(async doc => {
         clearTimeout(slowTimer)
@@ -122,10 +134,11 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
         setError('No se pudo cargar el PDF.')
         setIsLoading(false)
       })
+
     return () => { clearTimeout(slowTimer); task.destroy().catch(() => {}) }
   }, [pdfUrl, calcScale])
 
-  // ── Render a page to a specific canvas ─────────────────────────────
+  // ── Render page to canvas ─────────────────────────────────────────────
   const renderToCanvas = useCallback(async (
     pageNum: number,
     s: number,
@@ -133,15 +146,15 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     taskRef: React.MutableRefObject<pdfjsLib.RenderTask | null>
   ) => {
     if (!pdf || !canvas) return
-    if (taskRef.current) taskRef.current.cancel()
+    taskRef.current?.cancel()
     try {
       const page     = await pdf.getPage(pageNum)
       const viewport = page.getViewport({ scale: s })
-      const ctx = canvas.getContext('2d')
+      const ctx      = canvas.getContext('2d')
       if (!ctx) return
-      canvas.height = viewport.height
-      canvas.width  = viewport.width
-      const t = page.render({ canvasContext: ctx, viewport, canvas })
+      canvas.height  = viewport.height
+      canvas.width   = viewport.width
+      const t = page.render({ canvasContext: ctx, viewport })
       taskRef.current = t
       await t.promise
     } catch (e: unknown) {
@@ -149,19 +162,18 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     }
   }, [pdf])
 
-  // ── Initial + scale-change render to front canvas ───────────────────
+  // ── Initial render ────────────────────────────────────────────────────
   useEffect(() => {
-    if (pdf && (flipPhase === 'idle') && !isFlipping.current) {
-      renderToCanvas(currentPage, scale, canvasFrontRef.current, renderTaskFront)
-    }
-  }, [pdf, currentPage, scale, flipPhase, renderToCanvas])
+    if (!pdf || isAnimating) return
+    renderToCanvas(currentPage, scale, canvasFrontRef.current, renderTaskFront)
+      .then(() => setPdfPageReady(true))
+  }, [pdf, currentPage, scale, isAnimating, renderToCanvas])
 
-  // ── Transition end: front has peeled away → swap content → snap back ─
-  const handleTransitionEnd = useCallback((e: React.TransitionEvent) => {
-    if (e.propertyName !== 'transform' || flipPhase !== 'lifting') return
-    setFlipPhase('settling')
+  // ── Animation end: copy back→front, reset ────────────────────────────
+  const handleAnimationEnd = useCallback((e: React.AnimationEvent) => {
+    const expected = flipDir === 'forward' ? 'dw-out-left' : 'dw-out-right'
+    if (e.animationName !== expected) return
 
-    // Copy pre-rendered back canvas onto front canvas
     const front = canvasFrontRef.current
     const back  = canvasBackRef.current
     if (front && back) {
@@ -170,36 +182,33 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
       front.getContext('2d')?.drawImage(back, 0, 0)
     }
 
-    // Two rAFs: let React commit the 'settling' style (rotateY 0 / no transition) first
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        isFlipping.current = false
-        setFlipPhase('idle')
-        const sid = sessionStorage.getItem('dework_session') || ''
-        fetch('/api/track-page', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ issueId, sessionId: sid, pageNumber: currentPage }),
-        }).catch(() => {})
-      })
-    })
-  }, [flipPhase, currentPage, issueId])
+    isFlipping.current = false
+    setIsAnimating(false)
 
-  // ── Navigate to page ────────────────────────────────────────────────
+    // Track page view
+    const sid = sessionStorage.getItem('dework_session') || ''
+    fetch('/api/track-page', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ issueId, sessionId: sid, pageNumber: currentPage }),
+    }).catch(() => {})
+  }, [flipDir, currentPage, issueId])
+
+  // ── Navigate ──────────────────────────────────────────────────────────
   const goTo = useCallback(async (p: number) => {
     if (!pdf || p < 1 || p > numPages || isLoading || isFlipping.current) return
     const dir: 'forward' | 'backward' = p > currentPage ? 'forward' : 'backward'
     isFlipping.current = true
     setFlipDir(dir)
-    // Pre-render destination to back canvas while front is still showing
     await renderToCanvas(p, scaleRef.current, canvasBackRef.current, renderTaskBack)
     setCurrentPage(p)
     playPageSound()
-    setFlipPhase('lifting')
+    setIsAnimating(true)
   }, [pdf, numPages, isLoading, currentPage, renderToCanvas])
 
   const prevPage = useCallback(() => goTo(currentPage - 1), [goTo, currentPage])
   const nextPage = useCallback(() => goTo(currentPage + 1), [goTo, currentPage])
 
+  // ── Keyboard ──────────────────────────────────────────────────────────
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextPage() }
@@ -209,33 +218,14 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     return () => window.removeEventListener('keydown', h)
   }, [nextPage, prevPage])
 
-  const touchX = useRef(0)
+  // ── Touch ─────────────────────────────────────────────────────────────
   const onTouchStart = (e: React.TouchEvent) => { touchX.current = e.touches[0].clientX }
   const onTouchEnd   = (e: React.TouchEvent) => {
     const dx = touchX.current - e.changedTouches[0].clientX
     if (Math.abs(dx) > 45) { dx > 0 ? nextPage() : prevPage() }
   }
 
-  // ── Front canvas CSS: peels from bound edge ──────────────────────────
-  const frontStyle = (): React.CSSProperties => {
-    const origin = flipDir === 'forward' ? '0% 50%' : '100% 50%'
-    const angle  = flipDir === 'forward' ? -90 : 90
-    if (flipPhase === 'lifting') {
-      return {
-        transformOrigin: origin,
-        transition: `transform ${LIFT_MS}ms cubic-bezier(.4,0,.9,.6)`,
-        transform: `rotateY(${angle}deg)`,
-        willChange: 'transform',
-      }
-    }
-    return {
-      transformOrigin: origin,
-      transition: 'none',
-      transform: 'rotateY(0deg)',
-      willChange: 'auto',
-    }
-  }
-
+  // ── Styles ────────────────────────────────────────────────────────────
   const frameStyle: React.CSSProperties = {
     borderRadius: 2,
     borderLeft:   '3px solid rgba(100,80,55,0.18)',
@@ -245,11 +235,23 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     background:   '#FEFDFB',
     boxShadow:    '0 1px 2px rgba(0,0,0,0.06),0 4px 10px rgba(0,0,0,0.10),0 12px 30px rgba(0,0,0,0.16),0 35px 70px rgba(0,0,0,0.22),inset 0 1px 0 rgba(255,255,255,0.95),inset -3px 0 8px rgba(0,0,0,0.04)',
     overflow:     'hidden',
+    position:     'relative',
   }
 
+  // Estimated dimensions for placeholder
+  const estW = Math.round(pageDims.current.w * scale) || 300
+  const estH = Math.round(pageDims.current.h * scale) || 424
   const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
-  const estW     = Math.round(pageDims.current.w * scale) || 300
-  const estH     = Math.round(pageDims.current.h * scale) || 424
+
+  // ── Front animation ───────────────────────────────────────────────────
+  const frontAnim = isAnimating
+    ? `${flipDir === 'forward' ? 'dw-out-left' : 'dw-out-right'} ${ANIM_MS}ms cubic-bezier(.4,0,.2,1) forwards`
+    : 'none'
+
+  // ── Back animation ────────────────────────────────────────────────────
+  const backAnim = isAnimating
+    ? `${flipDir === 'forward' ? 'dw-in-right' : 'dw-in-left'} ${ANIM_MS}ms cubic-bezier(.4,0,.2,1) forwards`
+    : 'none'
 
   if (error) {
     return (
@@ -276,9 +278,11 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
+      <style>{SLIDE_CSS}</style>
+
       <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 0 }}>
 
-        {/* Navigation hotspots */}
+        {/* Left hotspot */}
         {!isLoading && currentPage > 1 && (
           <button onClick={prevPage} aria-label="Anterior"
             style={{ position: 'absolute', left: 0, top: 0, width: '22%', height: '100%', zIndex: 10, background: 'transparent', border: 'none', cursor: 'w-resize', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 14 }}
@@ -289,6 +293,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
             </div>
           </button>
         )}
+        {/* Right hotspot */}
         {!isLoading && currentPage < numPages && (
           <button onClick={nextPage} aria-label="Siguiente"
             style={{ position: 'absolute', right: 0, top: 0, width: '22%', height: '100%', zIndex: 10, background: 'transparent', border: 'none', cursor: 'e-resize', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 14 }}
@@ -300,51 +305,95 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
           </button>
         )}
 
-        {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, zIndex: 2, padding: '0 20px', maxWidth: '100%', textAlign: 'center' }}>
-            <div className="animate-pulse" style={{
-              width: estW, height: estH, maxWidth: '85vw',
-              background: 'linear-gradient(160deg,#F2EDE6 25%,#F8F5F1 50%,#F2EDE6 75%)',
-              borderRadius: 2,
-              border: '1px solid rgba(180,155,120,0.3)',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.10),0 8px 20px rgba(0,0,0,0.14),0 30px 60px rgba(0,0,0,0.20)',
-            }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {[0, 150, 300].map(d => (
-                <div key={d} className="w-2 h-2 rounded-full bg-[#C5A56B] animate-bounce"
-                  style={{ animationDelay: `${d}ms` }} />
-              ))}
-            </div>
-            <p style={{ color: '#A89880', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase' }}>
-              Cargando revista...
-            </p>
-            {loadSlow && (
-              <p style={{ color: '#B8A090', fontSize: 12, maxWidth: 260, lineHeight: 1.7, marginTop: 4 }}>
-                Las ediciones son de alta resolución. En conexiones lentas puede tardar unos minutos.
-              </p>
-            )}
-          </div>
-        ) : (
-          /* ── Dual-canvas page peel ── */
-          <div style={{ position: 'relative', zIndex: 2, perspective: '1800px' }}>
+        {/* ── Main reader frame ── */}
+        <div ref={containerRef} style={{ position: 'relative', zIndex: 2 }}>
+          <div style={{ ...frameStyle, width: estW, minHeight: isLoading ? estH : undefined }}>
 
-            {/* BACK: pre-rendered destination, always underneath at z=0 */}
-            <div style={{ ...frameStyle, position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
+            {/* BACK canvas — slides in from side during animation */}
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+              zIndex: 0,
+              opacity: isAnimating ? undefined : 0,
+              pointerEvents: 'none',
+              animation: backAnim,
+            }}>
               <canvas ref={canvasBackRef} style={{ display: 'block' }} />
             </div>
 
-            {/* FRONT: current page, peels from bound edge */}
-            <div
-              style={{ ...frameStyle, position: 'relative', zIndex: 1, ...frontStyle() }}
-              onTransitionEnd={handleTransitionEnd}
-            >
+            {/* FRONT canvas — slides out during animation */}
+            <div style={{
+              position: 'relative', zIndex: 1,
+              animation: frontAnim,
+            }}
+            onAnimationEnd={handleAnimationEnd}>
               <canvas ref={canvasFrontRef} style={{ display: 'block', maxWidth: '100%' }} />
             </div>
 
-            {/* Page number tab */}
+            {/* Cover image overlay — shown instantly, fades out when PDF renders */}
+            {coverUrl && (
+              <div style={{
+                position: 'absolute', inset: 0, zIndex: 20,
+                transition: pdfPageReady ? 'opacity 0.65s ease' : 'none',
+                opacity: pdfPageReady ? 0 : 1,
+                pointerEvents: pdfPageReady ? 'none' : 'auto',
+              }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={coverUrl}
+                  alt="Portada"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+                {/* Spinner overlay */}
+                {!pdfPageReady && (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', justifyContent: 'flex-end',
+                    paddingBottom: 28,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 50%)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {[0, 140, 280].map(d => (
+                        <div key={d} className="w-1.5 h-1.5 rounded-full bg-white animate-bounce"
+                          style={{ animationDelay: `${d}ms`, opacity: 0.85 }} />
+                      ))}
+                    </div>
+                    {loadSlow && (
+                      <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 10, maxWidth: 220, textAlign: 'center', lineHeight: 1.6 }}>
+                        Edición en alta resolución.<br />Un momento por favor…
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Fallback loading (no coverUrl) */}
+            {isLoading && !coverUrl && (
+              <div style={{ width: estW, height: estH, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {[0, 150, 300].map(d => (
+                    <div key={d} className="w-2 h-2 rounded-full bg-[#C5A56B] animate-bounce"
+                      style={{ animationDelay: `${d}ms` }} />
+                  ))}
+                </div>
+                <p style={{ color: '#A89880', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase' }}>
+                  Cargando…
+                </p>
+                {loadSlow && (
+                  <p style={{ color: '#B8A090', fontSize: 12, maxWidth: 240, lineHeight: 1.7, textAlign: 'center', marginTop: 4 }}>
+                    Las ediciones son de alta resolución. Puede tardar unos momentos.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Page number tab */}
+          {!isLoading && (
             <div style={{
               position: 'absolute', bottom: 0, left: '50%',
-              transform: 'translate(-50%,100%)',
+              transform: 'translate(-50%, 100%)',
               background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(4px)',
               border: '1px solid rgba(0,0,0,0.08)',
               padding: '1px 10px 2px', borderRadius: '0 0 4px 4px',
@@ -353,11 +402,11 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
             }}>
               {currentPage}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Bottom bar */}
+      {/* ── Bottom bar ── */}
       <div style={{ flexShrink: 0, position: 'relative', zIndex: 5 }}>
         <div style={{ height: 2, background: 'rgba(0,0,0,0.12)' }}>
           <div style={{ height: '100%', background: 'linear-gradient(90deg,#B8882A,#E0B860)', width: `${progress}%`, transition: 'width 0.55s ease' }} />

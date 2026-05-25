@@ -134,6 +134,7 @@ export default async function ReaderPage({ params }: Props) {
           pdfUrl={issue.pdf_url}
           issueId={issue.id}
           totalPages={issue.page_count}
+          coverUrl={issue.cover_url || undefined}
         />
       </div>
     </div>
