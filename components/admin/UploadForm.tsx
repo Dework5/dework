@@ -28,6 +28,51 @@ export function UploadForm({ publications }: UploadFormProps) {
   const coverInputRef = useRef<HTMLInputElement>(null)
   const pdfInputRef   = useRef<HTMLInputElement>(null)
 
+  // Sube el PDF usando TUS (protocolo de subida por chunks) — soporta cualquier tamanio
+  const uploadPdfTus = (
+    file: File,
+    path: string,
+    token: string,
+    onProgress: (pct: number) => void
+  ): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+      const { Upload } = await import('tus-js-client')
+
+      const upload = new Upload(file, {
+        endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
+        retryDelays: [0, 3000, 5000, 10000, 20000],
+        headers: {
+          authorization: `Bearer ${token}`,
+          'x-upsert': 'true',
+        },
+        uploadDataDuringCreation: true,
+        removeFingerprintOnSuccess: true,
+        metadata: {
+          bucketName:  'pdfs',
+          objectName:  path,
+          contentType: 'application/pdf',
+          cacheControl: '3600',
+        },
+        chunkSize: 6 * 1024 * 1024, // 6 MB por chunk
+        onError(error) {
+          reject(new Error('Error subiendo el PDF: ' + error.message))
+        },
+        onProgress(bytesUploaded, bytesTotal) {
+          const pct = bytesTotal > 0 ? Math.round((bytesUploaded / bytesTotal) * 100) : 0
+          onProgress(pct)
+        },
+        onSuccess() {
+          resolve()
+        },
+      })
+
+      upload.findPreviousUploads().then((previous) => {
+        if (previous.length > 0) upload.resumeFromPreviousUpload(previous[0])
+        upload.start()
+      })
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!publicationId || !issueNumber || !title || !coverFile || !pdfFile) {
@@ -44,7 +89,7 @@ export function UploadForm({ publications }: UploadFormProps) {
     const coverExt = coverFile.name.split('.').pop() || 'jpg'
 
     try {
-      // 1. Obtener URLs firmadas desde el servidor
+      // 1. Obtener tokens firmados desde el servidor
       setProgressLabel('Obteniendo URLs de subida...')
       const urlsRes = await fetch('/api/admin/get-upload-urls', {
         method:  'POST',
@@ -58,8 +103,7 @@ export function UploadForm({ publications }: UploadFormProps) {
       const { cover: coverUpload, pdf: pdfUpload } = await urlsRes.json()
       setProgress(15)
 
-      // 2. Subir portada via SDK de Supabase
-      // uploadToSignedUrl usa POST+FormData — el formato correcto para Supabase Storage
+      // 2. Subir portada via SDK de Supabase (uploadToSignedUrl)
       setProgressLabel('Subiendo portada...')
       const { error: coverErr } = await supabasePublic.storage
         .from('covers')
@@ -70,15 +114,13 @@ export function UploadForm({ publications }: UploadFormProps) {
       if (coverErr) throw new Error('Error subiendo la portada: ' + coverErr.message)
       setProgress(50)
 
-      // 3. Subir PDF via SDK de Supabase (directo, sin limite de Vercel)
+      // 3. Subir PDF via TUS (Tus Resumable Upload) — soporta archivos de cualquier tamanio
       setProgressLabel('Subiendo PDF...')
-      const { error: pdfErr } = await supabasePublic.storage
-        .from('pdfs')
-        .uploadToSignedUrl(pdfUpload.path, pdfUpload.token, pdfFile, {
-          contentType: 'application/pdf',
-          upsert: true,
-        })
-      if (pdfErr) throw new Error('Error subiendo el PDF: ' + pdfErr.message)
+      await uploadPdfTus(pdfFile, pdfUpload.path, pdfUpload.token, (pct) => {
+        // Mapear 0–100% del PDF → 50–82% del progreso total
+        setProgress(50 + Math.round(pct * 0.32))
+        setProgressLabel(`Subiendo PDF... ${pct}%`)
+      })
       setProgress(82)
 
       // 4. Crear registro en la base de datos
@@ -141,7 +183,7 @@ export function UploadForm({ publications }: UploadFormProps) {
         <label className={labelCls}>PDF de la revista *</label>
         <input ref={pdfInputRef} type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
           className="w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#444] text-sm focus:outline-none focus:border-[#080808] file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#F0F0F0] file:text-xs file:cursor-pointer" required />
-        <p className="text-[#AAA] text-xs mt-1">PDF — Sube directo a Supabase Storage (sin limite de Vercel)</p>
+        <p className="text-[#AAA] text-xs mt-1">PDF — Sin limite de tamanio, sube directo a Supabase</p>
       </div>
       <div>
         <label className={labelCls}>Imagen de portada *</label>
