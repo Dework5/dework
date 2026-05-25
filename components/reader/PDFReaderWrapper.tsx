@@ -2,14 +2,29 @@
 
 import dynamic from 'next/dynamic'
 
-// En Next.js 16, dynamic con ssr: false solo puede estar en Client Components
 const PDFReader = dynamic(() => import('./PDFReader'), {
   ssr: false,
   loading: () => (
-    <div className="flex flex-col items-center gap-4 pt-24 min-h-screen bg-black justify-center">
-      <div className="w-48 h-64 md:w-64 md:h-80 bg-dw-card animate-pulse" />
-      <p className="text-dw-muted font-body text-sm animate-pulse">
-        Cargando revista...
+    <div
+      className="flex flex-col items-center justify-center gap-5 min-h-screen"
+      style={{ background: '#F0EDE8' }}
+    >
+      <div
+        className="animate-pulse rounded-sm"
+        style={{
+          width: 280,
+          height: 396,
+          background: 'linear-gradient(135deg, #E8E4DF 25%, #EBE8E3 50%, #E8E4DF 75%)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+        }}
+      />
+      <div className="flex items-center gap-2">
+        <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '0ms' }} />
+        <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '150ms' }} />
+        <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '300ms' }} />
+      </div>
+      <p className="text-gray-400 text-[11px] tracking-[0.3em] uppercase">
+        Preparando revista…
       </p>
     </div>
   ),

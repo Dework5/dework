@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -15,7 +15,7 @@ interface ReaderControlsProps {
 export function ReaderControls({
   currentPage, numPages, onPrev, onNext, onGoTo, isLoading,
 }: ReaderControlsProps) {
-  const [editing, setEditing] = useState(false)
+  const [editing,  setEditing]  = useState(false)
   const [inputVal, setInputVal] = useState('')
 
   const handlePageClick = () => {
@@ -30,24 +30,46 @@ export function ReaderControls({
     setEditing(false)
   }
 
+  const pct = numPages > 1 ? Math.round(((currentPage - 1) / (numPages - 1)) * 100) : 0
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
-      {/* Barra de controles */}
-      <div className="bg-[#0a0a0a]/98 backdrop-blur-md border-t border-white/8 h-16 flex items-center justify-between px-6 gap-4">
+      {/* Línea de progreso encima de la barra */}
+      <div className="h-[2px] bg-black/6 w-full">
+        <div
+          className="h-full transition-all duration-700 ease-out"
+          style={{ width: `${pct}%`, background: '#C5A56B' }}
+        />
+      </div>
 
-        {/* Botón anterior */}
+      {/* Barra de navegación */}
+      <div
+        className="flex items-center justify-between px-4 sm:px-8"
+        style={{
+          background: '#FFFFFF',
+          borderTop: '1px solid rgba(0,0,0,0.07)',
+          height: 64,
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.06)',
+        }}
+      >
+        {/* Anterior */}
         <button
           onClick={onPrev}
           disabled={currentPage <= 1 || isLoading}
-          className="flex items-center gap-1.5 text-white/40 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors group"
+          className="flex items-center gap-2 text-gray-400 hover:text-gray-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors group min-w-[80px]"
           aria-label="Página anterior"
         >
-          <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-          <span className="text-[11px] tracking-[0.15em] uppercase hidden sm:block">Anterior</span>
+          <ChevronLeft
+            size={18}
+            className="group-hover:-translate-x-0.5 transition-transform flex-shrink-0"
+          />
+          <span className="text-[11px] tracking-[0.15em] uppercase font-medium hidden sm:block">
+            Anterior
+          </span>
         </button>
 
-        {/* Contador de páginas — clickeable para ir directo */}
-        <div className="flex flex-col items-center gap-0.5">
+        {/* Contador central */}
+        <div className="flex flex-col items-center justify-center gap-0.5 flex-1">
           {editing ? (
             <input
               type="number"
@@ -57,40 +79,55 @@ export function ReaderControls({
               autoFocus
               onChange={e => setInputVal(e.target.value)}
               onBlur={handlePageSubmit}
-              onKeyDown={e => { if (e.key === 'Enter') handlePageSubmit(); if (e.key === 'Escape') setEditing(false) }}
-              className="w-16 text-center bg-white/10 text-white text-sm border border-white/20 rounded px-2 py-1 outline-none focus:border-[#C5A56B]"
+              onKeyDown={e => {
+                if (e.key === 'Enter') handlePageSubmit()
+                if (e.key === 'Escape') setEditing(false)
+              }}
+              className="w-16 text-center bg-gray-50 text-gray-900 text-sm border border-gray-200 rounded-md px-2 py-1.5 outline-none focus:border-[#C5A56B] focus:ring-1 focus:ring-[#C5A56B]/30"
             />
           ) : (
             <button
               onClick={handlePageClick}
-              className="flex flex-col items-center gap-0.5 hover:opacity-80 transition-opacity"
-              title="Clic para ir a una página"
+              className="flex flex-col items-center gap-0 hover:opacity-70 transition-opacity cursor-pointer"
+              title="Clic para saltar a una página"
+              disabled={isLoading || numPages === 0}
             >
               {isLoading ? (
-                <span className="text-white/20 text-[13px] tracking-widest">· · ·</span>
+                <span className="text-gray-300 text-sm tracking-widest">· · ·</span>
               ) : (
                 <>
-                  <span className="text-white text-[15px] font-light tabular-nums">
-                    {currentPage}
-                    <span className="text-white/25 mx-1">/</span>
-                    {numPages || '—'}
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-gray-900 text-[17px] font-light tabular-nums leading-none">
+                      {currentPage}
+                    </span>
+                    <span className="text-gray-300 text-sm leading-none">/</span>
+                    <span className="text-gray-400 text-[13px] font-light tabular-nums leading-none">
+                      {numPages || '—'}
+                    </span>
+                  </div>
+                  <span className="text-gray-300 text-[9px] tracking-[0.25em] uppercase mt-1">
+                    página
                   </span>
-                  <span className="text-white/25 text-[9px] tracking-[0.2em] uppercase">Página</span>
                 </>
               )}
             </button>
           )}
         </div>
 
-        {/* Botón siguiente */}
+        {/* Siguiente */}
         <button
           onClick={onNext}
           disabled={!numPages || currentPage >= numPages || isLoading}
-          className="flex items-center gap-1.5 text-white/40 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors group"
+          className="flex items-center gap-2 text-gray-400 hover:text-gray-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors group min-w-[80px] justify-end"
           aria-label="Página siguiente"
         >
-          <span className="text-[11px] tracking-[0.15em] uppercase hidden sm:block">Siguiente</span>
-          <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+          <span className="text-[11px] tracking-[0.15em] uppercase font-medium hidden sm:block">
+            Siguiente
+          </span>
+          <ChevronRight
+            size={18}
+            className="group-hover:translate-x-0.5 transition-transform flex-shrink-0"
+          />
         </button>
       </div>
     </div>

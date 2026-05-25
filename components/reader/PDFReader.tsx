@@ -1,10 +1,9 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
 import { ReaderControls } from './ReaderControls'
 
-// Worker CDN compatible con pdfjs v5
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 
@@ -15,22 +14,22 @@ interface PDFReaderProps {
 }
 
 export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
-  const canvasRef   = useRef<HTMLCanvasElement>(null)
+  const canvasRef    = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [pdf,         setPdf]         = useState<pdfjsLib.PDFDocumentProxy | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [numPages,    setNumPages]    = useState(totalPages || 0)
-  const [scale,       setScale]       = useState(1.5)
-  const [isLoading,   setIsLoading]   = useState(true)
-  const [pageChanging,setPageChanging]= useState(false)
-  const [error,       setError]       = useState<string | null>(null)
+  const [pdf,          setPdf]          = useState<pdfjsLib.PDFDocumentProxy | null>(null)
+  const [currentPage,  setCurrentPage]  = useState(1)
+  const [numPages,     setNumPages]     = useState(totalPages || 0)
+  const [scale,        setScale]        = useState(1.5)
+  const [isLoading,    setIsLoading]    = useState(true)
+  const [pageChanging, setPageChanging] = useState(false)
+  const [error,        setError]        = useState<string | null>(null)
   const renderTaskRef = useRef<pdfjsLib.RenderTask | null>(null)
 
-  // --- Scale automático al ancho del viewport ---
+  // ── Scale automático al ancho del viewport ──────────────────────
   const calcScale = useCallback(() => {
-    const w = Math.min(window.innerWidth, 960) // max 960px
-    const s = Math.max(0.4, (w - 32) / 595)   // 595 = ancho A4 en pts
-    setScale(Math.min(s, 2.2))
+    const maxW = Math.min(window.innerWidth, 900)
+    const s    = Math.max(0.4, (maxW - 40) / 595)
+    setScale(Math.min(s, 2.4))
   }, [])
 
   useEffect(() => {
@@ -39,7 +38,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     return () => window.removeEventListener('resize', calcScale)
   }, [calcScale])
 
-  // --- Session tracking ---
+  // ── Session tracking ─────────────────────────────────────────────
   useEffect(() => {
     let sid = sessionStorage.getItem('dework_session')
     if (!sid) { sid = crypto.randomUUID(); sessionStorage.setItem('dework_session', sid) }
@@ -50,7 +49,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     }).catch(() => {})
   }, [issueId])
 
-  // --- Cargar PDF ---
+  // ── Cargar PDF ───────────────────────────────────────────────────
   useEffect(() => {
     setIsLoading(true)
     setError(null)
@@ -65,11 +64,10 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     return () => { task.destroy().catch(() => {}) }
   }, [pdfUrl])
 
-  // --- Renderizar página ---
+  // ── Renderizar página ────────────────────────────────────────────
   const renderPage = useCallback(async (pageNum: number, s: number) => {
     if (!pdf || !canvasRef.current) return
     if (renderTaskRef.current) { renderTaskRef.current.cancel() }
-
     try {
       const page     = await pdf.getPage(pageNum)
       const viewport = page.getViewport({ scale: s })
@@ -77,14 +75,11 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
       if (!canvas) return
       const ctx = canvas.getContext('2d')
       if (!ctx) return
-
       canvas.height = viewport.height
       canvas.width  = viewport.width
-
       const task = page.render({ canvasContext: ctx, viewport, canvas })
       renderTaskRef.current = task
       await task.promise
-
       const sid = sessionStorage.getItem('dework_session') || ''
       fetch('/api/track-page', {
         method: 'POST',
@@ -100,22 +95,20 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     if (pdf) renderPage(currentPage, scale)
   }, [pdf, currentPage, scale, renderPage])
 
-  // --- Navegación ---
+  // ── Navegación ───────────────────────────────────────────────────
   const goTo = useCallback((p: number) => {
     if (p < 1 || p > numPages || isLoading) return
     setPageChanging(true)
-    setTimeout(() => {
-      setCurrentPage(p)
-      setPageChanging(false)
-    }, 120)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setTimeout(() => { setCurrentPage(p); setPageChanging(false) }, 140)
   }, [numPages, isLoading])
 
   const prevPage = () => goTo(currentPage - 1)
   const nextPage = () => goTo(currentPage + 1)
   const zoomIn   = () => setScale(s => Math.min(s + 0.25, 3))
-  const zoomOut  = () => setScale(s => Math.max(s - 0.25, 0.4))
+  const zoomOut  = () => setScale(s => Math.max(s - 0.25, 0.5))
 
-  // --- Teclado ---
+  // ── Teclado ──────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextPage() }
@@ -127,24 +120,26 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     return () => window.removeEventListener('keydown', handler)
   }, [currentPage, numPages, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // --- Swipe mobile ---
+  // ── Swipe mobile ─────────────────────────────────────────────────
   const touchStartX = useRef(0)
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
   const onTouchEnd   = (e: React.TouchEvent) => {
     const dx = touchStartX.current - e.changedTouches[0].clientX
-    if (Math.abs(dx) > 50) { dx > 0 ? nextPage() : prevPage() }
+    if (Math.abs(dx) > 48) { dx > 0 ? nextPage() : prevPage() }
   }
 
-  // --- Progress % ---
-  const progress = numPages > 0 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
+  const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
 
+  // ── Error ────────────────────────────────────────────────────────
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#0d0d0d]">
+      <div className="flex items-center justify-center min-h-screen bg-[#F0EDE8]">
         <div className="text-center space-y-4 px-6">
-          <p className="text-white/60 text-base">{error}</p>
-          <button onClick={() => window.location.reload()}
-            className="text-[#C5A56B] text-sm tracking-widest uppercase hover:text-white transition-colors">
+          <p className="text-gray-500 text-base">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-[#111] text-sm tracking-widest uppercase border-b border-[#111]/20 hover:border-[#111] transition-colors"
+          >
             Reintentar
           </button>
         </div>
@@ -155,32 +150,38 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
   return (
     <div
       ref={containerRef}
-      className="relative bg-[#0d0d0d] min-h-screen flex flex-col select-none"
+      className="relative min-h-screen flex flex-col select-none"
+      style={{ background: '#F0EDE8' }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* Barra de progreso de lectura */}
-      <div className="fixed top-14 left-0 right-0 z-40 h-px bg-white/5">
+      {/* ── Barra de progreso de lectura ── */}
+      <div className="fixed top-14 left-0 right-0 z-40 h-[3px] bg-black/5">
         <div
-          className="h-full bg-[#C5A56B] transition-all duration-700 ease-out"
-          style={{ width: `${progress}%` }}
+          className="h-full transition-all duration-700 ease-out"
+          style={{ width: `${progress}%`, background: '#C5A56B' }}
         />
       </div>
 
-      {/* Área del canvas */}
-      <div className="flex-1 overflow-auto flex items-start justify-center py-10 pb-28 px-4">
+      {/* ── Área de lectura ── */}
+      <div className="flex-1 flex items-start justify-center px-4 py-10 pb-28">
         {isLoading ? (
-          // Skeleton de carga
-          <div className="flex flex-col items-center gap-6 pt-16">
+          <div className="flex flex-col items-center gap-5 pt-16 w-full max-w-[640px]">
             <div
-              className="animate-pulse rounded-sm"
+              className="w-full animate-pulse rounded-sm"
               style={{
-                width:  Math.min(595 * scale, window.innerWidth - 32),
-                height: Math.min(842 * scale, (window.innerHeight - 120) * 1.2),
-                background: 'linear-gradient(135deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%)',
+                aspectRatio: '595/842',
+                background: 'linear-gradient(135deg, #E8E4DF 25%, #EBE8E3 50%, #E8E4DF 75%)',
+                backgroundSize: '400% 400%',
+                maxWidth: Math.min(595 * scale, (typeof window !== 'undefined' ? window.innerWidth : 600) - 40),
               }}
             />
-            <p className="text-white/30 text-[11px] tracking-[0.25em] uppercase animate-pulse">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+            <p className="text-gray-400 text-[11px] tracking-[0.3em] uppercase">
               Cargando revista…
             </p>
           </div>
@@ -191,31 +192,33 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
           >
             <canvas
               ref={canvasRef}
-              className="rounded-sm max-w-full block"
+              className="max-w-full block"
               style={{
-                boxShadow: '0 8px 60px rgba(0,0,0,0.8), 0 2px 20px rgba(0,0,0,0.6)',
+                borderRadius: '1px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08), 0 8px 40px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.06)',
               }}
             />
           </div>
         )}
       </div>
 
-      {/* Controles zoom (lado derecho) */}
+      {/* ── Zoom (lado derecho, solo desktop) ── */}
       {!isLoading && (
-        <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50">
-          <button onClick={zoomIn}
-            className="w-9 h-9 bg-black/70 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all text-base flex items-center justify-center rounded-sm backdrop-blur"
-            aria-label="Zoom in">+</button>
-          <button onClick={zoomOut}
-            className="w-9 h-9 bg-black/70 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all text-base flex items-center justify-center rounded-sm backdrop-blur"
-            aria-label="Zoom out">−</button>
-          <a href={pdfUrl} download
-            className="w-9 h-9 bg-black/70 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all text-sm flex items-center justify-center rounded-sm backdrop-blur"
-            aria-label="Descargar PDF" title="Descargar PDF">↓</a>
+        <div className="fixed right-4 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-1.5 z-50">
+          <button
+            onClick={zoomIn}
+            className="w-8 h-8 bg-white/80 backdrop-blur-sm border border-black/8 text-gray-500 hover:text-gray-900 hover:bg-white transition-all text-base flex items-center justify-center rounded shadow-sm"
+            aria-label="Zoom in"
+          >+</button>
+          <button
+            onClick={zoomOut}
+            className="w-8 h-8 bg-white/80 backdrop-blur-sm border border-black/8 text-gray-500 hover:text-gray-900 hover:bg-white transition-all text-base flex items-center justify-center rounded shadow-sm"
+            aria-label="Zoom out"
+          >−</button>
         </div>
       )}
 
-      {/* Controles inferior */}
+      {/* ── Controles de navegación ── */}
       <ReaderControls
         currentPage={currentPage}
         numPages={numPages}
