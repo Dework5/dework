@@ -10,17 +10,18 @@ import { Eye, EyeOff } from 'lucide-react'
 type Tab = 'upload' | 'stats' | 'issues'
 
 const PUBLICATIONS_SIDEBAR = [
-  { slug: 'san-diego-la-revista', name: 'San Diego La Revista', shortName: 'SDLR', issueCount: 139 },
-  { slug: 'haras-del-pilar',      name: 'Haras del Pilar',       shortName: 'HDP',  issueCount: 24  },
-  { slug: 'pilara-magazine',      name: 'Pilará Magazine',        shortName: 'PM',   issueCount: 18  },
-  { slug: 'los-lagartos',         name: 'Los Lagartos',           shortName: 'LL',   issueCount: 12  },
-  { slug: 'campo-chico',          name: 'Campo Chico',            shortName: 'CC',   issueCount: 8   },
+  { slug: 'san-diego-la-revista', name: 'San Diego La Revista', shortName: 'SDLR', issueCount: 0 },
+  { slug: 'haras-del-pilar',      name: 'Haras del Pilar',       shortName: 'HDP',  issueCount: 0 },
+  { slug: 'pilara-magazine',      name: 'Pilará Magazine',        shortName: 'PM',   issueCount: 0 },
+  { slug: 'los-lagartos',         name: 'Los Lagartos',           shortName: 'LL',   issueCount: 0 },
+  { slug: 'campo-chico',          name: 'Campo Chico',            shortName: 'CC',   issueCount: 0 },
 ]
 
 export default function AdminPage() {
   const [isAuth, setIsAuth] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('upload')
   const [publications, setPublications] = useState<Publication[]>([])
+  const [pubsLoading, setPubsLoading] = useState(false)
   const [issues, setIssues] = useState<(Issue & { views?: number })[]>([])
   const [selectedPub, setSelectedPub] = useState('')
   const [selectedIssue, setSelectedIssue] = useState('')
@@ -33,16 +34,45 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!isAuth) return
-    supabase.from('publications').select('*').eq('is_active', true).then(({ data }) => {
-      if (data) setPublications(data)
-    })
+    setPubsLoading(true)
+
+    const loadPublications = async () => {
+      // Try without is_active filter to get all publications
+      const { data } = await supabase
+        .from('publications')
+        .select('*')
+        .order('created_at', { ascending: true })
+
+      if (data && data.length > 0) {
+        setPublications(data)
+        setPubsLoading(false)
+      } else {
+        // Publications table is empty → auto-seed the 5 default publications
+        try {
+          const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+          const res = await fetch('/api/admin/seed-publications', {
+            method: 'POST',
+            headers: { Authorization: pw },
+          })
+          if (res.ok) {
+            const json = await res.json()
+            if (json.publications) setPublications(json.publications)
+          }
+        } catch {
+          // silent — form will show empty
+        }
+        setPubsLoading(false)
+      }
+    }
+
+    loadPublications()
   }, [isAuth])
 
   useEffect(() => {
     if (!isAuth) return
     supabase
       .from('issues')
-      .select('*, publications(name)')
+      .select('*, publications(name, slug)')
       .order('published_at', { ascending: false })
       .then(({ data }) => {
         if (data) setIssues(data as (Issue & { views?: number })[])
@@ -94,7 +124,12 @@ export default function AdminPage() {
   }
 
   const sidebarPubs = publications.length > 0
-    ? publications.map((p: any) => ({ slug: p.slug, name: p.name, shortName: p.shortName || p.short_name || p.name?.slice(0, 2), issueCount: p.issue_count || p.issueCount }))
+    ? publications.map((p: any) => ({
+        slug: p.slug,
+        name: p.name,
+        shortName: p.short_name || p.shortName || p.name?.slice(0, 2),
+        issueCount: issues.filter(i => i.publication_id === p.id).length,
+      }))
     : PUBLICATIONS_SIDEBAR
 
   return (
@@ -117,10 +152,10 @@ export default function AdminPage() {
               onClick={() => setActiveTab('issues')}
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#444] hover:bg-[#F5F5F5] hover:text-[#080808] text-sm mb-1 transition-colors group w-full text-left">
               <span className="w-7 h-7 bg-[#F0F0F0] rounded text-[10px] font-bold text-[#666] flex items-center justify-center flex-shrink-0 group-hover:bg-[#080808] group-hover:text-white transition-colors">
-                {(pub.shortName || 'DW').slice(0, 2)}
+                {(pub.shortName || 'DW').slice(0, 2).toUpperCase()}
               </span>
               <span className="flex-1 truncate text-sm">{pub.name}</span>
-              <span className="text-[#CCC] text-xs flex-shrink-0">{pub.issueCount}</span>
+              <span className="text-[#CCC] text-xs flex-shrink-0">{pub.issueCount || ''}</span>
             </button>
           ))}
 
@@ -173,7 +208,11 @@ export default function AdminPage() {
               <p className="text-[#888] text-sm mt-1">Completá los datos y subí el PDF de la edición.</p>
             </div>
             <div className="bg-white rounded-xl border border-[#E5E5E5] p-8 max-w-2xl">
-              <UploadForm publications={publications} />
+              {pubsLoading ? (
+                <p className="text-[#888] text-sm">Cargando publicaciones…</p>
+              ) : (
+                <UploadForm publications={publications} />
+              )}
             </div>
           </div>
         )}
@@ -189,11 +228,11 @@ export default function AdminPage() {
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="bg-white rounded-xl border border-[#E5E5E5] p-6">
                 <p className="text-[#888] text-xs uppercase tracking-wider mb-2">Total ediciones</p>
-                <p className="text-3xl font-bold text-[#080808]">201</p>
+                <p className="text-3xl font-bold text-[#080808]">{issues.length || 0}</p>
               </div>
               <div className="bg-white rounded-xl border border-[#E5E5E5] p-6">
                 <p className="text-[#888] text-xs uppercase tracking-wider mb-2">Publicaciones activas</p>
-                <p className="text-3xl font-bold text-[#080808]">5</p>
+                <p className="text-3xl font-bold text-[#080808]">{publications.length || 5}</p>
               </div>
               <div className="bg-white rounded-xl border border-[#E5E5E5] p-6">
                 <p className="text-[#888] text-xs uppercase tracking-wider mb-2">Lectores mensuales</p>
@@ -283,7 +322,7 @@ export default function AdminPage() {
                   {issues.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-12 text-center text-[#888] text-sm">
-                        No hay ediciones publicadas todavía.
+                        No hay ediciones todavía. Subí la primera desde "Subir edición".
                       </td>
                     </tr>
                   ) : issues.map((issue, i) => (
@@ -301,7 +340,7 @@ export default function AdminPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <a href={`/revistas/${issue.publication_id}/${issue.issue_number}`}
+                          <a href={`/revistas/${(issue as any).publications?.slug || issue.publication_id}/${issue.issue_number}`}
                             target="_blank" rel="noreferrer"
                             className="text-[#AAA] hover:text-[#080808] transition-colors" title="Ver">
                             <Eye size={15} />
