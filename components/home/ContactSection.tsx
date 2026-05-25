@@ -1,135 +1,35 @@
 'use client'
 
-import { useState } from 'react'
-import { Mail, Phone, MapPin, Send } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export function ContactSection() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setStatus('sending')
-
-    try {
-      const res = await fetch('https://formspree.io/f/xpwrprlw', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, message }),
-      })
-
-      if (res.ok) {
-        setStatus('sent')
-        setName('')
-        setEmail('')
-        setMessage('')
-      } else {
-        setStatus('error')
-      }
-    } catch {
-      setStatus('error')
-    }
-  }
-
   return (
-    <section id="contacto" className="bg-background py-16 md:py-24">
-      <div className="max-w-content mx-auto px-4 md:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-text-primary">
-            Escribinos
-          </h2>
-          <p className="mt-3 text-text-secondary font-body text-lg">
-            Para pautar, consultar o sumarte a nuestro equipo.
-          </p>
-        </div>
-
-        <div className="max-w-lg mx-auto space-y-8">
-          {/* Formulario */}
-          {status === 'sent' ? (
-            <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Send size={24} className="text-primary" />
-              </div>
-              <h3 className="font-display font-semibold text-text-primary text-xl">
-                ¡Mensaje enviado!
-              </h3>
-              <p className="text-text-secondary font-body">
-                Te respondemos a la brevedad.
-              </p>
-              <button
-                onClick={() => setStatus('idle')}
-                className="text-primary text-sm font-body hover:underline"
-              >
-                Enviar otro mensaje
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Nombre"
-                required
-                className="w-full bg-surface border border-border rounded-sm px-4 py-3 text-text-primary font-body text-sm focus:outline-none focus:border-text-secondary transition-colors placeholder:text-text-muted"
-              />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                required
-                className="w-full bg-surface border border-border rounded-sm px-4 py-3 text-text-primary font-body text-sm focus:outline-none focus:border-text-secondary transition-colors placeholder:text-text-muted"
-              />
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Mensaje"
-                rows={4}
-                required
-                className="w-full bg-surface border border-border rounded-sm px-4 py-3 text-text-primary font-body text-sm focus:outline-none focus:border-text-secondary transition-colors placeholder:text-text-muted resize-none"
-              />
-
-              {status === 'error' && (
-                <p className="text-primary text-sm font-body">
-                  Error al enviar. Intentá de nuevo.
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={status === 'sending'}
-                className="flex items-center gap-2 bg-primary text-white py-3 px-8 rounded-sm font-body font-medium tracking-wide hover:bg-primary-dark hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
-              >
-                <Send size={16} />
-                {status === 'sending' ? 'Enviando...' : 'Enviar mensaje'}
-              </button>
-            </form>
-          )}
-
-          {/* Datos de contacto */}
-          <div className="border-t border-border pt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <a
-              href="tel:+5401133616566"
-              className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors text-sm font-body"
-            >
-              <Phone size={14} className="text-primary flex-shrink-0" />
-              011 3361-6566
-            </a>
-            <a
-              href="mailto:Info@dework.com.ar"
-              className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors text-sm font-body"
-            >
-              <Mail size={14} className="text-primary flex-shrink-0" />
-              Info@dework.com.ar
-            </a>
-            <div className="flex items-center gap-2 text-text-secondary text-sm font-body">
-              <MapPin size={14} className="text-primary flex-shrink-0" />
-              Pilar, Buenos Aires
-            </div>
-          </div>
+    <section id="contacto" className="bg-dw-surface border-t border-dw-border py-28 px-6 md:px-10">
+      <div className="max-w-lg mx-auto">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.6 }}>
+          <p className="text-dw-muted text-[10px] tracking-[0.3em] uppercase mb-4">04 / Contacto</p>
+          <h2 className="font-display text-4xl text-dw-white font-bold mb-10">Escribinos</h2>
+        </motion.div>
+        <motion.form action="https://formspree.io/f/xwpkdqbn" method="POST"
+          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}
+          className="flex flex-col gap-3">
+          <input name="nombre" type="text" placeholder="Nombre" required
+            className="bg-dw-card border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-hover transition-colors" />
+          <input name="email" type="email" placeholder="Email" required
+            className="bg-dw-card border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-hover transition-colors" />
+          <textarea name="mensaje" placeholder="Mensaje" rows={4} required
+            className="bg-dw-card border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-hover transition-colors resize-none" />
+          <button type="submit"
+            className="bg-dw-white text-dw-black text-[11px] font-semibold tracking-[0.12em] uppercase py-4 hover:bg-dw-text transition-colors duration-200 mt-2">
+            Enviar mensaje →
+          </button>
+        </motion.form>
+        <div className="mt-10 flex flex-col gap-2">
+          <p className="text-dw-muted text-sm">011 3361-6566</p>
+          <p className="text-dw-muted text-sm">Info@dework.com.ar</p>
+          <p className="text-dw-muted text-sm">Pilar, Buenos Aires</p>
         </div>
       </div>
     </section>

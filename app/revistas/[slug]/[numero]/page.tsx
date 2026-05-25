@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { PDFReaderWrapper } from '@/components/reader/PDFReaderWrapper'
 
@@ -57,21 +56,23 @@ export default async function ReaderPage({ params }: Props) {
       <h1 className="sr-only">{issue.title}</h1>
 
       {/* Barra superior del lector */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-border h-12 flex items-center px-4 gap-4">
-        <Link
-          href={`/revistas/${slug}`}
-          className="flex items-center gap-1 text-text-secondary hover:text-text-primary transition-colors text-sm font-body min-h-[44px]"
-        >
-          <ChevronLeft size={16} />
-          <span className="hidden sm:inline">Volver</span>
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur border-b border-dw-border h-14 flex items-center px-6 gap-6">
+        <Link href={`/revistas/${slug}`}
+          className="text-dw-muted text-[11px] tracking-[0.15em] uppercase hover:text-dw-text transition-colors">
+          ← Volver
         </Link>
-        <span className="text-text-muted text-xs font-body truncate">
-          {issue.title}
-        </span>
+        <span className="text-dw-border">|</span>
+        <span className="text-dw-muted text-[11px] tracking-[0.1em] uppercase flex-1 truncate">{issue?.title || `Edición #${numero}`}</span>
+        {issue?.pdf_url && (
+          <a href={issue.pdf_url} download
+            className="text-dw-muted text-[11px] tracking-[0.15em] uppercase hover:text-dw-text transition-colors">
+            Descargar ↓
+          </a>
+        )}
       </div>
 
-      {/* Reader — sin Navbar ni Footer del sitio */}
-      <div className="pt-12">
+      {/* Reader */}
+      <div className="bg-black pt-14 min-h-screen">
         <PDFReaderWrapper
           pdfUrl={issue.pdf_url}
           issueId={issue.id}

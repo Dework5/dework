@@ -7,8 +7,8 @@ const PDFReader = dynamic(() => import('./PDFReader'), {
   ssr: false,
   loading: () => (
     <div className="flex flex-col items-center gap-4 pt-24 min-h-screen bg-black justify-center">
-      <div className="w-48 h-64 md:w-64 md:h-80 bg-surface-elevated animate-pulse rounded-sm" />
-      <p className="text-text-muted font-body text-sm animate-pulse">
+      <div className="w-48 h-64 md:w-64 md:h-80 bg-dw-card animate-pulse" />
+      <p className="text-dw-muted font-body text-sm animate-pulse">
         Cargando revista...
       </p>
     </div>

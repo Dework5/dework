@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { supabase } from '@/lib/supabase'
-import { IssuesGrid } from '@/components/issues/IssuesGrid'
-import { AnimateOnScroll } from '@/components/ui/AnimateOnScroll'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -52,74 +51,79 @@ export default async function RevistasSlugPage({ params }: Props) {
 
   const { publication, issues } = result
 
-  const periodicalSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Periodical',
-    name: publication.name,
-    description: publication.description,
-    publisher: { '@type': 'Organization', name: 'Dework Editorial' },
-    url: `https://dework.com.ar/revistas/${slug}`,
-  }
-
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(periodicalSchema) }}
-      />
-      <h1 className="sr-only">{publication.name}</h1>
-
-      {/* Header publicación */}
-      <section
-        className="pt-24 pb-16 md:pt-32 md:pb-24"
-        style={{
-          background: `linear-gradient(to bottom, ${publication.accent_color}15, #0A0A0A)`,
-        }}
-      >
-        <div className="max-w-content mx-auto px-4 md:px-8 text-center">
-          <AnimateOnScroll>
-            <span
-              className="inline-block px-3 py-1 text-xs font-body tracking-widest uppercase font-medium rounded-sm mb-6 text-white"
-              style={{ backgroundColor: publication.accent_color }}
-            >
-              {publication.short_name}
-            </span>
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-text-primary mb-4">
-              {publication.name}
-            </h2>
-            {publication.description && (
-              <p className="text-text-secondary font-body text-lg max-w-2xl mx-auto leading-relaxed">
-                {publication.description}
-              </p>
-            )}
-            <p className="mt-6 text-text-muted font-body text-sm">
-              {issues.length} ediciones publicadas
-            </p>
-          </AnimateOnScroll>
-        </div>
-      </section>
-
-      {/* Grid de ediciones */}
-      <section className="bg-background py-12 md:py-16">
-        <div className="max-w-content mx-auto px-4 md:px-8">
-          <IssuesGrid issues={issues} slug={slug} />
-        </div>
-      </section>
-
-      {/* CTA Anunciantes */}
-      <section className="bg-surface border-t border-border py-12">
-        <div className="max-w-content mx-auto px-4 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-text-secondary font-body text-sm">
-            ¿Querés pautar en <span className="text-text-primary">{publication.name}</span>?
-          </p>
-          <Link
-            href="/anunciantes"
-            className="border border-border text-text-primary py-2 px-6 rounded-sm font-body text-sm font-medium hover:border-text-secondary transition-colors whitespace-nowrap min-h-[44px] flex items-center"
-          >
-            Hablar con nosotros
+    <main className="min-h-screen bg-dw-black">
+      {/* Header */}
+      <div className="bg-dw-black pt-32 pb-16 px-6 md:px-10 border-b border-dw-border">
+        <div className="max-w-7xl mx-auto">
+          <Link href="/" className="text-dw-muted text-[10px] tracking-[0.2em] uppercase hover:text-dw-text transition-colors mb-8 inline-block">
+            ← Inicio
           </Link>
+          <span className="text-dw-muted text-[10px] tracking-[0.25em] uppercase block mb-4">
+            {publication.slug?.toUpperCase()}
+          </span>
+          <h1 className="font-display font-bold text-dw-white leading-tight mb-4"
+            style={{ fontSize: 'clamp(44px, 7vw, 88px)' }}>
+            {publication.name}
+          </h1>
+          <p className="text-dw-muted text-sm max-w-md">
+            {publication.description || `${issues?.length || 0} ediciones publicadas`}
+          </p>
         </div>
-      </section>
-    </>
+      </div>
+
+      {/* Issues grid */}
+      <div className="px-6 md:px-10 py-16">
+        <div className="max-w-7xl mx-auto">
+          {!issues || issues.length === 0 ? (
+            <div className="text-center py-32">
+              <p className="font-display italic text-dw-muted text-2xl">Próximamente</p>
+              <p className="text-dw-muted text-sm mt-3">
+                Las ediciones de {publication.name} estarán disponibles pronto.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-dw-border">
+              {issues.map((issue: any) => (
+                <Link
+                  key={issue.id}
+                  href={`/revistas/${publication.slug}/${issue.issue_number}`}
+                  className="bg-dw-card group relative overflow-hidden block"
+                >
+                  <div className="aspect-[3/4] relative overflow-hidden">
+                    {issue.cover_url ? (
+                      <Image
+                        src={issue.cover_url}
+                        alt={issue.title || `Edición #${issue.issue_number}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div
+                        className="absolute inset-0 bg-dw-surface flex items-end p-4"
+                        style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #1a1a1a 0,#1a1a1a 1px,transparent 0,transparent 12px)' }}
+                      >
+                        <p className="font-display italic text-dw-muted text-sm">#{issue.issue_number}</p>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <span className="text-white text-[11px] tracking-[0.2em] uppercase border border-white/40 px-5 py-3">
+                        Leer →
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-4 border-t border-dw-border">
+                    <p className="text-dw-muted text-[10px] tracking-widest uppercase">#{issue.issue_number}</p>
+                    <p className="text-dw-text text-sm mt-1 font-display">
+                      {issue.title || `Edición ${issue.issue_number}`}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
   )
 }

@@ -139,12 +139,12 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black text-text-secondary font-body">
+      <div className="flex items-center justify-center h-screen bg-black text-dw-muted font-body">
         <div className="text-center space-y-4">
           <p className="text-lg">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="text-primary hover:underline text-sm"
+            className="text-dw-sub hover:text-dw-text transition-colors text-sm"
           >
             Reintentar
           </button>
@@ -159,15 +159,15 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
       <div className="flex-1 overflow-auto flex items-start justify-center py-8 pb-24">
         {isLoading ? (
           <div className="flex flex-col items-center gap-4 pt-24">
-            <div className="w-48 h-64 md:w-64 md:h-80 bg-surface-elevated animate-pulse rounded-sm" />
-            <p className="text-text-muted font-body text-sm animate-pulse">
+            <div className="w-48 h-64 md:w-64 md:h-80 bg-dw-card animate-pulse" />
+            <p className="text-dw-muted font-body text-sm animate-pulse">
               Cargando revista...
             </p>
           </div>
         ) : (
           <canvas
             ref={canvasRef}
-            className="shadow-2xl rounded-sm max-w-full"
+            className="shadow-2xl max-w-full"
             style={{ display: 'block' }}
           />
         )}
@@ -178,14 +178,14 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
         <div className="fixed top-20 right-4 flex flex-col gap-2 z-50">
           <button
             onClick={zoomIn}
-            className="w-10 h-10 bg-black/80 border border-border rounded-sm flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors"
+            className="w-10 h-10 bg-black/80 border border-dw-border flex items-center justify-center text-dw-muted hover:text-dw-text hover:bg-dw-card transition-colors"
             aria-label="Zoom in"
           >
             +
           </button>
           <button
             onClick={zoomOut}
-            className="w-10 h-10 bg-black/80 border border-border rounded-sm flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors"
+            className="w-10 h-10 bg-black/80 border border-dw-border flex items-center justify-center text-dw-muted hover:text-dw-text hover:bg-dw-card transition-colors"
             aria-label="Zoom out"
           >
             −
@@ -193,7 +193,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
           <a
             href={pdfUrl}
             download
-            className="w-10 h-10 bg-black/80 border border-border rounded-sm flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors"
+            className="w-10 h-10 bg-black/80 border border-dw-border flex items-center justify-center text-dw-muted hover:text-dw-text hover:bg-dw-card transition-colors"
             aria-label="Descargar PDF"
             title="Descargar PDF"
           >
