@@ -28,16 +28,16 @@ export function StatsSection() {
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-dw-border border border-dw-border">
           {[
-            { end: 139,   suffix: '+', label: 'Ediciones publicadas', display: null,      italic: false },
-            { end: 10000, suffix: '+', label: 'Lectores mensuales',   display: '10.000+', italic: false },
-            { end: 5,     suffix: '',  label: 'Años publicando',      display: null,      italic: true  },
+            { end: 201,   suffix: '+', label: 'EDICIONES PUBLICADAS', italic: false },
+            { end: 10000, suffix: '+', label: 'LECTORES MENSUALES',   italic: false },
+            { end: 11,    suffix: '',  label: 'PUBLICANDO SIN PARAR', italic: true  },
           ].map(s => (
             <motion.div key={s.label} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
               viewport={{ once: true }} transition={{ duration: 0.7 }}
               className="bg-dw-black px-10 py-16">
               <div className={`font-display text-dw-white leading-none mb-4 ${s.italic ? 'italic' : ''}`}
                 style={{ fontSize: 'clamp(52px, 6vw, 80px)' }}>
-                {s.display ? s.display : <><Counter end={s.end} />{s.suffix}</>}
+                <Counter end={s.end} />{s.suffix}
                 {s.italic && <span className="ml-2 text-[0.5em] not-italic text-dw-sub tracking-wider align-middle">años</span>}
               </div>
               <p className="text-dw-muted text-[11px] tracking-[0.18em] uppercase">{s.label}</p>

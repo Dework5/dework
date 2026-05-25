@@ -5,9 +5,8 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const LINKS = [
-  { label: 'Revistas',    href: '/#publicaciones' },
-  { label: 'Anunciantes', href: '/anunciantes'    },
-  { label: 'Contacto',    href: '/#contacto'      },
+  { label: 'Revistas', href: '/#publicaciones' },
+  { label: 'Contacto', href: '/#contacto'      },
 ]
 
 export function Navbar() {

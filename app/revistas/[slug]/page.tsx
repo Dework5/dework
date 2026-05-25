@@ -8,24 +8,103 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+const PUBLICATIONS_FALLBACK = [
+  {
+    id: 'fallback-1',
+    slug: 'san-diego-la-revista',
+    name: 'San Diego La Revista',
+    shortName: 'SDLR',
+    description: 'La revista de la comunidad de San Diego y zona norte de Buenos Aires. Edición mensual desde 2014.',
+    issueCount: 139,
+    issue_count: 139,
+    category: 'Lifestyle · Comunidad · Zona Norte',
+    is_active: true,
+  },
+  {
+    id: 'fallback-2',
+    slug: 'haras-del-pilar',
+    name: 'Haras del Pilar',
+    shortName: 'HDP',
+    description: 'La revista del mundo ecuestre y country de Pilar.',
+    issueCount: 24,
+    issue_count: 24,
+    category: 'Lifestyle · Equitación · Country',
+    is_active: true,
+  },
+  {
+    id: 'fallback-3',
+    slug: 'pilara-magazine',
+    name: 'Pilará Magazine',
+    shortName: 'PM',
+    description: 'Moda, cultura y tendencias de Pilará y alrededores.',
+    issueCount: 18,
+    issue_count: 18,
+    category: 'Moda · Cultura · Tendencias',
+    is_active: true,
+  },
+  {
+    id: 'fallback-4',
+    slug: 'los-lagartos',
+    name: 'Los Lagartos',
+    shortName: 'LL',
+    description: 'Revista del country Los Lagartos.',
+    issueCount: 12,
+    issue_count: 12,
+    category: 'Country · Comunidad',
+    is_active: true,
+  },
+  {
+    id: 'fallback-5',
+    slug: 'campo-chico',
+    name: 'Campo Chico',
+    shortName: 'CC',
+    description: 'La vida en el campo chico de zona norte.',
+    issueCount: 8,
+    issue_count: 8,
+    category: 'Campo · Naturaleza',
+    is_active: true,
+  },
+]
+
 async function getPublication(slug: string) {
-  const { data: publication } = await supabase
-    .from('publications')
-    .select('*')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
+  let publication = null
+  let issues: any[] = []
+
+  try {
+    const { data } = await supabase
+      .from('publications')
+      .select('*')
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single()
+    publication = data
+  } catch {
+    // silenciar, usar fallback
+  }
+
+  if (!publication) {
+    publication = PUBLICATIONS_FALLBACK.find(p => p.slug === slug) ?? null
+  }
 
   if (!publication) return null
 
-  const { data: issues } = await supabase
-    .from('issues')
-    .select('*')
-    .eq('publication_id', publication.id)
-    .eq('is_published', true)
-    .order('issue_number', { ascending: false })
+  try {
+    const { data } = await supabase
+      .from('issues')
+      .select('*')
+      .eq('publication_id', publication.id)
+      .eq('is_published', true)
+      .order('issue_number', { ascending: false })
+    issues = data || []
+  } catch {
+    issues = []
+  }
 
-  return { publication, issues: issues || [] }
+  return { publication, issues }
+}
+
+export async function generateStaticParams() {
+  return PUBLICATIONS_FALLBACK.map(p => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

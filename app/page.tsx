@@ -5,7 +5,6 @@ import { HeroSection } from '@/components/home/HeroSection'
 import { MarqueeStrip } from '@/components/home/MarqueeStrip'
 import { PublicationsSection } from '@/components/home/PublicationsSection'
 import { StatsSection } from '@/components/home/StatsSection'
-import { AdvertiserSection } from '@/components/home/AdvertiserSection'
 import { ContactSection } from '@/components/home/ContactSection'
 
 const FALLBACK_PUBS = [
@@ -52,7 +51,6 @@ export default async function HomePage() {
       <MarqueeStrip publications={publications} />
       <PublicationsSection publications={publications} />
       <StatsSection />
-      <AdvertiserSection />
       <ContactSection />
     </main>
   )

@@ -46,14 +46,16 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
           {rest.map((pub: any) => (
             <motion.div key={pub.slug} variants={itemVariant}
               className="bg-dw-card relative group overflow-hidden" style={{ minHeight: '200px' }}>
+              {/* Gradient overlay for legibility */}
+              <div className="absolute inset-0 bg-gradient-to-t from-dw-black/90 via-dw-black/40 to-transparent pointer-events-none" />
               <Link href={`/revistas/${pub.slug}`} className="absolute inset-0 p-6 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <span className="text-dw-muted text-[10px] tracking-[0.2em] uppercase">{pub.shortName || pub.name?.slice(0,4)}</span>
-                  <span className="text-dw-hover group-hover:text-dw-sub transition-colors text-sm">↗</span>
+                <div className="flex justify-between items-start relative z-10">
+                  <span className="text-dw-sub text-[10px] tracking-[0.2em] uppercase">{pub.shortName || pub.name?.slice(0,4)}</span>
+                  <span className="text-dw-muted group-hover:text-dw-sub transition-colors text-sm">↗</span>
                 </div>
-                <div>
-                  <h3 className="font-display text-dw-text font-bold text-xl leading-tight mb-1">{pub.name}</h3>
-                  <p className="text-dw-muted text-xs">{pub.issueCount || pub.issue_count || '—'} ediciones</p>
+                <div className="relative z-10">
+                  <h3 className="font-display text-dw-white font-semibold text-xl leading-tight mb-1">{pub.name}</h3>
+                  <p className="text-[#999999] text-xs tracking-widest">{pub.issueCount || pub.issue_count || '—'} ediciones</p>
                 </div>
               </Link>
               <div className="absolute top-0 left-0 right-0 h-px bg-dw-white origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />

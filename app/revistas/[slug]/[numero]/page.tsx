@@ -47,7 +47,31 @@ export default async function ReaderPage({ params }: Props) {
   const { slug, numero } = await params
   const result = await getIssue(slug, numero)
 
-  if (!result) notFound()
+  // Show "próximamente" instead of 404 when issue doesn't exist yet
+  if (!result) {
+    return (
+      <>
+        <div className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur border-b border-dw-border h-14 flex items-center px-6 gap-6">
+          <Link href={`/revistas/${slug}`}
+            className="text-dw-muted text-[11px] tracking-[0.15em] uppercase hover:text-dw-text transition-colors">
+            ← Volver
+          </Link>
+          <span className="text-dw-border">|</span>
+          <span className="text-dw-muted text-[11px] tracking-[0.1em] uppercase">Edición #{numero}</span>
+        </div>
+        <div className="bg-dw-black min-h-screen pt-14 flex items-center justify-center">
+          <div className="text-center px-6">
+            <p className="font-display italic text-dw-sub text-4xl mb-4">Próximamente</p>
+            <p className="text-dw-muted text-sm mb-8">Esta edición estará disponible pronto.</p>
+            <Link href={`/revistas/${slug}`}
+              className="text-dw-sub text-xs tracking-[0.2em] uppercase hover:text-dw-white transition-colors border-b border-dw-border pb-px">
+              ← Volver a todas las ediciones
+            </Link>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   const { issue, publication } = result
 
