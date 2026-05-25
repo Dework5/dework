@@ -15,55 +15,45 @@ const PUBLICATIONS_FALLBACK = [
     id: 'fallback-1',
     slug: 'san-diego-la-revista',
     name: 'San Diego La Revista',
+    short_name: 'SDLR',
     shortName: 'SDLR',
     description: 'La revista de la comunidad de San Diego y zona norte de Buenos Aires. Edición mensual desde 2014.',
-    issueCount: 139,
-    issue_count: 139,
-    category: 'Lifestyle · Comunidad · Zona Norte',
     is_active: true,
   },
   {
     id: 'fallback-2',
     slug: 'haras-del-pilar',
     name: 'Haras del Pilar',
+    short_name: 'HDP',
     shortName: 'HDP',
     description: 'La revista del mundo ecuestre y country de Pilar.',
-    issueCount: 24,
-    issue_count: 24,
-    category: 'Lifestyle · Equitación · Country',
     is_active: true,
   },
   {
     id: 'fallback-3',
     slug: 'pilara-magazine',
     name: 'Pilará Magazine',
+    short_name: 'PM',
     shortName: 'PM',
     description: 'Moda, cultura y tendencias de Pilará y alrededores.',
-    issueCount: 18,
-    issue_count: 18,
-    category: 'Moda · Cultura · Tendencias',
     is_active: true,
   },
   {
     id: 'fallback-4',
     slug: 'los-lagartos',
     name: 'Los Lagartos',
+    short_name: 'LL',
     shortName: 'LL',
     description: 'Revista del country Los Lagartos.',
-    issueCount: 12,
-    issue_count: 12,
-    category: 'Country · Comunidad',
     is_active: true,
   },
   {
     id: 'fallback-5',
     slug: 'campo-chico',
     name: 'Campo Chico',
+    short_name: 'CC',
     shortName: 'CC',
     description: 'La vida en el campo chico de zona norte.',
-    issueCount: 8,
-    issue_count: 8,
-    category: 'Campo · Naturaleza',
     is_active: true,
   },
 ]
@@ -124,71 +114,127 @@ export default async function RevistasSlugPage({ params }: Props) {
   if (!result) notFound()
 
   const { publication, issues } = result
+  const shortName = publication.short_name || publication.shortName || publication.name?.slice(0, 4).toUpperCase()
 
   return (
     <main className="min-h-screen bg-dw-black">
-      {/* Header */}
-      <div className="bg-dw-black pt-32 pb-16 px-6 md:px-10 border-b border-dw-border">
-        <div className="max-w-7xl mx-auto">
-          <Link href="/" className="text-dw-muted text-[10px] tracking-[0.2em] uppercase hover:text-dw-text transition-colors mb-8 inline-block">
-            ← Inicio
-          </Link>
-          <span className="text-dw-muted text-[10px] tracking-[0.25em] uppercase block mb-4">
-            {publication.slug?.toUpperCase()}
+
+      {/* ── HEADER ── */}
+      <div className="relative pt-28 pb-14 px-6 md:px-12 overflow-hidden">
+
+        {/* Número decorativo de fondo */}
+        {issues.length > 0 && (
+          <span
+            aria-hidden
+            className="pointer-events-none select-none absolute right-8 top-1/2 -translate-y-1/2 font-display font-bold leading-none text-dw-surface hidden lg:block"
+            style={{ fontSize: 'clamp(140px, 18vw, 260px)' }}
+          >
+            {issues.length}
           </span>
-          <h1 className="font-display font-bold text-dw-white leading-tight mb-4"
-            style={{ fontSize: 'clamp(44px, 7vw, 88px)' }}>
+        )}
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Breadcrumb */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-dw-muted text-[10px] tracking-[0.25em] uppercase hover:text-dw-text transition-colors mb-10"
+          >
+            <span>←</span>
+            <span>Inicio</span>
+          </Link>
+
+          {/* Badge */}
+          <div className="mb-5">
+            <span className="inline-block text-dw-sub text-[10px] tracking-[0.35em] uppercase border border-dw-border px-3 py-1.5">
+              {shortName}
+            </span>
+          </div>
+
+          {/* Título */}
+          <h1
+            className="font-display font-bold text-dw-white leading-none mb-5"
+            style={{ fontSize: 'clamp(42px, 6.5vw, 86px)' }}
+          >
             {publication.name}
           </h1>
-          <p className="text-dw-muted text-sm max-w-md">
-            {publication.description || `${issues?.length || 0} ediciones publicadas`}
-          </p>
+
+          {/* Descripción + conteo */}
+          <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-10">
+            <p className="text-dw-sub text-sm max-w-sm leading-relaxed">
+              {publication.description}
+            </p>
+            {issues.length > 0 && (
+              <p className="text-dw-muted text-xs tracking-[0.2em] uppercase shrink-0">
+                {issues.length} {issues.length === 1 ? 'edición' : 'ediciones'}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Línea separadora */}
+        <div className="max-w-6xl mx-auto mt-12">
+          <div className="h-px bg-gradient-to-r from-dw-border via-dw-hover to-transparent" />
         </div>
       </div>
 
-      {/* Issues grid */}
-      <div className="px-6 md:px-10 py-16">
-        <div className="max-w-7xl mx-auto">
+      {/* ── GRID ── */}
+      <div className="px-6 md:px-12 pb-24">
+        <div className="max-w-6xl mx-auto">
           {!issues || issues.length === 0 ? (
             <div className="text-center py-32">
-              <p className="font-display italic text-dw-muted text-2xl">Próximamente</p>
-              <p className="text-dw-muted text-sm mt-3">
+              <p className="font-display italic text-dw-muted text-2xl mb-3">Próximamente</p>
+              <p className="text-dw-sub text-sm">
                 Las ediciones de {publication.name} estarán disponibles pronto.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-dw-border">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 md:gap-7">
               {issues.map((issue: any) => (
                 <Link
                   key={issue.id}
                   href={`/revistas/${publication.slug}/${issue.issue_number}`}
-                  className="bg-dw-card group relative overflow-hidden block"
+                  className="group"
                 >
-                  <div className="aspect-[3/4] relative overflow-hidden">
+                  {/* Portada */}
+                  <div className="aspect-[3/4] relative overflow-hidden bg-dw-card shadow-[0_2px_20px_rgba(0,0,0,0.5)]">
                     {issue.cover_url ? (
                       <Image
                         src={issue.cover_url}
                         alt={issue.title || `Edición #${issue.issue_number}`}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                       />
                     ) : (
-                      <div
-                        className="absolute inset-0 bg-dw-surface flex items-end p-4"
-                        style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #1a1a1a 0,#1a1a1a 1px,transparent 0,transparent 12px)' }}
-                      >
-                        <p className="font-display italic text-dw-muted text-sm">#{issue.issue_number}</p>
+                      <div className="absolute inset-0 bg-dw-surface flex flex-col items-center justify-center gap-1">
+                        <span className="font-display italic text-dw-border text-4xl">
+                          #{issue.issue_number}
+                        </span>
+                        <span className="text-dw-muted text-[9px] tracking-widest uppercase">
+                          {shortName}
+                        </span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <span className="text-white text-[11px] tracking-[0.2em] uppercase border border-white/40 px-5 py-3">
+
+                    {/* Overlay al hover */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <span className="text-white text-[10px] tracking-[0.28em] uppercase border border-white/25 px-4 py-2.5 translate-y-1.5 group-hover:translate-y-0 transition-transform duration-300 ease-out">
                         Leer →
                       </span>
                     </div>
+
+                    {/* Badge número — esquina superior izquierda */}
+                    <div className="absolute top-2.5 left-2.5 bg-black/60 backdrop-blur-sm px-2 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <span className="text-white/70 text-[9px] tracking-widest">#{issue.issue_number}</span>
+                    </div>
                   </div>
-                  <div className="p-4 border-t border-dw-border">
-                    <p className="text-dw-muted text-[10px] tracking-widest uppercase">#{issue.issue_number}</p>
-                    <p className="text-dw-text text-sm mt-1 font-display">
+
+                  {/* Metadata debajo de la portada */}
+                  <div className="mt-3 space-y-0.5">
+                    <p className="text-dw-muted text-[9px] tracking-[0.25em] uppercase">
+                      #{issue.issue_number}
+                    </p>
+                    <p className="text-dw-sub text-[11px] font-display leading-snug line-clamp-2 group-hover:text-dw-text transition-colors duration-200">
                       {issue.title || `Edición ${issue.issue_number}`}
                     </p>
                   </div>
@@ -198,6 +244,7 @@ export default async function RevistasSlugPage({ params }: Props) {
           )}
         </div>
       </div>
+
     </main>
   )
 }
