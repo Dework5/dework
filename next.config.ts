@@ -10,8 +10,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Next.js 15+: serverExternalPackages (ya no es experimental)
-  serverExternalPackages: ['pdfjs-dist'],
 };
 
 export default nextConfig;

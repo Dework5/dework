@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { supabase } from '@/lib/supabase'
 import { HeroLatestIssue } from '@/components/home/HeroLatestIssue'
 import { PublicationsGrid } from '@/components/home/PublicationsGrid'
