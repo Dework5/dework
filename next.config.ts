@@ -10,10 +10,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Evitar que PDF.js falle en edge runtime
-  experimental: {
-    serverComponentsExternalPackages: ['pdfjs-dist'],
-  },
+  // Next.js 15+: serverExternalPackages (ya no es experimental)
+  serverExternalPackages: ['pdfjs-dist'],
 };
 
 export default nextConfig;

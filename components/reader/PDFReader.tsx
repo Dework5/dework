@@ -213,3 +213,5 @@ export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
     </div>
   )
 }
+
+export default PDFReader

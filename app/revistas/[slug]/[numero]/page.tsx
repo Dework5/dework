@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
-// PDF Reader sin SSR — PDF.js es client-only
-const PDFReader = dynamic(() => import('@/components/reader/PDFReader').then(m => ({ default: m.PDFReader })), {
+// PDF Reader sin SSR — PDF.js es client-only (default export)
+const PDFReader = dynamic(() => import('@/components/reader/PDFReader'), {
   ssr: false,
 })
 
