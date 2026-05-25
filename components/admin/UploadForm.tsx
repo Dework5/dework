@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import { Publication } from '@/lib/types'
+import { supabase as supabasePublic } from '@/lib/supabase'
 
 interface UploadFormProps {
   publications: Publication[]
@@ -30,7 +31,7 @@ export function UploadForm({ publications }: UploadFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!publicationId || !issueNumber || !title || !coverFile || !pdfFile) {
-      setMessage('Completá todos los campos.')
+      setMessage('Completa todos los campos.')
       setStatus('error')
       return
     }
@@ -43,7 +44,7 @@ export function UploadForm({ publications }: UploadFormProps) {
     const coverExt = coverFile.name.split('.').pop() || 'jpg'
 
     try {
-      // 1. Obtener URLs firmadas
+      // 1. Obtener URLs firmadas desde el servidor
       setProgressLabel('Obteniendo URLs de subida...')
       const urlsRes = await fetch('/api/admin/get-upload-urls', {
         method:  'POST',
@@ -57,24 +58,27 @@ export function UploadForm({ publications }: UploadFormProps) {
       const { cover: coverUpload, pdf: pdfUpload } = await urlsRes.json()
       setProgress(15)
 
-      // 2. Subir portada directo a Supabase
+      // 2. Subir portada via SDK de Supabase
+      // uploadToSignedUrl usa POST+FormData — el formato correcto para Supabase Storage
       setProgressLabel('Subiendo portada...')
-      const coverRes = await fetch(coverUpload.signedUrl, {
-        method:  'PUT',
-        headers: { 'Content-Type': coverFile.type || 'image/jpeg' },
-        body:    coverFile,
-      })
-      if (!coverRes.ok) throw new Error('Error subiendo la portada (' + coverRes.status + ')')
+      const { error: coverErr } = await supabasePublic.storage
+        .from('covers')
+        .uploadToSignedUrl(coverUpload.path, coverUpload.token, coverFile, {
+          contentType: coverFile.type || 'image/jpeg',
+          upsert: true,
+        })
+      if (coverErr) throw new Error('Error subiendo la portada: ' + coverErr.message)
       setProgress(50)
 
-      // 3. Subir PDF directo a Supabase (sin limite de Vercel)
+      // 3. Subir PDF via SDK de Supabase (directo, sin limite de Vercel)
       setProgressLabel('Subiendo PDF...')
-      const pdfRes = await fetch(pdfUpload.signedUrl, {
-        method:  'PUT',
-        headers: { 'Content-Type': 'application/pdf' },
-        body:    pdfFile,
-      })
-      if (!pdfRes.ok) throw new Error('Error subiendo el PDF (' + pdfRes.status + ')')
+      const { error: pdfErr } = await supabasePublic.storage
+        .from('pdfs')
+        .uploadToSignedUrl(pdfUpload.path, pdfUpload.token, pdfFile, {
+          contentType: 'application/pdf',
+          upsert: true,
+        })
+      if (pdfErr) throw new Error('Error subiendo el PDF: ' + pdfErr.message)
       setProgress(82)
 
       // 4. Crear registro en la base de datos
@@ -137,24 +141,25 @@ export function UploadForm({ publications }: UploadFormProps) {
         <label className={labelCls}>PDF de la revista *</label>
         <input ref={pdfInputRef} type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
           className="w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#444] text-sm focus:outline-none focus:border-[#080808] file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#F0F0F0] file:text-xs file:cursor-pointer" required />
-        <p className="text-[#AAA] text-xs mt-1">PDF - Sin limite de tamanio (sube directo a Supabase)</p>
+        <p className="text-[#AAA] text-xs mt-1">PDF — Sube directo a Supabase Storage (sin limite de Vercel)</p>
       </div>
       <div>
         <label className={labelCls}>Imagen de portada *</label>
         <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
           className="w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#444] text-sm focus:outline-none focus:border-[#080808] file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#F0F0F0] file:text-xs file:cursor-pointer" required />
-        <p className="text-[#AAA] text-xs mt-1">JPG o PNG - Recomendado 800x1100px</p>
+        <p className="text-[#AAA] text-xs mt-1">JPG o PNG — Recomendado 800x1100px</p>
       </div>
       <label className="flex items-center gap-3 cursor-pointer">
         <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="w-4 h-4 accent-[#080808]" />
         <span className="text-sm text-[#444]">Publicar inmediatamente</span>
       </label>
+
       {status === 'uploading' && (
         <div className="space-y-2">
           <div className="h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
             <div className="h-full bg-[#080808] transition-all duration-500 rounded-full" style={{ width: progress + '%' }} />
           </div>
-          <p className="text-[#888] text-xs">{progressLabel} {progress}%</p>
+          <p className="text-[#888] text-xs">{progressLabel} — {progress}%</p>
         </div>
       )}
       {status === 'success' && (
@@ -172,6 +177,7 @@ export function UploadForm({ publications }: UploadFormProps) {
           <p className="text-sm">{message}</p>
         </div>
       )}
+
       <button type="submit" disabled={status === 'uploading'}
         className="flex items-center gap-2 bg-[#080808] text-white py-3 px-8 rounded-lg text-sm font-medium hover:bg-[#333] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
         <Upload size={16} />
