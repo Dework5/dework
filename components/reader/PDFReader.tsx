@@ -154,7 +154,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderPr
       if (!ctx) return
       canvas.height  = viewport.height
       canvas.width   = viewport.width
-      const t = page.render({ canvasContext: ctx, viewport })
+      const t = page.render({ canvasContext: ctx, viewport, canvas })
       taskRef.current = t
       await t.promise
     } catch (e: unknown) {
