@@ -46,11 +46,11 @@ export function HeroSection({ issue }: { issue: any }) {
             <motion.h1
               initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.06 }}
-              className="font-display font-bold text-dw-white leading-[0.88] tracking-tight mb-6"
-              style={{ fontSize: 'clamp(58px, 9vw, 114px)' }}>
+              className="font-display font-bold text-dw-white leading-[0.9] tracking-tight mb-6"
+              style={{ fontSize: 'clamp(52px, 7.5vw, 96px)' }}>
               Revistas<br />
               <em className="font-display italic font-normal text-dw-sub"
-                style={{ fontSize: '0.65em' }}>agencia de zona norte / oeste</em>
+                style={{ fontSize: '0.6em' }}>agencia de zona norte / oeste</em>
             </motion.h1>
 
             {/* Description */}
