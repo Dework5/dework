@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { supabase } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase-server'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -69,20 +69,17 @@ const PUBLICATIONS_FALLBACK = [
 ]
 
 async function getPublication(slug: string) {
+  const db = createServerClient()
   let publication = null
   let issues: any[] = []
 
-  try {
-    const { data } = await supabase
-      .from('publications')
-      .select('*')
-      .eq('slug', slug)
-      .eq('is_active', true)
-      .single()
-    publication = data
-  } catch {
-    // silenciar, usar fallback
-  }
+  const { data: pubData } = await db
+    .from('publications')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single()
+  publication = pubData
 
   if (!publication) {
     publication = PUBLICATIONS_FALLBACK.find(p => p.slug === slug) ?? null
@@ -90,17 +87,13 @@ async function getPublication(slug: string) {
 
   if (!publication) return null
 
-  try {
-    const { data } = await supabase
-      .from('issues')
-      .select('*')
-      .eq('publication_id', publication.id)
-      .eq('is_published', true)
-      .order('issue_number', { ascending: false })
-    issues = data || []
-  } catch {
-    issues = []
-  }
+  const { data: issuesData } = await db
+    .from('issues')
+    .select('*')
+    .eq('publication_id', publication.id)
+    .eq('is_published', true)
+    .order('issue_number', { ascending: false })
+  issues = issuesData || []
 
   return { publication, issues }
 }

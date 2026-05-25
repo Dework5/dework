@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { supabase } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase-server'
 import { HeroSection } from '@/components/home/HeroSection'
 import { MarqueeStrip } from '@/components/home/MarqueeStrip'
 import { PublicationsSection } from '@/components/home/PublicationsSection'
@@ -23,12 +23,13 @@ const FALLBACK_ISSUE = {
 
 async function getData() {
   try {
-    const { data: publications } = await supabase
+    const db = createServerClient()
+    const { data: publications } = await db
       .from('publications').select('*').eq('is_active', true).order('created_at', { ascending: true })
     const sdlrPub = publications?.find((p: any) => p.slug === 'san-diego-la-revista')
     let latestIssue = null
     if (sdlrPub) {
-      const { data: issue } = await supabase
+      const { data: issue } = await db
         .from('issues').select('*').eq('publication_id', sdlrPub.id)
         .eq('is_published', true).order('published_at', { ascending: false }).limit(1).single()
       latestIssue = issue

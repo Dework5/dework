@@ -1,18 +1,20 @@
-﻿import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
-
-export const dynamic = 'force-dynamic'
+import { createServerClient } from '@/lib/supabase-server'
 import { PDFReaderWrapper } from '@/components/reader/PDFReaderWrapper'
 import { ArrowLeft, Download } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ slug: string; numero: string }>
 }
 
 async function getIssue(slug: string, numero: string) {
-  const { data: publication } = await supabase
+  const db = createServerClient()
+
+  const { data: publication } = await db
     .from('publications')
     .select('*')
     .eq('slug', slug)
@@ -20,7 +22,7 @@ async function getIssue(slug: string, numero: string) {
 
   if (!publication) return null
 
-  const { data: issue } = await supabase
+  const { data: issue } = await db
     .from('issues')
     .select('*')
     .eq('publication_id', publication.id)
