@@ -85,26 +85,17 @@ export default function AdminPage() {
     setCoverUpdating(prev => ({ ...prev, [issue.id]: true }))
     try {
       const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
-      const coverExt = file.name.split('.').pop() || 'jpg'
-      // 1. Get signed upload URL
-      const urlsRes = await fetch('/api/admin/get-upload-urls', {
+      // Send file directly to API — server uploads with service-role key (reliable)
+      const form = new FormData()
+      form.append('issueId', issue.id)
+      form.append('file', file)
+      const res = await fetch('/api/admin/update-issue-cover', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: pw },
-        body: JSON.stringify({ publicationId: issue.publication_id, issueNumber: issue.issue_number, coverExt }),
+        headers: { Authorization: pw },
+        body: form,
       })
-      if (!urlsRes.ok) throw new Error('Error obteniendo URL')
-      const { cover } = await urlsRes.json()
-      // 2. Upload image to Supabase Storage
-      const { error: uploadErr } = await supabase.storage.from('covers')
-        .uploadToSignedUrl(cover.path, cover.token, file, { contentType: file.type || 'image/jpeg', upsert: true })
-      if (uploadErr) throw new Error('Error subiendo imagen: ' + uploadErr.message)
-      // 3. Update cover_url in DB
-      const updateRes = await fetch('/api/admin/update-issue-cover', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: pw },
-        body: JSON.stringify({ issueId: issue.id, coverPath: cover.path }),
-      })
-      if (!updateRes.ok) throw new Error('Error actualizando DB')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error subiendo portada')
       setCoverDone(prev => ({ ...prev, [issue.id]: true }))
       setTimeout(() => setCoverDone(prev => ({ ...prev, [issue.id]: false })), 3000)
     } catch (e) {
