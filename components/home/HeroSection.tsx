@@ -50,7 +50,7 @@ export function HeroSection({ issue }: { issue: any }) {
               style={{ fontSize: 'clamp(52px, 7.5vw, 96px)' }}>
               Revistas<br />
               <em className="font-display italic font-normal text-dw-sub"
-                style={{ fontSize: '0.6em' }}>agencia de zona norte / oeste</em>
+                style={{ fontSize: '0.6em' }}>zona norte / oeste</em>
             </motion.h1>
 
             {/* Description */}
