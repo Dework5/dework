@@ -65,6 +65,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderPr
   const [loadSlow,     setLoadSlow]     = useState(false)
 
   const isFlipping      = useRef(false)
+  const skipRerender    = useRef(false)   // true after animation copies back→front
   const scaleRef        = useRef(1)
   const renderTaskFront = useRef<pdfjsLib.RenderTask | null>(null)
   const renderTaskBack  = useRef<pdfjsLib.RenderTask | null>(null)
@@ -165,6 +166,9 @@ export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderPr
   // ── Initial render ────────────────────────────────────────────────────
   useEffect(() => {
     if (!pdf || isAnimating) return
+    // After a flip the front canvas already has the correct content (copied from back).
+    // Skip the redundant re-render to avoid the canvas-clear flicker.
+    if (skipRerender.current) { skipRerender.current = false; return }
     renderToCanvas(currentPage, scale, canvasFrontRef.current, renderTaskFront)
       .then(() => setPdfPageReady(true))
   }, [pdf, currentPage, scale, isAnimating, renderToCanvas])
@@ -182,6 +186,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderPr
       front.getContext('2d')?.drawImage(back, 0, 0)
     }
 
+    skipRerender.current = true   // front already correct — skip re-render
     isFlipping.current = false
     setIsAnimating(false)
 
@@ -199,11 +204,19 @@ export function PDFReader({ pdfUrl, issueId, totalPages, coverUrl }: PDFReaderPr
     const dir: 'forward' | 'backward' = p > currentPage ? 'forward' : 'backward'
     isFlipping.current = true
     setFlipDir(dir)
+
+    // Recalculate scale for the destination page's actual dimensions so pages
+    // that differ from page 1 (e.g. landscape spreads) fill the viewport correctly.
+    const destPage = await pdf.getPage(p)
+    const destVp   = destPage.getViewport({ scale: 1 })
+    pageDims.current = { w: destVp.width, h: destVp.height }
+    calcScale()   // updates scaleRef.current synchronously + schedules setScale
+
     await renderToCanvas(p, scaleRef.current, canvasBackRef.current, renderTaskBack)
     setCurrentPage(p)
     playPageSound()
     setIsAnimating(true)
-  }, [pdf, numPages, isLoading, currentPage, renderToCanvas])
+  }, [pdf, numPages, isLoading, currentPage, renderToCanvas, calcScale])
 
   const prevPage = useCallback(() => goTo(currentPage - 1), [goTo, currentPage])
   const nextPage = useCallback(() => goTo(currentPage + 1), [goTo, currentPage])
