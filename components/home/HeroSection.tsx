@@ -40,7 +40,7 @@ export function HeroSection({ issue }: { issue: any }) {
               className="flex items-center gap-3 mb-10">
               <span className="w-5 h-px bg-dw-border" />
               <span className="text-dw-muted text-[10px] tracking-[0.28em] uppercase">
-                Dework &middot; Agencia Editorial &middot; Pilar, Buenos Aires
+                Dework · Agencia Editorial · Pilar, Buenos Aires
               </span>
             </motion.div>
 
@@ -69,11 +69,11 @@ export function HeroSection({ issue }: { issue: any }) {
               className="flex flex-wrap items-center gap-5">
               <Link href="/#publicaciones"
                 className="bg-dw-white text-dw-black text-[11px] tracking-[0.18em] uppercase px-8 py-4 font-semibold hover:bg-dw-text transition-colors duration-200">
-                VER PUBLICACIONES &rarr;
+                VER PUBLICACIONES →
               </Link>
-              <Link href={/revistas//}
+              <Link href={`/revistas/${slug}/${issueNumber}`}
                 className="text-dw-sub text-[11px] tracking-[0.18em] uppercase hover:text-dw-white transition-colors border-b border-dw-border pb-px">
-                &Uacute;LTIMA EDICI&Oacute;N #{issueNumber}
+                ÚLTIMA EDICIÓN #{issueNumber}
               </Link>
             </motion.div>
           </div>
@@ -83,13 +83,13 @@ export function HeroSection({ issue }: { issue: any }) {
             initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.22, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="hidden md:block self-end">
-            <Link href={/revistas//} className="block group">
+            <Link href={`/revistas/${slug}/${issueNumber}`} className="block group">
               <div className="aspect-[3/4] bg-dw-surface border border-dw-border relative overflow-hidden mb-4 group-hover:border-dw-sub transition-colors duration-300">
                 {coverUrl ? (
                   <>
                     <Image
                       src={coverUrl}
-                      alt={San Diego La Revista #}
+                      alt={`San Diego La Revista #${issueNumber}`}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="220px"
@@ -119,7 +119,7 @@ export function HeroSection({ issue }: { issue: any }) {
                 )}
               </div>
               <p className="text-dw-muted text-[10px] tracking-[0.2em] uppercase group-hover:text-dw-sub transition-colors">
-                Leer ahora &rarr;
+                Leer ahora →
               </p>
             </Link>
           </motion.div>
