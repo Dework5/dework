@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useRef } from 'react'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
@@ -28,22 +28,26 @@ export function UploadForm({ publications }: UploadFormProps) {
   const coverInputRef = useRef<HTMLInputElement>(null)
   const pdfInputRef   = useRef<HTMLInputElement>(null)
 
-  // Sube el PDF usando TUS (protocolo de subida por chunks) — soporta cualquier tamanio
+  /**
+   * Sube el PDF via TUS a través del proxy Edge Function.
+   * El proxy agrega la service_role key de Supabase server-side.
+   * Cada chunk es de 6 MB, muy por debajo del límite de 25 MB de Edge Functions.
+   * Soporta archivos de cualquier tamanio.
+   */
   const uploadPdfTus = (
     file: File,
     path: string,
-    token: string,
+    adminPw: string,
     onProgress: (pct: number) => void
   ): Promise<void> => {
     return new Promise(async (resolve, reject) => {
       const { Upload } = await import('tus-js-client')
 
       const upload = new Upload(file, {
-        endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
+        endpoint: '/api/admin/tus/',   // Nuestro proxy Edge Function
         retryDelays: [0, 3000, 5000, 10000, 20000],
         headers: {
-          authorization: `Bearer ${token}`,
-          'x-upsert': 'true',
+          'x-dw-admin': adminPw,       // El proxy valida esto al crear el upload
         },
         uploadDataDuringCreation: true,
         removeFingerprintOnSuccess: true,
@@ -53,21 +57,20 @@ export function UploadForm({ publications }: UploadFormProps) {
           contentType: 'application/pdf',
           cacheControl: '3600',
         },
-        chunkSize: 6 * 1024 * 1024, // 6 MB por chunk
+        chunkSize: 6 * 1024 * 1024,   // 6 MB por chunk
         onError(error) {
           reject(new Error('Error subiendo el PDF: ' + error.message))
         },
         onProgress(bytesUploaded, bytesTotal) {
-          const pct = bytesTotal > 0 ? Math.round((bytesUploaded / bytesTotal) * 100) : 0
-          onProgress(pct)
+          if (bytesTotal > 0) onProgress(Math.round((bytesUploaded / bytesTotal) * 100))
         },
         onSuccess() {
           resolve()
         },
       })
 
-      upload.findPreviousUploads().then((previous) => {
-        if (previous.length > 0) upload.resumeFromPreviousUpload(previous[0])
+      upload.findPreviousUploads().then((prev) => {
+        if (prev.length > 0) upload.resumeFromPreviousUpload(prev[0])
         upload.start()
       })
     })
@@ -89,7 +92,7 @@ export function UploadForm({ publications }: UploadFormProps) {
     const coverExt = coverFile.name.split('.').pop() || 'jpg'
 
     try {
-      // 1. Obtener tokens firmados desde el servidor
+      // 1. Obtener rutas y token de portada desde el servidor
       setProgressLabel('Obteniendo URLs de subida...')
       const urlsRes = await fetch('/api/admin/get-upload-urls', {
         method:  'POST',
@@ -103,7 +106,7 @@ export function UploadForm({ publications }: UploadFormProps) {
       const { cover: coverUpload, pdf: pdfUpload } = await urlsRes.json()
       setProgress(15)
 
-      // 2. Subir portada via SDK de Supabase (uploadToSignedUrl)
+      // 2. Subir portada via SDK de Supabase (uploadToSignedUrl — portada es pequena)
       setProgressLabel('Subiendo portada...')
       const { error: coverErr } = await supabasePublic.storage
         .from('covers')
@@ -114,16 +117,15 @@ export function UploadForm({ publications }: UploadFormProps) {
       if (coverErr) throw new Error('Error subiendo la portada: ' + coverErr.message)
       setProgress(50)
 
-      // 3. Subir PDF via TUS (Tus Resumable Upload) — soporta archivos de cualquier tamanio
+      // 3. Subir PDF via TUS proxy (Edge Function) — sin limite de tamanio
       setProgressLabel('Subiendo PDF...')
-      await uploadPdfTus(pdfFile, pdfUpload.path, pdfUpload.token, (pct) => {
-        // Mapear 0–100% del PDF → 50–82% del progreso total
+      await uploadPdfTus(pdfFile, pdfUpload.path, pw, (pct) => {
         setProgress(50 + Math.round(pct * 0.32))
         setProgressLabel(`Subiendo PDF... ${pct}%`)
       })
       setProgress(82)
 
-      // 4. Crear registro en la base de datos
+      // 4. Guardar en la base de datos
       setProgressLabel('Guardando edicion...')
       const createRes = await fetch('/api/admin/create-issue', {
         method:  'POST',
@@ -144,19 +146,15 @@ export function UploadForm({ publications }: UploadFormProps) {
       setStatus('success')
       setMessage('Edicion publicada correctamente!')
       setResultUrl(data.url || '')
-      setPublicationId('')
-      setIssueNumber('')
-      setTitle('')
-      setCoverFile(null)
-      setPdfFile(null)
+      setPublicationId(''); setIssueNumber(''); setTitle('')
+      setCoverFile(null);   setPdfFile(null)
       if (coverInputRef.current) coverInputRef.current.value = ''
       if (pdfInputRef.current)   pdfInputRef.current.value   = ''
 
     } catch (err) {
       setStatus('error')
       setMessage(err instanceof Error ? err.message : 'Error inesperado. Intenta de nuevo.')
-      setProgress(0)
-      setProgressLabel('')
+      setProgress(0); setProgressLabel('')
     }
   }
 
@@ -181,13 +179,15 @@ export function UploadForm({ publications }: UploadFormProps) {
       </div>
       <div>
         <label className={labelCls}>PDF de la revista *</label>
-        <input ref={pdfInputRef} type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+        <input ref={pdfInputRef} type="file" accept="application/pdf"
+          onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
           className="w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#444] text-sm focus:outline-none focus:border-[#080808] file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#F0F0F0] file:text-xs file:cursor-pointer" required />
-        <p className="text-[#AAA] text-xs mt-1">PDF — Sin limite de tamanio, sube directo a Supabase</p>
+        <p className="text-[#AAA] text-xs mt-1">PDF — Sin limite de tamanio</p>
       </div>
       <div>
         <label className={labelCls}>Imagen de portada *</label>
-        <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+        <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp"
+          onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
           className="w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#444] text-sm focus:outline-none focus:border-[#080808] file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#F0F0F0] file:text-xs file:cursor-pointer" required />
         <p className="text-[#AAA] text-xs mt-1">JPG o PNG — Recomendado 800x1100px</p>
       </div>
@@ -199,7 +199,7 @@ export function UploadForm({ publications }: UploadFormProps) {
       {status === 'uploading' && (
         <div className="space-y-2">
           <div className="h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
-            <div className="h-full bg-[#080808] transition-all duration-500 rounded-full" style={{ width: progress + '%' }} />
+            <div className="h-full bg-[#080808] transition-all duration-300 rounded-full" style={{ width: progress + '%' }} />
           </div>
           <p className="text-[#888] text-xs">{progressLabel} — {progress}%</p>
         </div>
@@ -209,7 +209,7 @@ export function UploadForm({ publications }: UploadFormProps) {
           <CheckCircle size={16} className="mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-sm">{message}</p>
-            {resultUrl && <a href={resultUrl} className="text-xs underline mt-1 block" target="_blank" rel="noreferrer">Ver edicion</a>}
+            {resultUrl && <a href={resultUrl} className="text-xs underline mt-1 block" target="_blank" rel="noreferrer">Ver edicion →</a>}
           </div>
         </div>
       )}
