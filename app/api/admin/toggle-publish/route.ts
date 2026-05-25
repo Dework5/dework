@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
@@ -25,6 +26,23 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Look up publication slug to purge the right pages
+    const { data: issue } = await supabase
+      .from('issues')
+      .select('issue_number, publications(slug)')
+      .eq('id', issueId)
+      .single()
+
+    if (issue) {
+      const pub = issue.publications as { slug: string } | null
+      const slug = pub?.slug
+      if (slug) {
+        revalidatePath('/')
+        revalidatePath(`/revistas/${slug}`)
+        revalidatePath(`/revistas/${slug}/${issue.issue_number}`)
+      }
     }
 
     return NextResponse.json({ ok: true })

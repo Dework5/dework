@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
@@ -52,5 +53,13 @@ export async function POST(req: NextRequest) {
     .single()
 
   const url = pub ? `/revistas/${pub.slug}/${issueNumber}` : null
+
+  // Purge ISR cache immediately so the new issue appears without waiting
+  if (pub?.slug) {
+    revalidatePath('/')
+    revalidatePath(`/revistas/${pub.slug}`)
+    revalidatePath(`/revistas/${pub.slug}/${issueNumber}`)
+  }
+
   return NextResponse.json({ ok: true, issue, url })
 }

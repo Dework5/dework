@@ -1,8 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
-// This route ONLY uploads the file to Supabase Storage and returns the public URL.
-// The DB update is done client-side (same pattern as togglePublish which works).
 export async function POST(req: NextRequest) {
   const auth = req.headers.get('authorization')
   if (auth !== process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
@@ -46,9 +45,27 @@ export async function POST(req: NextRequest) {
       .from('issues')
       .update({ cover_url: publicUrl })
       .eq('id', issueId)
+
     if (dbErr) {
       console.error('[update-issue-cover] DB update failed:', dbErr.message)
-      // Still return the URL so the client can update local state
+    }
+
+    // Look up the publication slug so we can purge the right ISR pages
+    const { data: issue } = await supabase
+      .from('issues')
+      .select('issue_number, publications(slug)')
+      .eq('id', issueId)
+      .single()
+
+    if (issue) {
+      const pub = issue.publications as { slug: string } | null
+      const slug = pub?.slug
+      if (slug) {
+        // Immediately invalidate ISR cache for all affected pages
+        revalidatePath('/')                                          // home (hero cover)
+        revalidatePath(`/revistas/${slug}`)                         // listing grid
+        revalidatePath(`/revistas/${slug}/${issue.issue_number}`)   // reader page
+      }
     }
 
     return NextResponse.json({ ok: true, coverUrl: publicUrl })
