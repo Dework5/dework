@@ -85,7 +85,7 @@ export default function AdminPage() {
     setCoverUpdating(prev => ({ ...prev, [issue.id]: true }))
     try {
       const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
-      // Send file directly to API — server uploads with service-role key (reliable)
+      // 1. Upload file to Storage via API (service-role key needed for storage)
       const form = new FormData()
       form.append('issueId', issue.id)
       form.append('file', file)
@@ -95,7 +95,15 @@ export default function AdminPage() {
         body: form,
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error subiendo portada')
+      if (!res.ok) throw new Error(data.error || 'Error subiendo archivo')
+      // 2. Update DB client-side — same pattern as togglePublish (works with anon key)
+      const { error: dbErr } = await supabase
+        .from('issues')
+        .update({ cover_url: data.coverUrl })
+        .eq('id', issue.id)
+      if (dbErr) throw new Error('Error actualizando DB: ' + dbErr.message)
+      // 3. Reload issues list so table reflects new cover
+      setIssues(prev => prev.map(i => i.id === issue.id ? { ...i, cover_url: data.coverUrl } : i))
       setCoverDone(prev => ({ ...prev, [issue.id]: true }))
       setTimeout(() => setCoverDone(prev => ({ ...prev, [issue.id]: false })), 3000)
     } catch (e) {
