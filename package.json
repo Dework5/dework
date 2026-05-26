@@ -21,6 +21,10 @@
     "tus-js-client": "^4.2.3",
     "page-flip": "^2.0.7"
   },
+  "optionalDependencies": {
+    "@napi-rs/canvas-linux-x64-gnu": "^1.0.0",
+    "@napi-rs/canvas-linux-arm64-gnu": "^1.0.0"
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
