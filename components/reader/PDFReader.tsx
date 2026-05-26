@@ -94,7 +94,8 @@ export default function PDFReader({
   const [isDraggingZoom, setIsDraggingZoom] = useState(false)
   const zoomDragRef  = useRef({ on: false, sx: 0, sy: 0, px: 0, py: 0, moved: false })
   const zoomPinchRef = useRef(0)
-  const [isMobile,     setIsMobile]     = useState(false)  // < 768px viewport
+  const [isMobile,     setIsMobile]     = useState(false)  // smallest dimension < 600px (phone)
+  const [isLandscape,  setIsLandscape]  = useState(false)  // phone rotated landscape
 
   const scaleRef      = useRef(1)
   const pageDims      = useRef({ w: 595, h: 842 })   // from PDF page 1
@@ -123,26 +124,46 @@ export default function PDFReader({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preRendered])
 
-  // ── Detect mobile ─────────────────────────────────────────────────────
+  // ── Detect mobile & orientation ───────────────────────────────────────
+  // Use smallest dimension so phones in landscape are still "mobile"
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
+    const check = () => {
+      const minDim = Math.min(window.innerWidth, window.innerHeight)
+      setIsMobile(minDim < 600)
+      setIsLandscape(window.innerWidth > window.innerHeight)
+    }
     check()
     window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
+    window.addEventListener('orientationchange', check)
+    return () => {
+      window.removeEventListener('resize', check)
+      window.removeEventListener('orientationchange', check)
+    }
   }, [])
 
   // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
     const { w, h } = pageDims.current
-    if (window.innerWidth < 768) {
-      // Mobile: fit a single page to screen (leave room for top/bottom bars)
-      const PAD_TOP = 52, PAD_BOT = 72
-      const s = Math.min(
-        (window.innerWidth  - 12) / w,
-        (window.innerHeight - PAD_TOP - PAD_BOT) / h
-      )
-      setScale(Math.max(0.25, s)); scaleRef.current = Math.max(0.25, s)
+    const minDim = Math.min(window.innerWidth, window.innerHeight)
+    if (minDim < 600) {
+      if (window.innerWidth > window.innerHeight) {
+        // Landscape phone: fit two portrait pages side by side
+        const PAD_H = 10, PAD_V = 36
+        const s = Math.min(
+          (window.innerWidth  - PAD_H * 2) / (w * 2),
+          (window.innerHeight - PAD_V)      / h
+        )
+        setScale(Math.max(0.2, s)); scaleRef.current = Math.max(0.2, s)
+      } else {
+        // Portrait phone: fit single page (leave room for top/bottom bars)
+        const PAD_TOP = 52, PAD_BOT = 72
+        const s = Math.min(
+          (window.innerWidth  - 12) / w,
+          (window.innerHeight - PAD_TOP - PAD_BOT) / h
+        )
+        setScale(Math.max(0.25, s)); scaleRef.current = Math.max(0.25, s)
+      }
     } else {
       // Desktop: PAD_V/H ensure visible breathing room around the book (wood visible).
       // MAX_SCALE caps size on large monitors so the book never feels overwhelming.
@@ -412,8 +433,9 @@ export default function PDFReader({
     const dx = touchStartX.current - e.changedTouches[0].clientX
     if (Math.abs(dx) < 45) return
     if (isMobile) {
-      if (dx > 0) { if (currentPage < totalSlots) { setCurrentPage(p => p + 1); if (audioOn) playPageSound() } }
-      else         { if (currentPage > 1)          { setCurrentPage(p => p - 1); if (audioOn) playPageSound() } }
+      const step = isLandscape ? 2 : 1
+      if (dx > 0) { if (currentPage < totalSlots) { setCurrentPage(p => Math.min(totalSlots, p + step)); if (audioOn) playPageSound() } }
+      else         { if (currentPage > 1)          { setCurrentPage(p => Math.max(1, p - step));          if (audioOn) playPageSound() } }
     } else {
       if (!pageFlipRef.current) return
       if (dx > 0) pageFlipRef.current.flipNext()
@@ -567,45 +589,114 @@ export default function PDFReader({
           </div>
         )}
 
-        {/* ── Mobile: single-page carousel (replaces PageFlip on small screens) ── */}
+        {/* ── Mobile reader (portrait = single page, landscape = double spread) ── */}
         {isMobile && coverClosed && pdfReady && (() => {
-          const slotUrl = getSlotUrl(currentPage - 1)
-          return (
-            <div style={{ position: 'absolute', inset: 0, zIndex: 5,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              padding: '8px 4px' }}>
-              {/* Page image */}
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0 }}>
-                {slotUrl
-                  ? /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={slotUrl} alt={`Página ${currentPage}`}
-                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
-                        boxShadow: '0 6px 32px rgba(0,0,0,0.22)', border: '2px solid #D4A830' }} />
-                  : <div style={{ color: '#ccc', fontSize: 13 }}>Cargando…</div>
-                }
+          const goNext = () => { if (currentPage < totalSlots) { setCurrentPage(p => Math.min(totalSlots, p + (isLandscape ? 2 : 1))); if (audioOn) playPageSound() } }
+          const goPrev = () => { if (currentPage > 1)          { setCurrentPage(p => Math.max(1,           p - (isLandscape ? 2 : 1))); if (audioOn) playPageSound() } }
+          const canNext = currentPage < totalSlots
+          const canPrev = currentPage > 1
+
+          if (isLandscape) {
+            /* ── Landscape: two pages side by side ─────────────────────── */
+            const leftUrl  = getSlotUrl(currentPage - 1)
+            const rightUrl = currentPage < totalSlots ? getSlotUrl(currentPage) : null
+            return (
+              <div style={{ position: 'absolute', inset: 0, zIndex: 5,
+                display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* Pages */}
+                <div style={{ display: 'flex', gap: 3, height: 'calc(100% - 28px)',
+                  padding: '4px 52px', alignItems: 'center', justifyContent: 'center' }}>
+                  {leftUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={leftUrl} alt="Página izquierda" style={{ height: '100%', width: 'auto',
+                      objectFit: 'contain', boxShadow: '0 3px 16px rgba(0,0,0,0.20)', border: '2px solid #D4A830' }} />
+                  )}
+                  {rightUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={rightUrl} alt="Página derecha" style={{ height: '100%', width: 'auto',
+                      objectFit: 'contain', boxShadow: '0 3px 16px rgba(0,0,0,0.20)', border: '2px solid #D4A830' }} />
+                  )}
+                </div>
+                {/* Left tap zone */}
+                <div onClick={goPrev} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 52,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: canPrev ? 'pointer' : 'default', zIndex: 6 }}>
+                  {canPrev && (
+                    <div style={{ background: 'rgba(0,0,0,0.13)', borderRadius: '50%', width: 34, height: 34,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(0,0,0,0.55)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </div>
+                  )}
+                </div>
+                {/* Right tap zone */}
+                <div onClick={goNext} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 52,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: canNext ? 'pointer' : 'default', zIndex: 6 }}>
+                  {canNext && (
+                    <div style={{ background: 'rgba(0,0,0,0.13)', borderRadius: '50%', width: 34, height: 34,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(0,0,0,0.55)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </div>
+                  )}
+                </div>
               </div>
-              {/* Tap-target navigation row */}
-              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, paddingTop: 12 }}>
-                <button
-                  disabled={currentPage <= 1}
-                  onClick={() => { if (currentPage > 1) { setCurrentPage(p => p - 1); if (audioOn) playPageSound() } }}
-                  style={{ background: 'rgba(0,0,0,0.18)', border: 'none', borderRadius: 8, cursor: 'pointer',
-                    color: currentPage <= 1 ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.50)', padding: '10px 18px', display: 'flex', alignItems: 'center' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-                </button>
-                <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', letterSpacing: '0.2em' }}>
-                  {currentPage} / {totalSlots}
-                </span>
-                <button
-                  disabled={currentPage >= totalSlots}
-                  onClick={() => { if (currentPage < totalSlots) { setCurrentPage(p => p + 1); if (audioOn) playPageSound() } }}
-                  style={{ background: 'rgba(0,0,0,0.18)', border: 'none', borderRadius: 8, cursor: 'pointer',
-                    color: currentPage >= totalSlots ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.50)', padding: '10px 18px', display: 'flex', alignItems: 'center' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-                </button>
+            )
+          } else {
+            /* ── Portrait: single page, full-width invisible tap zones ─── */
+            const slotUrl = getSlotUrl(currentPage - 1)
+            return (
+              <div style={{ position: 'absolute', inset: 0, zIndex: 5 }}>
+                {/* Page fills space between bars */}
+                <div style={{ position: 'absolute', inset: 0, display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', padding: '52px 6px 56px' }}>
+                  {slotUrl
+                    ? /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={slotUrl} alt={`Página ${currentPage}`}
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
+                          boxShadow: '0 6px 32px rgba(0,0,0,0.22)', border: '2px solid #D4A830' }} />
+                    : <div style={{ color: '#aaa', fontSize: 13 }}>Cargando…</div>
+                  }
+                </div>
+
+                {/* ← invisible left half = tap to go back */}
+                <div onClick={goPrev}
+                  style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '44%', zIndex: 6,
+                    display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
+                    paddingLeft: 10, cursor: canPrev ? 'pointer' : 'default' }}>
+                  {canPrev && (
+                    <div style={{ background: 'rgba(0,0,0,0.15)', borderRadius: '50%',
+                      width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(0,0,0,0.55)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </div>
+                  )}
+                </div>
+
+                {/* → invisible right half = tap to go forward */}
+                <div onClick={goNext}
+                  style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '44%', zIndex: 6,
+                    display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+                    paddingRight: 10, cursor: canNext ? 'pointer' : 'default' }}>
+                  {canNext && (
+                    <div style={{ background: 'rgba(0,0,0,0.15)', borderRadius: '50%',
+                      width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(0,0,0,0.55)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </div>
+                  )}
+                </div>
+
+                {/* Page counter + first-time hint */}
+                <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0, zIndex: 7, pointerEvents: 'none',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                  {currentPage <= 2 && (
+                    <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.28)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                      tocá los bordes o deslizá para pasar
+                    </span>
+                  )}
+                  <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.32)', letterSpacing: '0.22em' }}>
+                    {currentPage} / {totalSlots}
+                  </span>
+                </div>
               </div>
-            </div>
-          )
+            )
+          }
         })()}
 
         {/* ── Side navigation arrows (show when book is open — desktop only) ── */}
@@ -723,9 +814,9 @@ export default function PDFReader({
 
       {/* ── Reading-zoom overlay ─────────────────────────────────────────── */}
       {zoomOpen && (() => {
-        // Mobile zoom: single page centred. Desktop: left + right spread.
+        // Portrait mobile: single page centred. Landscape mobile + desktop: left + right spread.
         const leftUrl  = getSlotUrl(currentPage - 1)
-        const rightUrl = isMobile ? null : getSlotUrl(currentPage)
+        const rightUrl = (isMobile && !isLandscape) ? null : getSlotUrl(currentPage)
         const zBtnStyle: React.CSSProperties = {
           background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)',
           borderRadius: 8, cursor: 'pointer', color: 'white', width: 40, height: 40,
@@ -848,7 +939,7 @@ export default function PDFReader({
             <button
               onClick={e => {
                 e.stopPropagation()
-                if (isMobile) { if (currentPage > 1) { setCurrentPage(p => p - 1); if (audioOn) playPageSound() } }
+                if (isMobile) { const step = isLandscape ? 2 : 1; if (currentPage > 1) { setCurrentPage(p => Math.max(1, p - step)); if (audioOn) playPageSound() } }
                 else pageFlipRef.current?.flipPrev()
                 setZoomLevel(1); setZoomPan({ x: 0, y: 0 })
               }}
@@ -860,7 +951,7 @@ export default function PDFReader({
             <button
               onClick={e => {
                 e.stopPropagation()
-                if (isMobile) { if (currentPage < totalSlots) { setCurrentPage(p => p + 1); if (audioOn) playPageSound() } }
+                if (isMobile) { const step = isLandscape ? 2 : 1; if (currentPage < totalSlots) { setCurrentPage(p => Math.min(totalSlots, p + step)); if (audioOn) playPageSound() } }
                 else pageFlipRef.current?.flipNext()
                 setZoomLevel(1); setZoomPan({ x: 0, y: 0 })
               }}
