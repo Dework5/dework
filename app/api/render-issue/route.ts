@@ -5,24 +5,16 @@ import { join } from 'path'
 
 /**
  * POST /api/render-issue
- * Server-side: downloads the PDF, renders every page with @napi-rs/canvas + pdfjs-dist,
- * splits landscape spreads into L/R halves, uploads all JPEGs to Supabase Storage in
- * parallel, and saves the slot-URL map in issues.page_images_json.
- *
- * Prerequisites (run once in Supabase SQL Editor):
- *   ALTER TABLE issues ADD COLUMN IF NOT EXISTS page_images_json jsonb;
- *   -- Create a public 'page-images' bucket (Storage → New bucket → Public)
  */
 
-export const maxDuration = 60   // seconds (Hobby max; Pro supports 300)
+export const maxDuration = 60
 export const dynamic    = 'force-dynamic'
 
-const RENDER_SCALE = 1.5   // 1.5× = ~892px wide for A4 — noticeably sharper
-const JPEG_QUALITY = 93    // 0-100
+const RENDER_SCALE = 1.5
+const JPEG_QUALITY = 93
 
 export async function POST(req: NextRequest) {
   try {
-    // ── Auth ───────────────────────────────────────────────────────────────
     const auth = req.headers.get('authorization')
     if (!auth || auth !== process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -32,7 +24,6 @@ export async function POST(req: NextRequest) {
     const { issueId } = body as { issueId?: string }
     if (!issueId) return NextResponse.json({ error: 'Missing issueId' }, { status: 400 })
 
-    // ── Fetch issue ────────────────────────────────────────────────────────
     const { createServerClient } = await import('@/lib/supabase-server')
     const db = createServerClient()
 
@@ -46,39 +37,53 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Issue not found' }, { status: 404 })
     }
 
-    // ── Download PDF ───────────────────────────────────────────────────────
     const pdfRes = await fetch(issue.pdf_url, { cache: 'no-store' })
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
-    // ── Step 1: Load @napi-rs/canvas and register globals ─────────────────
-    // MUST happen before pdfjs-dist is imported. Since both packages are in
-    // serverExternalPackages, neither is bundled — each loads on first import().
-    // Importing canvas first ensures globalThis.Path2D and DOMMatrix are set
-    // before pdfjs-dist's module initialisation code runs.
+    // ── Step 1: Load @napi-rs/canvas and set globals BEFORE pdfjs loads ───
     const napiCanvas = await import('@napi-rs/canvas')
     const { createCanvas } = napiCanvas
 
-    // Always overwrite — never guard with typeof. On warm Lambdas the module
-    // cache is reused but globals must still be correct.
+    // Always overwrite — ensures pdfjs-dist (external too) sees these when
+    // its module initialises on this first import() call below
     ;(globalThis as any).Path2D   = napiCanvas.Path2D
     ;(globalThis as any).DOMMatrix = napiCanvas.DOMMatrix
 
-    // ── Step 2: Load pdfjs-dist (now that globals are ready) ──────────────
+    console.log('[render-issue] Path2D type:', typeof (globalThis as any).Path2D)
+    console.log('[render-issue] Path2D constructor:', (globalThis as any).Path2D?.name)
+
+    // ── Step 2: Load pdfjs (external → inits NOW, after globals are set) ──
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
     const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')
     ;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `file://${workerPath}`
 
-    // ── Load PDF document ──────────────────────────────────────────────────
+    // ── Node canvas factory — pdfjs uses this for any internal canvas ──────
+    const NodeCanvasFactory = {
+      create(w: number, h: number) {
+        const c = createCanvas(Math.ceil(w), Math.ceil(h))
+        return { canvas: c, context: c.getContext('2d') }
+      },
+      reset(cc: any, w: number, h: number) {
+        cc.canvas.width  = Math.ceil(w)
+        cc.canvas.height = Math.ceil(h)
+      },
+      destroy(cc: any) {
+        cc.canvas.width = 0
+        cc.canvas.height = 0
+      },
+    }
+
     const doc = await pdfjsLib.getDocument({
       data: pdfBuffer,
+      CanvasFactory: NodeCanvasFactory,
       isEvalSupported: false,
       useSystemFonts: true,
       disableRange: true,
       disableStream: true,
     }).promise
 
-    // ── Detect spread format ───────────────────────────────────────────────
+    // Spread detection
     const p1  = await doc.getPage(1)
     const vp1 = p1.getViewport({ scale: 1 })
 
@@ -96,12 +101,9 @@ export async function POST(req: NextRequest) {
       isSpreadPDF = vp2.width > vp2.height * 1.1
     }
 
-    // ── Ensure Storage bucket exists ───────────────────────────────────────
     await db.storage.createBucket('page-images', { public: true }).catch(() => {})
 
-    // ── Phase 1: Render all pages sequentially (CPU-bound) ─────────────────
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-
     type Slot = { key: string; buffer: Buffer; path: string }
     const pending: Slot[] = []
 
@@ -109,12 +111,35 @@ export async function POST(req: NextRequest) {
       const page     = await doc.getPage(pageNum)
       const viewport = page.getViewport({ scale: RENDER_SCALE })
       const canvas   = createCanvas(Math.round(viewport.width), Math.round(viewport.height))
-      const ctx      = canvas.getContext('2d')
+      const rawCtx   = canvas.getContext('2d') as any
+
+      // ── Diagnostic proxy: wraps every ctx call and reports arg types on error
+      // This lets us see EXACTLY which method fails and what type was passed.
+      const ctx = new Proxy(rawCtx, {
+        get(target, prop) {
+          const val = Reflect.get(target, prop)
+          if (typeof val !== 'function') return val
+          return function (...args: unknown[]) {
+            try {
+              return (val as Function).apply(target, args)
+            } catch (e: any) {
+              const argInfo = args.map(a => {
+                if (a === null)      return 'null'
+                if (a === undefined) return 'undefined'
+                return `${typeof a}<${(a as any)?.constructor?.name ?? '?'}>`
+              }).join(', ')
+              throw new Error(
+                `ctx.${String(prop)}(${argInfo}) FAILED: ${e?.message ?? e}`
+              )
+            }
+          }
+        },
+      })
 
       await page.render({
-        canvasContext: ctx as unknown as CanvasRenderingContext2D,
+        canvasContext: ctx,
         viewport,
-        canvas: canvas as unknown as HTMLCanvasElement,
+        // NOTE: no 'canvas' param — not an official pdfjs-dist v5 render param
       }).promise
 
       const isLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
@@ -135,7 +160,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Phase 2: Upload all slots in parallel (I/O-bound) ─────────────────
     const slots: Record<string, string> = {}
 
     await Promise.all(
@@ -148,7 +172,6 @@ export async function POST(req: NextRequest) {
       })
     )
 
-    // ── Save to DB ─────────────────────────────────────────────────────────
     const pageImagesJson = { isSpreadPDF, isAllSpread, pageDimensions, totalPdfPages: doc.numPages, slots }
 
     const { error: updateErr } = await db
@@ -167,8 +190,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, slots: Object.keys(slots).length, isSpreadPDF, isAllSpread })
 
-  } catch (err) {
-    console.error('[render-issue]', err)
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+  } catch (err: any) {
+    console.error('[render-issue] ERROR:', err?.message ?? err)
+    // Return full message (not truncated) so admin UI shows exactly what failed
+    const msg = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
