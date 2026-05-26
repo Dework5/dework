@@ -70,8 +70,9 @@ export default function PDFReader({
   const [loadSlow,    setLoadSlow]    = useState(false)
   const [pdfReady,    setPdfReady]    = useState(false)  // first page rendered
 
-  // Per-page rendered data URLs
-  const [pageUrls, setPageUrls] = useState<Record<number, string>>({})
+  // Per-slot rendered data URLs.
+  // Keys: String(pageNum) for portrait pages, "${pageNum}_L" / "${pageNum}_R" for landscape halves.
+  const [pageUrls, setPageUrls] = useState<Record<string, string>>({})
 
   // UI overlays
   const [audioOn,      setAudioOn]      = useState(true)
@@ -153,6 +154,7 @@ export default function PDFReader({
   // ── Load PDF ───────────────────────────────────────────────────────────
   useEffect(() => {
     setIsLoading(true); setError(null); setLoadSlow(false); setPdfReady(false)
+    setPageUrls({})               // clear old PDF's images
     isSpreadPDF.current = false   // reset for incoming PDF
     isAllSpread.current = false
     const slow = setTimeout(() => setLoadSlow(true), 12000)
@@ -210,8 +212,32 @@ export default function PDFReader({
       canvas.height  = viewport.height
       const ctx      = canvas.getContext('2d')!
       await page.render({ canvasContext: ctx, viewport, canvas }).promise
-      const url = canvas.toDataURL('image/jpeg', 0.80)  // 0.80 = faster encode, still good quality
-      setPageUrls(prev => ({ ...prev, [pageNum]: url }))
+
+      // Landscape pages (spreads) → split canvas into LEFT and RIGHT halves.
+      // This avoids relying on CSS overflow:hidden which page-flip doesn't honour.
+      const isLandscapePage = isSpreadPDF.current &&
+        (isAllSpread.current || pageNum > 1)
+
+      if (isLandscapePage) {
+        const halfW = Math.round(canvas.width / 2)
+
+        const left = document.createElement('canvas')
+        left.width = halfW; left.height = canvas.height
+        left.getContext('2d')!.drawImage(canvas, 0, 0, halfW, canvas.height, 0, 0, halfW, canvas.height)
+
+        const right = document.createElement('canvas')
+        right.width = halfW; right.height = canvas.height
+        right.getContext('2d')!.drawImage(canvas, halfW, 0, halfW, canvas.height, 0, 0, halfW, canvas.height)
+
+        setPageUrls(prev => ({
+          ...prev,
+          [`${pageNum}_L`]: left.toDataURL('image/jpeg', 0.82),
+          [`${pageNum}_R`]: right.toDataURL('image/jpeg', 0.82),
+        }))
+      } else {
+        setPageUrls(prev => ({ ...prev, [String(pageNum)]: canvas.toDataURL('image/jpeg', 0.82) }))
+      }
+
       if (pageNum === 1) setPdfReady(true)
     } catch { /* cancelled */ }
     renderingSet.current.delete(pageNum)
@@ -267,7 +293,8 @@ export default function PDFReader({
         if (audioOn) playPageSound()
         // Eagerly render upcoming pages
         for (let i = pg + 1; i <= Math.min(pg + 4, numPages); i++) {
-          if (!pageUrls[i]) renderPage(i)
+          const key = isSpreadPDF.current ? `${i}_L` : String(i)
+          if (!pageUrls[key]) renderPage(i)
         }
         const sid = sessionStorage.getItem('dework_session') || ''
         fetch('/api/track-page', {
@@ -286,7 +313,7 @@ export default function PDFReader({
       flipReady.current   = false
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfReady, numPages, pageUrls[1]])   // init once when first page URL lands
+  }, [pdfReady, numPages])   // pdfReady fires when page 1 finishes → URLs are in state
 
   // ── Keyboard navigation ────────────────────────────────────────────────
   useEffect(() => {
@@ -455,73 +482,50 @@ export default function PDFReader({
           >
             {Array.from({ length: totalSlots }, (_, i) => {
               /*
-                Slot layout — three cases:
+                Each slot is exactly estW x estH — one magazine page.
+                Images are pre-cropped JPEGs (split at canvas render time).
+                No CSS overflow tricks needed.
 
-                (C) All-portrait (isSpreadPDF=false):
-                  slot i → PDF page i+1
+                URL key scheme:
+                  Portrait page  → String(pageNum)          e.g. "1"
+                  Landscape left  → "${pageNum}_L"           e.g. "2_L"
+                  Landscape right → "${pageNum}_R"           e.g. "2_R"
 
-                (A) Mixed — portrait cover + landscape spreads (isSpreadPDF, !isAllSpread):
-                  slot 0         → PDF page 1 (portrait cover), full width estW
-                  slot 1         → LEFT  half of PDF page 2 (landscape, canvas = 2×estW)
-                  slot 2         → RIGHT half of PDF page 2
-                  slot 3         → LEFT  half of PDF page 3  …
-
-                (B) All-landscape (isAllSpread):
-                  slot 0         → LEFT  half of PDF page 1
-                  slot 1         → RIGHT half of PDF page 1
-                  slot 2         → LEFT  half of PDF page 2  …
-
-                Each slot is estW × estH with overflow:hidden.
-                Landscape halves use position:absolute + left offset to clip the right half.
+                Slot-to-key mapping:
+                  (C) All-portrait:           key = String(i+1)
+                  (A) Portrait cover+spreads: i=0 → "1" | i>0 → pdfPage_L/R
+                  (B) All-landscape:          all → pdfPage_L/R
               */
-              let pdfPage: number
-              let isRightHalf = false
-              let imgW = estW  // default: portrait page, natural width
-
+              let urlKey: string
               if (isAllSpread.current) {
-                // (B) All-landscape
-                const k = Math.floor(i / 2)
-                pdfPage     = k + 1
-                isRightHalf = i % 2 === 1
-                imgW        = estW * 2
+                const pdfPage = Math.floor(i / 2) + 1
+                urlKey = `${pdfPage}_${i % 2 === 0 ? 'L' : 'R'}`
+              } else if (!isSpreadPDF.current) {
+                urlKey = String(i + 1)
               } else if (i === 0) {
-                // (A/C) Cover is always PDF page 1 (portrait)
-                pdfPage = 1
-              } else if (isSpreadPDF.current) {
-                // (A) Mixed — pages 2+ are landscape spreads
-                const k = Math.floor((i - 1) / 2)
-                pdfPage     = k + 2
-                isRightHalf = (i - 1) % 2 === 1
-                imgW        = estW * 2
+                urlKey = '1'
               } else {
-                // (C) All-portrait
-                pdfPage = i + 1
+                const pdfPage = Math.floor((i - 1) / 2) + 2
+                urlKey = `${pdfPage}_${(i - 1) % 2 === 0 ? 'L' : 'R'}`
               }
 
-              const url = pageUrls[pdfPage]
+              const url = pageUrls[urlKey]
 
               return (
                 <div
                   key={i}
                   className="pf-slot"
-                  style={{ background: '#FEFDFB', width: estW, height: estH, overflow: 'hidden', position: 'relative', flexShrink: 0 }}
+                  style={{ width: estW, height: estH, background: '#FEFDFB', flexShrink: 0, overflow: 'hidden' }}
                 >
                   {url
                     ? /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={url}
-                        alt={`Página ${pdfPage}`}
-                        style={{
-                          position: 'absolute',
-                          width: imgW,
-                          height: estH,
-                          left: isRightHalf ? -estW : 0,
-                          top: 0,
-                          display: 'block',
-                        }}
+                        alt={`Slot ${i + 1}`}
+                        style={{ width: estW, height: estH, display: 'block', objectFit: 'fill' }}
                       />
-                    : <div style={{ width: '100%', height: '100%', background: '#FAFAF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ color: '#ddd', fontSize: Math.round(estH * 0.12), fontStyle: 'italic' }}>{pdfPage}</span>
+                    : <div style={{ width: estW, height: estH, background: '#FAFAF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ color: '#ddd', fontSize: Math.round(estH * 0.12), fontStyle: 'italic' }}>{i + 1}</span>
                       </div>
                   }
                 </div>
