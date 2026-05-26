@@ -10,7 +10,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.840.0",
     "@aws-sdk/s3-request-presigner": "^3.840.0",
-    "@napi-rs/canvas": "^1.0.0",
+    "canvas": "^3.2.0",
     "@supabase/supabase-js": "^2.106.2",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
@@ -21,11 +21,7 @@
     "tus-js-client": "^4.2.3",
     "page-flip": "^2.0.7"
   },
-  "optionalDependencies": {
-    "@napi-rs/canvas-linux-x64-gnu": "^1.0.0",
-    "@napi-rs/canvas-linux-arm64-gnu": "^1.0.0"
-  },
-  "devDependencies": {
+"devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

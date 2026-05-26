@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Keep @napi-rs/canvas and pdfjs-dist as external so their native binaries work in serverless
-  serverExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
+  serverExternalPackages: ['canvas', 'pdfjs-dist'],
 
   images: {
     remotePatterns: [
@@ -38,8 +38,7 @@ const nextConfig: NextConfig = {
 Object.assign(nextConfig, {
   outputFileTracingIncludes: {
     '/api/render-issue': [
-      './node_modules/@napi-rs/canvas/**/*',
-      './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
+      './node_modules/canvas/**/*',
       './node_modules/pdfjs-dist/build/**/*',
     ],
   },

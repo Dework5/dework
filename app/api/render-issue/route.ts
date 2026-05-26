@@ -89,8 +89,15 @@ export async function POST(req: NextRequest) {
 
     // ── Phase 1: Render all pages sequentially (CPU-bound) ─────────────────
     // Collect { key, buffer, path } for every slot. Upload happens after.
-    const { createCanvas } = await import('@napi-rs/canvas')
+    const { createCanvas } = await import('canvas')
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+
+    // Helper: async JPEG buffer with quality (canvas npm uses 0-1 range)
+    const toJpeg = (c: any): Promise<Buffer> =>
+      new Promise((res, rej) =>
+        c.toBuffer((err: Error | null, buf: Buffer) => err ? rej(err) : res(buf),
+          'image/jpeg', { quality: JPEG_QUALITY / 100 })
+      )
 
     type Slot = { key: string; buffer: Buffer; path: string }
     const pending: Slot[] = []
@@ -117,11 +124,11 @@ export async function POST(req: NextRequest) {
           const sx      = side === 'L' ? 0 : halfW
           halfCtx.drawImage(canvas as any, sx, 0, halfW, canvas.height, 0, 0, halfW, canvas.height)
           const key = `${pageNum}_${side}`
-          pending.push({ key, buffer: half.toBuffer('image/jpeg', JPEG_QUALITY), path: `${issueId}/${key}.jpg` })
+          pending.push({ key, buffer: await toJpeg(half), path: `${issueId}/${key}.jpg` })
         }
       } else {
         const key = String(pageNum)
-        pending.push({ key, buffer: canvas.toBuffer('image/jpeg', JPEG_QUALITY), path: `${issueId}/${key}.jpg` })
+        pending.push({ key, buffer: await toJpeg(canvas), path: `${issueId}/${key}.jpg` })
       }
     }
 
