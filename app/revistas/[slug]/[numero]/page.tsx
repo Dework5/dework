@@ -66,7 +66,7 @@ export default async function ReaderPage({ params }: Props) {
       backUrl={`/revistas/${slug}`}
       downloadUrl={issue.pdf_url || undefined}
       publicationName={publication.name}
-      issueTitle={issue.title || `#${issue.issue_number}`}
+      issueTitle={`#${issue.issue_number}`}
       preRendered={issue.page_images_json ?? null}
     />
   )

@@ -10,8 +10,7 @@ const PDFReader = dynamic(() => import('./PDFReader'), {
       className="flex flex-col items-center justify-center gap-5"
       style={{
         height: '100vh',
-        backgroundColor: '#111111',
-        backgroundImage: 'radial-gradient(ellipse 90% 80% at 50% 48%, #181614 0%, #0c0b0a 100%)',
+        backgroundColor: '#F5F3F0',
       }}
     >
       <div
@@ -28,7 +27,7 @@ const PDFReader = dynamic(() => import('./PDFReader'), {
         <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '150ms' }} />
         <div className="w-1.5 h-1.5 rounded-full bg-[#C5A56B] animate-bounce" style={{ animationDelay: '300ms' }} />
       </div>
-      <p className="text-[11px] tracking-[0.3em] uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>
+      <p className="text-[11px] tracking-[0.3em] uppercase" style={{ color: 'rgba(0,0,0,0.35)' }}>
         Preparando revista…
       </p>
     </div>
