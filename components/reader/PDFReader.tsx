@@ -80,23 +80,24 @@ export default function PDFReader({
   const [coverClosed,  setCoverClosed]  = useState(false)  // user hasn't opened the book yet
 
   const scaleRef      = useRef(1)
-  const pageDims      = useRef({ w: 595, h: 842 })
-  const renderingSet  = useRef(new Set<number>())     // pages currently being rendered
-  const pageFlipRef   = useRef<any>(null)              // PageFlip instance
-  const containerRef  = useRef<HTMLDivElement>(null)   // PageFlip DOM target
+  const pageDims      = useRef({ w: 595, h: 842 })   // from PDF page 1
+  const isSpreadPDF   = useRef(false)                  // true = each PDF page = landscape spread (2 mag pages)
+  const renderingSet  = useRef(new Set<number>())
+  const pageFlipRef   = useRef<any>(null)
+  const containerRef  = useRef<HTMLDivElement>(null)
   const idleTimer     = useRef<ReturnType<typeof setTimeout> | null>(null)
   const touchStartX   = useRef(0)
-  const flipReady     = useRef(false)                  // PageFlip initialised
+  const flipReady     = useRef(false)
 
   // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
     const BOTTOM = 36, PAD_V = 20, PAD_H = 24
     const { w, h } = pageDims.current
-    // Each PDF page is already a spread (landscape) — fit one page to the screen
+    // w = one magazine page width (portrait). Fit two side by side.
     const s = Math.max(0.25, Math.min(
       (window.innerHeight - BOTTOM - PAD_V * 2) / h,
-      (window.innerWidth  - PAD_H * 2)          / w,
+      (window.innerWidth  - PAD_H * 2)          / (w * 2),
       3
     ))
     setScale(s); scaleRef.current = s
@@ -161,9 +162,19 @@ export default function PDFReader({
     task.promise.then(async doc => {
       clearTimeout(slow)
       setPdf(doc); setNumPages(doc.numPages)
+
+      // Read page 1 dimensions (portrait cover = 1 magazine page width)
       const p1 = await doc.getPage(1)
-      const vp = p1.getViewport({ scale: 1 })
-      pageDims.current = { w: vp.width, h: vp.height }
+      const vp1 = p1.getViewport({ scale: 1 })
+      pageDims.current = { w: vp1.width, h: vp1.height }
+
+      // Detect if pages 2+ are landscape spreads (2 magazine pages per PDF page)
+      if (doc.numPages >= 2) {
+        const p2 = await doc.getPage(2)
+        const vp2 = p2.getViewport({ scale: 1 })
+        isSpreadPDF.current = vp2.width > vp2.height * 1.1
+      }
+
       calcScale()
       setIsLoading(false)
       setLoadSlow(false)
@@ -224,8 +235,8 @@ export default function PDFReader({
         size:               'fixed',
         drawShadow:         true,
         flippingTime:       700,
-        usePortrait:        true,    // each PDF page = one spread (landscape), single-page flip
-        showCover:          true,
+        usePortrait:        false,   // two magazine pages side by side (open book)
+        showCover:          true,    // slot 0 = cover, shown alone
         useMouseEvents:     true,
         swipeDistance:      30,
         clickEventForward:  true,
@@ -285,10 +296,18 @@ export default function PDFReader({
   }
 
   // ── Derived ────────────────────────────────────────────────────────────
-  const estW     = Math.round(pageDims.current.w * scale) || 600
+  // estW = one magazine page width (= portrait PDF page 1 width × scale)
+  // For spread PDFs: landscape pages render to 2×estW wide; we split them into L/R halves
+  const estW     = Math.round(pageDims.current.w * scale) || 300
   const estH     = Math.round(pageDims.current.h * scale) || 424
-  // Each PDF page IS a spread — container = one PDF page = one spread
-  const bookW    = estW
+  const bookW    = estW * 2   // open book = two magazine pages side by side
+
+  // Total page-flip slots:
+  // Portrait PDF: 1 slot per page
+  // Spread PDF:   slot 0 = portrait cover (PDF page 1) + 2 slots per landscape page (PDF pages 2+)
+  const totalSlots = (numPages > 0 && isSpreadPDF.current)
+    ? 1 + (numPages - 1) * 2
+    : numPages
   const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
 
   const iconBtn: React.CSSProperties = {
@@ -417,25 +436,60 @@ export default function PDFReader({
               overflow: 'hidden',
             }}
           >
-            {Array.from({ length: numPages }, (_, i) => {
-              const n   = i + 1
-              const url = pageUrls[n]
+            {Array.from({ length: totalSlots }, (_, i) => {
+              /*
+                Slot layout for spread PDFs (each PDF page = landscape with 2 magazine pages):
+                  slot 0         → PDF page 1 (portrait cover), full width estW
+                  slot 1         → LEFT  half of PDF page 2 (landscape, canvas = 2×estW)
+                  slot 2         → RIGHT half of PDF page 2
+                  slot 3         → LEFT  half of PDF page 3
+                  slot 4         → RIGHT half of PDF page 3
+                  ...
+
+                For portrait PDFs: slot i → PDF page i+1, full width estW.
+
+                Each slot is estW × estH. For landscape halves, the full-width image
+                (2×estW) is shifted left (left:0 or left:-estW) and clipped by overflow:hidden.
+              */
+              let pdfPage: number
+              let isRightHalf = false
+              let imgW = estW  // default: portrait page, natural width
+
+              if (i === 0) {
+                pdfPage = 1  // portrait cover
+              } else if (isSpreadPDF.current) {
+                const k = Math.floor((i - 1) / 2)  // 0-based index into pages 2, 3, ...
+                pdfPage = k + 2
+                isRightHalf = (i - 1) % 2 === 1
+                imgW = estW * 2  // landscape page = 2× magazine page width
+              } else {
+                pdfPage = i + 1
+              }
+
+              const url = pageUrls[pdfPage]
+
               return (
-                /*
-                  IMPORTANT: each slot must be exactly estW × estH — the single-page size
-                  passed to PageFlip options. If width is '100%' (= bookW = 2×estW),
-                  page-flip only shows the left half of each slot.
-                */
                 <div
-                  key={n}
+                  key={i}
                   className="pf-slot"
-                  style={{ background: '#FEFDFB', width: estW, height: estH, overflow: 'hidden', flexShrink: 0 }}
+                  style={{ background: '#FEFDFB', width: estW, height: estH, overflow: 'hidden', position: 'relative', flexShrink: 0 }}
                 >
                   {url
                     ? /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={url} alt={`Página ${n}`} style={{ width: estW, height: estH, display: 'block' }} />
-                    : <div style={{ width: estW, height: estH, background: '#FAFAF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ color: '#ddd', fontSize: Math.round(estH * 0.12), fontStyle: 'italic' }}>{n}</span>
+                      <img
+                        src={url}
+                        alt={`Página ${pdfPage}`}
+                        style={{
+                          position: 'absolute',
+                          width: imgW,
+                          height: estH,
+                          left: isRightHalf ? -estW : 0,
+                          top: 0,
+                          display: 'block',
+                        }}
+                      />
+                    : <div style={{ width: '100%', height: '100%', background: '#FAFAF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ color: '#ddd', fontSize: Math.round(estH * 0.12), fontStyle: 'italic' }}>{pdfPage}</span>
                       </div>
                   }
                 </div>
