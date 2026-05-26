@@ -16,6 +16,12 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // Enlace enviado a clientes para la edición #139
+      {
+        source: '/san-diego-la-revistas',
+        destination: '/revistas/san-diego-la-revista/139',
+        permanent: false,
+      },
       // URL amigable para San Diego La Revista → listado de ediciones
       {
         source: '/sandiego-revistas',
