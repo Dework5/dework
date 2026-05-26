@@ -174,32 +174,56 @@ export default function AdminPage() {
   }
 
   // ── Server-side pre-render issue pages ────────────────────────────
+  // The API renders up to 15 pages per call. We loop until done: true.
   const renderIssue = async (issue: Issue) => {
     setRendering(prev => ({ ...prev, [issue.id]: true }))
     setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } }))
     try {
-      const pw  = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
-      const res = await fetch('/api/render-issue', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: pw },
-        body:    JSON.stringify({ issueId: issue.id }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        const msg = data.error || 'Error desconocido'
-        // If it's a DB column error, show the migration SQL helper
-        if (msg.includes('ALTER TABLE')) setShowMigrationSQL(true)
-        setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg } }))
-      } else {
+      const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+      let startPage   = 1
+      let totalPages  = 0
+      let pagesRendered = 0
+
+      while (true) {
         setRenderResult(prev => ({
           ...prev,
-          [issue.id]: { ok: true, msg: `✓ ${data.slots} páginas renderizadas` },
+          [issue.id]: { ok: false, msg: totalPages
+            ? `Renderizando… ${pagesRendered}/${totalPages} págs`
+            : 'Renderizando…' },
         }))
-        // Mark issue as having pre-rendered images in local state
-        setIssues(prev => prev.map(i =>
-          i.id === issue.id ? { ...i, page_images_json: { isSpreadPDF: data.isSpreadPDF, isAllSpread: data.isAllSpread, pageDimensions: { w: 595, h: 842 }, totalPdfPages: 0, slots: {} } } : i
-        ))
-        setTimeout(() => setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } })), 8000)
+
+        const res  = await fetch('/api/render-issue', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: pw },
+          body:    JSON.stringify({ issueId: issue.id, startPage }),
+        })
+        const data = await res.json()
+
+        if (!res.ok) {
+          const msg = data.error || 'Error desconocido'
+          if (msg.includes('ALTER TABLE')) setShowMigrationSQL(true)
+          setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg } }))
+          break
+        }
+
+        totalPages    = data.totalPdfPages ?? totalPages
+        pagesRendered += data.pagesRendered ?? 0
+
+        if (data.done) {
+          setRenderResult(prev => ({
+            ...prev,
+            [issue.id]: { ok: true, msg: `✓ ${pagesRendered} páginas renderizadas` },
+          }))
+          setIssues(prev => prev.map(i =>
+            i.id === issue.id
+              ? { ...i, page_images_json: { isSpreadPDF: data.isSpreadPDF, isAllSpread: data.isAllSpread, pageDimensions: { w: 595, h: 842 }, totalPdfPages: data.totalPdfPages, slots: {} } }
+              : i
+          ))
+          setTimeout(() => setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } })), 8000)
+          break
+        }
+
+        startPage = data.nextStartPage
       }
     } catch (e) {
       setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: e instanceof Error ? e.message : 'Error' } }))
