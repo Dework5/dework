@@ -91,11 +91,12 @@ export default function PDFReader({
   // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
-    const BOTTOM = 36, PAD_V = 20, PAD_H = 32
+    const BOTTOM = 36, PAD_V = 20, PAD_H = 24
     const { w, h } = pageDims.current
+    // Each PDF page is already a spread (landscape) — fit one page to the screen
     const s = Math.max(0.25, Math.min(
       (window.innerHeight - BOTTOM - PAD_V * 2) / h,
-      (window.innerWidth  - PAD_H * 2)          / (w * 2),  // two pages side by side
+      (window.innerWidth  - PAD_H * 2)          / w,
       3
     ))
     setScale(s); scaleRef.current = s
@@ -223,8 +224,8 @@ export default function PDFReader({
         size:               'fixed',
         drawShadow:         true,
         flippingTime:       700,
-        usePortrait:        false,   // two-page book spread
-        showCover:          true,    // cover shown as single page centered
+        usePortrait:        true,    // each PDF page = one spread (landscape), single-page flip
+        showCover:          true,
         useMouseEvents:     true,
         swipeDistance:      30,
         clickEventForward:  true,
@@ -284,9 +285,10 @@ export default function PDFReader({
   }
 
   // ── Derived ────────────────────────────────────────────────────────────
-  const estW     = Math.round(pageDims.current.w * scale) || 300
+  const estW     = Math.round(pageDims.current.w * scale) || 600
   const estH     = Math.round(pageDims.current.h * scale) || 424
-  const bookW    = estW * 2   // full book width (two pages side by side)
+  // Each PDF page IS a spread — container = one PDF page = one spread
+  const bookW    = estW
   const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
 
   const iconBtn: React.CSSProperties = {
