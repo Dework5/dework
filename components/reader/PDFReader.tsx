@@ -19,25 +19,25 @@ interface PDFReaderProps {
 
 const GOLD = '#C8961E'
 
-// Realistic horizontal wood-plank background (matches aflip reference)
+// Airy horizontal wood-plank background — very light, matches aflip reference
 const WOOD_BG: React.CSSProperties = {
-  backgroundColor: '#e6e3dc',
+  backgroundColor: '#edeae4',
   backgroundImage: `repeating-linear-gradient(180deg,
-    #f4f1ec  0px,
-    #f0ede8  8px,
-    #e9e6e0  9px,
-    #f0ede8 10px,
-    #ede9e4 19px,
-    #e6e3dd 20px,
-    #ede9e4 21px,
-    #eae7e1 30px,
-    #e3e0da 31px,
-    #eae7e1 32px,
-    #e8e4df 38px,
-    #a5a29c 39px,
-    #d2cfc8 40px,
-    #e4e1da 41px,
-    #f4f1ec 42px
+    #f8f6f2  0px,
+    #f6f4f0 10px,
+    #edebe7 11px,
+    #f6f4f0 12px,
+    #f4f2ee 23px,
+    #ebe9e5 24px,
+    #f4f2ee 25px,
+    #f2f0ec 36px,
+    #e9e7e3 37px,
+    #f2f0ec 38px,
+    #f0ede9 44px,
+    #a6a39e 45px,
+    #cecbc4 46px,
+    #e4e1db 47px,
+    #f8f6f2 48px
   )`,
 }
 
@@ -85,6 +85,7 @@ export default function PDFReader({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [ctrlVisible,  setCtrlVisible]  = useState(true)
   const [coverClosed,  setCoverClosed]  = useState(false)  // user hasn't opened the book yet
+  const [zoomOpen,     setZoomOpen]     = useState(false)  // reading-zoom overlay
 
   const scaleRef      = useRef(1)
   const pageDims      = useRef({ w: 595, h: 842 })   // from PDF page 1
@@ -100,13 +101,15 @@ export default function PDFReader({
   // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
-    const BOTTOM = 36, PAD_V = 48, PAD_H = 72
+    // PAD_V/H ensure visible breathing room around the book (wood visible).
+    // MAX_SCALE caps size on large monitors so the book never feels overwhelming.
+    const BOTTOM = 36, PAD_V = 64, PAD_H = 88, MAX_SCALE = 0.72
     const { w, h } = pageDims.current
     // w = one magazine page width (portrait). Fit two side by side.
     const s = Math.max(0.25, Math.min(
       (window.innerHeight - BOTTOM - PAD_V * 2) / h,
       (window.innerWidth  - PAD_H * 2)          / (w * 2),
-      3
+      MAX_SCALE
     ))
     setScale(s); scaleRef.current = s
   }, [])
@@ -342,6 +345,24 @@ export default function PDFReader({
     else        pageFlipRef.current.flipPrev()
   }
 
+  // ── Slot URL helper (used by zoom overlay) ────────────────────────────
+  const getSlotUrl = (slot: number): string | null => {
+    if (slot < 0) return null
+    let urlKey: string
+    if (isAllSpread.current) {
+      const p = Math.floor(slot / 2) + 1
+      urlKey = `${p}_${slot % 2 === 0 ? 'L' : 'R'}`
+    } else if (!isSpreadPDF.current) {
+      urlKey = String(slot + 1)
+    } else if (slot === 0) {
+      urlKey = '1'
+    } else {
+      const p = Math.floor((slot - 1) / 2) + 2
+      urlKey = `${p}_${(slot - 1) % 2 === 0 ? 'L' : 'R'}`
+    }
+    return pageUrls[urlKey] ?? null
+  }
+
   // ── Derived ────────────────────────────────────────────────────────────
   // estW = one magazine page width (= portrait PDF page 1 width × scale)
   // For spread PDFs: landscape pages render to 2×estW wide; we split them into L/R halves
@@ -395,8 +416,16 @@ export default function PDFReader({
           </Link>
         </div>
 
-        {/* Top-right: audio + fullscreen */}
+        {/* Top-right: zoom + audio + fullscreen */}
         <div style={{ position: 'absolute', top: 10, right: 14, zIndex: 30, display: 'flex', gap: 2, opacity: ctrlVisible ? 1 : 0, transition: 'opacity 0.5s', pointerEvents: ctrlVisible ? 'auto' : 'none' }}>
+          {/* Zoom / reading mode */}
+          {coverClosed && (
+            <button onClick={() => setZoomOpen(true)} style={iconBtn} title="Zoom para leer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          )}
           <button onClick={() => setAudioOn(a => !a)} style={{ ...iconBtn, color: audioOn ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.18)' }}>
             {audioOn
               ? <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
@@ -498,7 +527,7 @@ export default function PDFReader({
         <div style={{
           padding: 3,
           background: 'linear-gradient(145deg, #E8C040 0%, #C8921A 35%, #A87010 60%, #D4A830 100%)',
-          boxShadow: '0 6px 36px rgba(0,0,0,0.22), 0 2px 10px rgba(0,0,0,0.14)',
+          boxShadow: '0 12px 64px rgba(0,0,0,0.34), 0 4px 18px rgba(0,0,0,0.20), 0 1px 4px rgba(0,0,0,0.12)',
           // Hidden behind the cover overlay until the book opens
           visibility: (pdfReady && coverClosed) ? 'visible' : 'hidden',
           zIndex: 2,
@@ -573,6 +602,75 @@ export default function PDFReader({
         </div>
 
       </div>{/* end main viewport */}
+
+      {/* ── Reading-zoom overlay ─────────────────────────────────────────── */}
+      {zoomOpen && (() => {
+        // In two-page mode: left slot = currentPage-1, right slot = currentPage
+        const leftUrl  = getSlotUrl(currentPage - 1)
+        const rightUrl = getSlotUrl(currentPage)
+        return (
+          <div
+            style={{
+              position: 'fixed', inset: 0, zIndex: 200,
+              background: 'rgba(0,0,0,0.92)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              overflow: 'auto', cursor: 'zoom-out',
+              WebkitOverflowScrolling: 'touch',
+            }}
+            onClick={() => setZoomOpen(false)}
+          >
+            {/* Pages — side by side at max readable height */}
+            <div
+              style={{ display: 'flex', gap: 2, padding: '16px 8px', cursor: 'default' }}
+              onClick={e => e.stopPropagation()}
+            >
+              {leftUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={leftUrl} alt="Página izquierda"
+                  style={{ height: 'calc(100vh - 32px)', width: 'auto', display: 'block',
+                    boxShadow: '0 4px 32px rgba(0,0,0,0.6)' }} />
+              )}
+              {rightUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={rightUrl} alt="Página derecha"
+                  style={{ height: 'calc(100vh - 32px)', width: 'auto', display: 'block',
+                    boxShadow: '0 4px 32px rgba(0,0,0,0.6)' }} />
+              )}
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={() => setZoomOpen(false)}
+              style={{
+                position: 'fixed', top: 14, right: 16, zIndex: 201,
+                background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                borderRadius: '50%', width: 38, height: 38, cursor: 'pointer',
+                color: 'white', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+
+            {/* Prev / Next in zoom mode */}
+            <button
+              onClick={e => { e.stopPropagation(); pageFlipRef.current?.flipPrev() }}
+              style={{ position: 'fixed', left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 201,
+                background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 6, cursor: 'pointer',
+                color: 'white', padding: '12px 8px', display: 'flex', alignItems: 'center' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+              </svg>
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); pageFlipRef.current?.flipNext() }}
+              style={{ position: 'fixed', right: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 201,
+                background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 6, cursor: 'pointer',
+                color: 'white', padding: '12px 8px', display: 'flex', alignItems: 'center' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+              </svg>
+            </button>
+          </div>
+        )
+      })()}
 
       {/* ── Bottom: progress bar + page counter ── */}
       <div style={{ flexShrink: 0 }}>
