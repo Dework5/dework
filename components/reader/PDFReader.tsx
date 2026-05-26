@@ -82,6 +82,7 @@ export default function PDFReader({
   const scaleRef      = useRef(1)
   const pageDims      = useRef({ w: 595, h: 842 })   // from PDF page 1
   const isSpreadPDF   = useRef(false)                  // true = each PDF page = landscape spread (2 mag pages)
+  const isAllSpread   = useRef(false)                  // true = even page 1 is landscape (all pages are spreads)
   const renderingSet  = useRef(new Set<number>())
   const pageFlipRef   = useRef<any>(null)
   const containerRef  = useRef<HTMLDivElement>(null)
@@ -152,6 +153,8 @@ export default function PDFReader({
   // ── Load PDF ───────────────────────────────────────────────────────────
   useEffect(() => {
     setIsLoading(true); setError(null); setLoadSlow(false); setPdfReady(false)
+    isSpreadPDF.current = false   // reset for incoming PDF
+    isAllSpread.current = false
     const slow = setTimeout(() => setLoadSlow(true), 12000)
     const task = pdfjsLib.getDocument({
       url: pdfUrl,
@@ -163,16 +166,27 @@ export default function PDFReader({
       clearTimeout(slow)
       setPdf(doc); setNumPages(doc.numPages)
 
-      // Read page 1 dimensions (portrait cover = 1 magazine page width)
-      const p1 = await doc.getPage(1)
+      // ── Detect spread format ──────────────────────────────────────────────
+      // Three possible PDF shapes:
+      //   A) Portrait cover (p1) + landscape spreads (p2+) — most common
+      //   B) All-landscape (every page is a spread, including p1)
+      //   C) All-portrait (no spreads)
+      const p1  = await doc.getPage(1)
       const vp1 = p1.getViewport({ scale: 1 })
-      pageDims.current = { w: vp1.width, h: vp1.height }
 
-      // Detect if pages 2+ are landscape spreads (2 magazine pages per PDF page)
-      if (doc.numPages >= 2) {
-        const p2 = await doc.getPage(2)
-        const vp2 = p2.getViewport({ scale: 1 })
-        isSpreadPDF.current = vp2.width > vp2.height * 1.1
+      if (vp1.width > vp1.height * 1.1) {
+        // (B) All-landscape: page 1 is itself a spread → one mag page = half width
+        pageDims.current    = { w: vp1.width / 2, h: vp1.height }
+        isSpreadPDF.current = true
+        isAllSpread.current = true
+      } else {
+        // Portrait page 1 — check page 2 for spread detection
+        pageDims.current = { w: vp1.width, h: vp1.height }
+        if (doc.numPages >= 2) {
+          const p2  = await doc.getPage(2)
+          const vp2 = p2.getViewport({ scale: 1 })
+          isSpreadPDF.current = vp2.width > vp2.height * 1.1  // (A)
+        }
       }
 
       calcScale()
@@ -303,11 +317,14 @@ export default function PDFReader({
   const bookW    = estW * 2   // open book = two magazine pages side by side
 
   // Total page-flip slots:
-  // Portrait PDF: 1 slot per page
-  // Spread PDF:   slot 0 = portrait cover (PDF page 1) + 2 slots per landscape page (PDF pages 2+)
-  const totalSlots = (numPages > 0 && isSpreadPDF.current)
-    ? 1 + (numPages - 1) * 2
-    : numPages
+  //   All-portrait PDF:       1 slot per PDF page
+  //   Mixed (portrait cover): slot 0 = cover  +  2 slots × (numPages-1) landscape pages
+  //   All-landscape PDF:      2 slots × numPages
+  const totalSlots = !isSpreadPDF.current
+    ? numPages
+    : isAllSpread.current
+      ? numPages * 2
+      : 1 + (numPages - 1) * 2
   const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
 
   const iconBtn: React.CSSProperties = {
@@ -438,31 +455,46 @@ export default function PDFReader({
           >
             {Array.from({ length: totalSlots }, (_, i) => {
               /*
-                Slot layout for spread PDFs (each PDF page = landscape with 2 magazine pages):
+                Slot layout — three cases:
+
+                (C) All-portrait (isSpreadPDF=false):
+                  slot i → PDF page i+1
+
+                (A) Mixed — portrait cover + landscape spreads (isSpreadPDF, !isAllSpread):
                   slot 0         → PDF page 1 (portrait cover), full width estW
                   slot 1         → LEFT  half of PDF page 2 (landscape, canvas = 2×estW)
                   slot 2         → RIGHT half of PDF page 2
-                  slot 3         → LEFT  half of PDF page 3
-                  slot 4         → RIGHT half of PDF page 3
-                  ...
+                  slot 3         → LEFT  half of PDF page 3  …
 
-                For portrait PDFs: slot i → PDF page i+1, full width estW.
+                (B) All-landscape (isAllSpread):
+                  slot 0         → LEFT  half of PDF page 1
+                  slot 1         → RIGHT half of PDF page 1
+                  slot 2         → LEFT  half of PDF page 2  …
 
-                Each slot is estW × estH. For landscape halves, the full-width image
-                (2×estW) is shifted left (left:0 or left:-estW) and clipped by overflow:hidden.
+                Each slot is estW × estH with overflow:hidden.
+                Landscape halves use position:absolute + left offset to clip the right half.
               */
               let pdfPage: number
               let isRightHalf = false
               let imgW = estW  // default: portrait page, natural width
 
-              if (i === 0) {
-                pdfPage = 1  // portrait cover
+              if (isAllSpread.current) {
+                // (B) All-landscape
+                const k = Math.floor(i / 2)
+                pdfPage     = k + 1
+                isRightHalf = i % 2 === 1
+                imgW        = estW * 2
+              } else if (i === 0) {
+                // (A/C) Cover is always PDF page 1 (portrait)
+                pdfPage = 1
               } else if (isSpreadPDF.current) {
-                const k = Math.floor((i - 1) / 2)  // 0-based index into pages 2, 3, ...
-                pdfPage = k + 2
+                // (A) Mixed — pages 2+ are landscape spreads
+                const k = Math.floor((i - 1) / 2)
+                pdfPage     = k + 2
                 isRightHalf = (i - 1) % 2 === 1
-                imgW = estW * 2  // landscape page = 2× magazine page width
+                imgW        = estW * 2
               } else {
+                // (C) All-portrait
                 pdfPage = i + 1
               }
 
