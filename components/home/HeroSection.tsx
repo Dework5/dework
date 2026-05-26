@@ -10,7 +10,10 @@ export function HeroSection({ issue }: { issue: any }) {
   const coverUrl = issue?.cover_url || null
 
   return (
-    <section className="relative min-h-screen flex flex-col bg-dw-black overflow-hidden">
+    <section
+      className="relative flex flex-col justify-center md:justify-start bg-dw-black overflow-hidden"
+      style={{ minHeight: '100svh' }}
+    >
 
       {/* Ambient radial background */}
       <div className="absolute inset-0 pointer-events-none"
@@ -24,11 +27,11 @@ export function HeroSection({ issue }: { issue: any }) {
         </span>
       </div>
 
-      {/* Spacer */}
-      <div className="flex-1 min-h-[2rem] md:min-h-[11rem]" aria-hidden />
+      {/* Desktop spacer — pushes content to bottom on large screens */}
+      <div className="hidden md:block md:flex-1 md:min-h-[11rem]" aria-hidden />
 
       {/* Main content */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pb-10 md:pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pt-24 pb-12 md:pt-0 md:pb-20">
 
         <div className="grid md:grid-cols-[1fr_220px] gap-12 items-end">
 

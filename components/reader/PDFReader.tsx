@@ -94,6 +94,7 @@ export default function PDFReader({
   const [isDraggingZoom, setIsDraggingZoom] = useState(false)
   const zoomDragRef  = useRef({ on: false, sx: 0, sy: 0, px: 0, py: 0, moved: false })
   const zoomPinchRef = useRef(0)
+  const [isMobile,     setIsMobile]     = useState(false)  // < 768px viewport
 
   const scaleRef      = useRef(1)
   const pageDims      = useRef({ w: 595, h: 842 })   // from PDF page 1
@@ -122,20 +123,38 @@ export default function PDFReader({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preRendered])
 
+  // ── Detect mobile ─────────────────────────────────────────────────────
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
     if (typeof window === 'undefined') return
-    // PAD_V/H ensure visible breathing room around the book (wood visible).
-    // MAX_SCALE caps size on large monitors so the book never feels overwhelming.
-    const BOTTOM = 36, PAD_V = 64, PAD_H = 88, MAX_SCALE = 0.72
     const { w, h } = pageDims.current
-    // w = one magazine page width (portrait). Fit two side by side.
-    const s = Math.max(0.25, Math.min(
-      (window.innerHeight - BOTTOM - PAD_V * 2) / h,
-      (window.innerWidth  - PAD_H * 2)          / (w * 2),
-      MAX_SCALE
-    ))
-    setScale(s); scaleRef.current = s
+    if (window.innerWidth < 768) {
+      // Mobile: fit a single page to screen (leave room for top/bottom bars)
+      const PAD_TOP = 52, PAD_BOT = 72
+      const s = Math.min(
+        (window.innerWidth  - 12) / w,
+        (window.innerHeight - PAD_TOP - PAD_BOT) / h
+      )
+      setScale(Math.max(0.25, s)); scaleRef.current = Math.max(0.25, s)
+    } else {
+      // Desktop: PAD_V/H ensure visible breathing room around the book (wood visible).
+      // MAX_SCALE caps size on large monitors so the book never feels overwhelming.
+      const BOTTOM = 36, PAD_V = 64, PAD_H = 88, MAX_SCALE = 0.72
+      // w = one magazine page width (portrait). Fit two side by side.
+      const s = Math.max(0.25, Math.min(
+        (window.innerHeight - BOTTOM - PAD_V * 2) / h,
+        (window.innerWidth  - PAD_H * 2)          / (w * 2),
+        MAX_SCALE
+      ))
+      setScale(s); scaleRef.current = s
+    }
   }, [])
 
   useEffect(() => {
@@ -320,6 +339,7 @@ export default function PDFReader({
   useEffect(() => {
     if (!containerRef.current || !pdfReady || flipReady.current) return
     if (numPages === 0 || !pageUrls[1]) return
+    if (isMobile) return   // mobile uses custom single-page carousel
 
     const estW = Math.round(pageDims.current.w * scaleRef.current)
     const estH = Math.round(pageDims.current.h * scaleRef.current)
@@ -372,7 +392,7 @@ export default function PDFReader({
       flipReady.current   = false
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfReady, numPages])   // pdfReady fires when page 1 finishes → URLs are in state
+  }, [pdfReady, numPages, isMobile])   // pdfReady fires when page 1 finishes → URLs are in state
 
   // ── Keyboard navigation ────────────────────────────────────────────────
   useEffect(() => {
@@ -390,9 +410,15 @@ export default function PDFReader({
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
   const onTouchEnd   = (e: React.TouchEvent) => {
     const dx = touchStartX.current - e.changedTouches[0].clientX
-    if (Math.abs(dx) < 45 || !pageFlipRef.current) return
-    if (dx > 0) pageFlipRef.current.flipNext()
-    else        pageFlipRef.current.flipPrev()
+    if (Math.abs(dx) < 45) return
+    if (isMobile) {
+      if (dx > 0) { if (currentPage < totalSlots) { setCurrentPage(p => p + 1); if (audioOn) playPageSound() } }
+      else         { if (currentPage > 1)          { setCurrentPage(p => p - 1); if (audioOn) playPageSound() } }
+    } else {
+      if (!pageFlipRef.current) return
+      if (dx > 0) pageFlipRef.current.flipNext()
+      else        pageFlipRef.current.flipPrev()
+    }
   }
 
   // ── Slot URL helper (used by zoom overlay) ────────────────────────────
@@ -541,8 +567,49 @@ export default function PDFReader({
           </div>
         )}
 
-        {/* ── Side navigation arrows (show when book is open) ── */}
-        {coverClosed && (
+        {/* ── Mobile: single-page carousel (replaces PageFlip on small screens) ── */}
+        {isMobile && coverClosed && pdfReady && (() => {
+          const slotUrl = getSlotUrl(currentPage - 1)
+          return (
+            <div style={{ position: 'absolute', inset: 0, zIndex: 5,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              padding: '8px 4px' }}>
+              {/* Page image */}
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0 }}>
+                {slotUrl
+                  ? /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={slotUrl} alt={`Página ${currentPage}`}
+                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
+                        boxShadow: '0 6px 32px rgba(0,0,0,0.22)', border: '2px solid #D4A830' }} />
+                  : <div style={{ color: '#ccc', fontSize: 13 }}>Cargando…</div>
+                }
+              </div>
+              {/* Tap-target navigation row */}
+              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, paddingTop: 12 }}>
+                <button
+                  disabled={currentPage <= 1}
+                  onClick={() => { if (currentPage > 1) { setCurrentPage(p => p - 1); if (audioOn) playPageSound() } }}
+                  style={{ background: 'rgba(0,0,0,0.18)', border: 'none', borderRadius: 8, cursor: 'pointer',
+                    color: currentPage <= 1 ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.50)', padding: '10px 18px', display: 'flex', alignItems: 'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                </button>
+                <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', letterSpacing: '0.2em' }}>
+                  {currentPage} / {totalSlots}
+                </span>
+                <button
+                  disabled={currentPage >= totalSlots}
+                  onClick={() => { if (currentPage < totalSlots) { setCurrentPage(p => p + 1); if (audioOn) playPageSound() } }}
+                  style={{ background: 'rgba(0,0,0,0.18)', border: 'none', borderRadius: 8, cursor: 'pointer',
+                    color: currentPage >= totalSlots ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.50)', padding: '10px 18px', display: 'flex', alignItems: 'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                </button>
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ── Side navigation arrows (show when book is open — desktop only) ── */}
+        {!isMobile && coverClosed && (
           <>
             <button
               onClick={() => pageFlipRef.current?.flipPrev()}
@@ -573,13 +640,14 @@ export default function PDFReader({
           </>
         )}
 
-        {/* ── Gold border + PageFlip container ── */}
+        {/* ── Gold border + PageFlip container (desktop only) ── */}
         <div style={{
           padding: 3,
           background: 'linear-gradient(145deg, #E8C040 0%, #C8921A 35%, #A87010 60%, #D4A830 100%)',
           boxShadow: '0 12px 64px rgba(0,0,0,0.34), 0 4px 18px rgba(0,0,0,0.20), 0 1px 4px rgba(0,0,0,0.12)',
-          // Hidden behind the cover overlay until the book opens
-          visibility: (pdfReady && coverClosed) ? 'visible' : 'hidden',
+          // Hidden behind cover overlay until book opens; completely gone on mobile
+          visibility: (!isMobile && pdfReady && coverClosed) ? 'visible' : 'hidden',
+          display: isMobile ? 'none' : undefined,
           zIndex: 2,
         }}>
           {/*
@@ -655,8 +723,9 @@ export default function PDFReader({
 
       {/* ── Reading-zoom overlay ─────────────────────────────────────────── */}
       {zoomOpen && (() => {
+        // Mobile zoom: single page centred. Desktop: left + right spread.
         const leftUrl  = getSlotUrl(currentPage - 1)
-        const rightUrl = getSlotUrl(currentPage)
+        const rightUrl = isMobile ? null : getSlotUrl(currentPage)
         const zBtnStyle: React.CSSProperties = {
           background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)',
           borderRadius: 8, cursor: 'pointer', color: 'white', width: 40, height: 40,
@@ -777,14 +846,24 @@ export default function PDFReader({
 
             {/* Prev / Next */}
             <button
-              onClick={e => { e.stopPropagation(); pageFlipRef.current?.flipPrev(); setZoomLevel(1); setZoomPan({ x: 0, y: 0 }) }}
+              onClick={e => {
+                e.stopPropagation()
+                if (isMobile) { if (currentPage > 1) { setCurrentPage(p => p - 1); if (audioOn) playPageSound() } }
+                else pageFlipRef.current?.flipPrev()
+                setZoomLevel(1); setZoomPan({ x: 0, y: 0 })
+              }}
               style={{ position: 'fixed', left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 201,
                 background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 6, cursor: 'pointer',
                 color: 'white', padding: '12px 8px', display: 'flex', alignItems: 'center' }}>
               <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
             </button>
             <button
-              onClick={e => { e.stopPropagation(); pageFlipRef.current?.flipNext(); setZoomLevel(1); setZoomPan({ x: 0, y: 0 }) }}
+              onClick={e => {
+                e.stopPropagation()
+                if (isMobile) { if (currentPage < totalSlots) { setCurrentPage(p => p + 1); if (audioOn) playPageSound() } }
+                else pageFlipRef.current?.flipNext()
+                setZoomLevel(1); setZoomPan({ x: 0, y: 0 })
+              }}
               style={{ position: 'fixed', right: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 201,
                 background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 6, cursor: 'pointer',
                 color: 'white', padding: '12px 8px', display: 'flex', alignItems: 'center' }}>
@@ -794,8 +873,9 @@ export default function PDFReader({
             {/* Hint */}
             {zoomLevel === 1 && (
               <div style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
-                color: 'rgba(255,255,255,0.45)', fontSize: 11, letterSpacing: '0.08em', pointerEvents: 'none' }}>
-                scroll para hacer zoom · arrastrá para mover
+                color: 'rgba(255,255,255,0.45)', fontSize: 11, letterSpacing: '0.08em', pointerEvents: 'none',
+                whiteSpace: 'nowrap' }}>
+                {isMobile ? 'pellizca para acercar · arrastrá para mover' : 'scroll para hacer zoom · arrastrá para mover'}
               </div>
             )}
           </div>
