@@ -500,9 +500,9 @@ export default function PDFReader({
         {/* Title — top-center, always visible */}
         {(publicationName || issueTitle) && (
           <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 30,
-            height: 44, display: 'flex', alignItems: 'center', pointerEvents: 'none',
-            maxWidth: 'calc(100% - 240px)', overflow: 'hidden' }}>
-            <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.82)', letterSpacing: '0.12em',
+            height: 52, display: 'flex', alignItems: 'center', pointerEvents: 'none',
+            maxWidth: 'calc(100% - 260px)', overflow: 'hidden' }}>
+            <span style={{ fontSize: 20, color: 'rgba(0,0,0,0.85)', letterSpacing: '0.08em',
               textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
               fontWeight: 700 }}>
               {publicationName}{publicationName && issueTitle ? ' · ' : ''}{issueTitle}
