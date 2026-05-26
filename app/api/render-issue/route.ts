@@ -17,8 +17,8 @@ import { join } from 'path'
 export const maxDuration = 60   // seconds (300 on Pro plan)
 export const dynamic    = 'force-dynamic'
 
-const RENDER_SCALE = 1.8        // higher = better quality, slower + more memory
-const JPEG_QUALITY = 88         // 0-100
+const RENDER_SCALE = 1.4        // 1.4 is sharp enough; 1.8 is too slow for Vercel Hobby (60s limit)
+const JPEG_QUALITY = 82         // 0-100
 
 export async function POST(req: NextRequest) {
   try {

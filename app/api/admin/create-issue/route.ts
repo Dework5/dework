@@ -61,5 +61,21 @@ export async function POST(req: NextRequest) {
     revalidatePath(`/revistas/${pub.slug}/${issueNumber}`)
   }
 
+  // ── Fire-and-forget: trigger server-side page pre-rendering automatically ──
+  // Runs in its own serverless invocation so it doesn't block this response.
+  try {
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT || 3000}`
+    fetch(`${baseUrl}/api/render-issue`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '',
+      },
+      body: JSON.stringify({ issueId: issue.id }),
+    }).catch(() => {}) // errors are silent — user can retry from admin
+  } catch { /* silent */ }
+
   return NextResponse.json({ ok: true, issue, url })
 }

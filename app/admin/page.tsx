@@ -452,8 +452,9 @@ export default function AdminPage() {
                             }
                           </button>
                           {renderResult[issue.id]?.msg && (
-                            <span className={`text-xs ${renderResult[issue.id].ok ? 'text-green-600' : 'text-red-500'}`}>
-                              {renderResult[issue.id].ok ? renderResult[issue.id].msg : '✗ Error'}
+                            <span className={`text-xs max-w-[180px] truncate ${renderResult[issue.id].ok ? 'text-green-600' : 'text-red-500'}`}
+                              title={renderResult[issue.id].msg}>
+                              {renderResult[issue.id].msg}
                             </span>
                           )}
                         </div>
