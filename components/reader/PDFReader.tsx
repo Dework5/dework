@@ -402,7 +402,7 @@ export default function PDFReader({
     : isAllSpread.current
       ? numPages * 2
       : 1 + (numPages - 1) * 2
-  const progress = numPages > 1 ? ((currentPage - 1) / (numPages - 1)) * 100 : 0
+  const progress = totalSlots > 1 ? ((currentPage - 1) / (totalSlots - 1)) * 100 : 0
 
   const iconBtn: React.CSSProperties = {
     background: 'none', border: 'none', cursor: 'pointer', padding: 6,
@@ -703,7 +703,7 @@ export default function PDFReader({
         <div style={{ height: 33, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(216,212,204,0.97)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
           {!isLoading && numPages > 0 && (
             <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', letterSpacing: '0.28em', textTransform: 'uppercase' }}>
-              {currentPage}&thinsp;/&thinsp;{numPages}
+              {currentPage}&thinsp;/&thinsp;{totalSlots}
             </span>
           )}
         </div>
