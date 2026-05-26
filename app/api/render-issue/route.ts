@@ -5,6 +5,10 @@ import { join } from 'path'
 
 /**
  * POST /api/render-issue
+ * Renders PDF pages server-side with @napi-rs/canvas + pdfjs-dist v3.
+ *
+ * pdfjs-dist v3 (CJS legacy build) has stable Node.js support and does not
+ * trigger the Path2D type-mismatch that v5 caused with @napi-rs/canvas.
  */
 
 export const maxDuration = 60
@@ -12,42 +16,6 @@ export const dynamic    = 'force-dynamic'
 
 const RENDER_SCALE = 1.5
 const JPEG_QUALITY = 93
-
-/**
- * Patches canvas context methods that pdfjs-dist may call with an incompatible
- * Path2D argument (one created by its own internal polyfill instead of
- * @napi-rs/canvas's native Path2D).
- *
- * When @napi-rs/canvas receives a non-native Path2D it throws:
- *   Error: Value is none of these types 'String', 'Path' (code: InvalidArg)
- *
- * pdfjs-dist builds the current path with beginPath/moveTo/lineTo before
- * creating the Path2D object, so falling back to the no-arg form (which uses
- * the current path) produces visually identical output.
- */
-function patchCtx(ctx: any) {
-  for (const method of ['fill', 'stroke', 'clip'] as const) {
-    const original = ctx[method].bind(ctx)
-    ctx[method] = (...args: any[]) => {
-      try {
-        return original(...args)
-      } catch (e: any) {
-        // Only swallow the specific Path2D type-mismatch error
-        if (e?.code === 'InvalidArg' || e?.message?.includes('none of these types')) {
-          // Retry: if first arg is a Path2D-like object, drop it and use
-          // the current path (which pdfjs already built with beginPath/moveTo)
-          if (args.length > 0 && typeof args[0] === 'object' && args[0] !== null) {
-            try { return original(...args.slice(1)) } catch {}
-            try { return original() } catch {}
-            return // silently skip if all retries fail
-          }
-        }
-        throw e
-      }
-    }
-  }
-  return ctx
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,19 +45,22 @@ export async function POST(req: NextRequest) {
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
-    // ── Load canvas + set globals before pdfjs-dist evaluates ─────────────
-    const napiCanvas = await import('@napi-rs/canvas')
-    const { createCanvas } = napiCanvas
-    // Always set — pdfjs-dist will use these if it checks globalThis at call time
-    ;(globalThis as any).Path2D   = napiCanvas.Path2D
-    ;(globalThis as any).DOMMatrix = napiCanvas.DOMMatrix
+    // ── @napi-rs/canvas: external native binary ───────────────────────────
+    const { createCanvas } = await import('@napi-rs/canvas')
 
-    // ── Load pdfjs (bundled by Turbopack) ─────────────────────────────────
-    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
-    const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')
+    // Set DOMMatrix globally so pdfjs-dist can use it for transforms
+    const napiCanvas = await import('@napi-rs/canvas')
+    if (napiCanvas.DOMMatrix && !(globalThis as any).DOMMatrix) {
+      ;(globalThis as any).DOMMatrix = napiCanvas.DOMMatrix
+    }
+
+    // ── pdfjs-dist v3 legacy CJS build ────────────────────────────────────
+    // v3 uses pdf.js (CJS), not pdf.mjs (ESM) — more compatible with Turbopack
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js')
+    const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.js')
     ;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `file://${workerPath}`
 
-    const doc = await pdfjsLib.getDocument({
+    const doc = await (pdfjsLib as any).getDocument({
       data: pdfBuffer,
       isEvalSupported: false,
       useSystemFonts: true,
@@ -125,12 +96,10 @@ export async function POST(req: NextRequest) {
       const page     = await doc.getPage(pageNum)
       const viewport = page.getViewport({ scale: RENDER_SCALE })
       const canvas   = createCanvas(Math.round(viewport.width), Math.round(viewport.height))
-
-      // Patch fill/stroke/clip to handle incompatible Path2D gracefully
-      const ctx = patchCtx(canvas.getContext('2d') as any)
+      const ctx      = canvas.getContext('2d')
 
       await page.render({
-        canvasContext: ctx,
+        canvasContext: ctx as unknown as CanvasRenderingContext2D,
         viewport,
       }).promise
 

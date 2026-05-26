@@ -53,7 +53,7 @@ Object.assign(nextConfig, {
     '/api/render-issue': [
       './node_modules/@napi-rs/canvas/**/*',
       './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
-      './node_modules/pdfjs-dist/legacy/build/**/*',
+      './node_modules/pdfjs-dist/**/*',
     ],
   },
 });
