@@ -14,6 +14,17 @@ import { join } from 'path'
  *   -- Create a public 'page-images' bucket (Storage → New bucket → Public)
  */
 
+// ── Bootstrap @napi-rs/canvas globals synchronously at module init ─────────
+// @napi-rs/canvas is in serverExternalPackages → real Node.js module → require() works.
+// pdfjs-dist/legacy captures globalThis.Path2D and DOMMatrix at *module evaluation time*.
+// Turbopack may evaluate pdfjs-dist eagerly (before the first await import() call inside
+// POST), so these globals MUST be set here at module level — not inside the request handler.
+try {
+  const napiCanvas = require('@napi-rs/canvas')
+  if (!globalThis.Path2D)   globalThis.Path2D   = napiCanvas.Path2D
+  if (!globalThis.DOMMatrix) globalThis.DOMMatrix = napiCanvas.DOMMatrix
+} catch { /* canvas binary not available — render will fail with a clear error */ }
+
 export const maxDuration = 60   // seconds (Hobby max; Pro supports 300)
 export const dynamic    = 'force-dynamic'
 
@@ -51,15 +62,10 @@ export async function POST(req: NextRequest) {
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
-    // ── Init canvas first — @napi-rs/canvas also sets up DOMMatrix globally ──
-    // pdfjs-dist/legacy requires DOMMatrix at init; @napi-rs/canvas provides it
-    const { createCanvas, Path2D: NapiPath2D } = await import('@napi-rs/canvas')
-
-    // Expose @napi-rs/canvas's Path2D globally so pdfjs-dist creates compatible
-    // Path2D instances (its internal ones cause InvalidArg when passed to canvas ctx)
-    if (typeof (globalThis as any).Path2D === 'undefined') {
-      ;(globalThis as any).Path2D = NapiPath2D
-    }
+    // ── Load @napi-rs/canvas (external, native binary) ────────────────────
+    // globalThis.Path2D + DOMMatrix already set at module init above.
+    // We re-import here just to get createCanvas for the render loop.
+    const { createCanvas } = await import('@napi-rs/canvas')
 
     // ── Init pdfjs (legacy build — Node.js compatible) ────────────────────
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
