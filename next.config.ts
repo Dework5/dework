@@ -14,14 +14,19 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  async redirects() {
+  // Rewrite: la URL del browser se queda en /san-diego-la-revistas
+  // pero Next.js sirve el contenido de /revistas/san-diego-la-revista/139
+  async rewrites() {
     return [
-      // Enlace enviado a clientes para la edición #139
       {
         source: '/san-diego-la-revistas',
         destination: '/revistas/san-diego-la-revista/139',
-        permanent: false,
       },
+    ]
+  },
+
+  async redirects() {
+    return [
       // URL amigable para San Diego La Revista → listado de ediciones
       {
         source: '/sandiego-revistas',
