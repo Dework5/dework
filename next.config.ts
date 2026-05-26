@@ -32,4 +32,17 @@ const nextConfig: NextConfig = {
   },
 };
 
+// outputFileTracingIncludes is valid at runtime but not in Next.js TS types.
+// It forces Vercel's file tracer to bundle the @napi-rs/canvas native binary
+// and pdfjs-dist worker inside the /api/render-issue serverless function.
+Object.assign(nextConfig, {
+  outputFileTracingIncludes: {
+    '/api/render-issue': [
+      './node_modules/@napi-rs/canvas/**/*',
+      './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
+      './node_modules/pdfjs-dist/build/**/*',
+    ],
+  },
+});
+
 export default nextConfig;
