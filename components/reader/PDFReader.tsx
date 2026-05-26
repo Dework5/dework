@@ -241,7 +241,8 @@ export default function PDFReader({
       canvas.width   = viewport.width
       canvas.height  = viewport.height
       const ctx      = canvas.getContext('2d')!
-      await page.render({ canvasContext: ctx, viewport, canvas }).promise
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await page.render({ canvasContext: ctx, viewport } as any).promise
 
       // Landscape pages (spreads) → split canvas into LEFT and RIGHT halves.
       // This avoids relying on CSS overflow:hidden which page-flip doesn't honour.

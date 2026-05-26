@@ -4,7 +4,11 @@ const nextConfig: NextConfig = {
   // @napi-rs/canvas: external (native Skia binary — must NOT be bundled)
   // pdfjs-dist: bundled by Turbopack (ESM .mjs files can't be loaded as
   //             external on Vercel Lambda — causes non-JSON 500 responses)
-  serverExternalPackages: ['@napi-rs/canvas'],
+  // @napi-rs/canvas: native Skia binary — must NOT be bundled
+  // pdfjs-dist v3: CJS build tries require("canvas") inside NodeCanvasFactory;
+  //   Turbopack can't resolve it. Mark as external so Node.js loads it at runtime
+  //   (the require("canvas") is lazy inside a method we never call).
+  serverExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
 
   images: {
     remotePatterns: [
