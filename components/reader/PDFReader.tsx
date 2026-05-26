@@ -497,15 +497,14 @@ export default function PDFReader({
           </Link>
         </div>
 
-        {/* Title — top-center */}
+        {/* Title — top-center, always visible */}
         {(publicationName || issueTitle) && (
           <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 30,
             height: 44, display: 'flex', alignItems: 'center', pointerEvents: 'none',
-            opacity: ctrlVisible ? 1 : 0, transition: 'opacity 0.5s',
-            maxWidth: 'calc(100% - 220px)', overflow: 'hidden' }}>
-            <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.55)', letterSpacing: '0.20em',
+            maxWidth: 'calc(100% - 240px)', overflow: 'hidden' }}>
+            <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.82)', letterSpacing: '0.12em',
               textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              fontWeight: 600 }}>
+              fontWeight: 700 }}>
               {publicationName}{publicationName && issueTitle ? ' · ' : ''}{issueTitle}
             </span>
           </div>
