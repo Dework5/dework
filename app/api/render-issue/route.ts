@@ -52,9 +52,9 @@ export async function POST(req: NextRequest) {
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
-    // ── Init pdfjs ─────────────────────────────────────────────────────────
-    const pdfjsLib = await import('pdfjs-dist')
-    const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/build/pdf.worker.min.mjs')
+    // ── Init pdfjs (legacy build — required for Node.js; avoids DOMMatrix/browser APIs) ──
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
+    const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')
     ;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `file://${workerPath}`
 
     // ── Load PDF document ──────────────────────────────────────────────────

@@ -45,7 +45,7 @@ Object.assign(nextConfig, {
   outputFileTracingIncludes: {
     '/api/render-issue': [
       './node_modules/canvas/**/*',
-      './node_modules/pdfjs-dist/build/**/*',
+      './node_modules/pdfjs-dist/legacy/build/**/*',
     ],
   },
 });
