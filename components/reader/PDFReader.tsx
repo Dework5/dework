@@ -419,15 +419,20 @@ export default function PDFReader({
               const n   = i + 1
               const url = pageUrls[n]
               return (
+                /*
+                  IMPORTANT: each slot must be exactly estW × estH — the single-page size
+                  passed to PageFlip options. If width is '100%' (= bookW = 2×estW),
+                  page-flip only shows the left half of each slot.
+                */
                 <div
                   key={n}
                   className="pf-slot"
-                  style={{ background: '#FEFDFB', width: '100%', height: '100%' }}
+                  style={{ background: '#FEFDFB', width: estW, height: estH, overflow: 'hidden', flexShrink: 0 }}
                 >
                   {url
                     ? /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={url} alt={`Página ${n}`} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'fill' }} />
-                    : <div style={{ width: '100%', height: '100%', background: '#FAFAF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={url} alt={`Página ${n}`} style={{ width: estW, height: estH, display: 'block' }} />
+                    : <div style={{ width: estW, height: estH, background: '#FAFAF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ color: '#ddd', fontSize: Math.round(estH * 0.12), fontStyle: 'italic' }}>{n}</span>
                       </div>
                   }
