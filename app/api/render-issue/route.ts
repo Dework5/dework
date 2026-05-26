@@ -52,6 +52,17 @@ export async function POST(req: NextRequest) {
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
+    // ── Polyfill browser globals pdfjs-dist needs in Node.js ──────────────────
+    // pdfjs-dist v5 legacy uses Path2D, ImageData, etc. at init time
+    if (typeof (globalThis as any).Path2D === 'undefined') {
+      (globalThis as any).Path2D = class Path2D {
+        constructor(_path?: string | Path2D) {}
+        addPath() {} closePath() {} moveTo() {} lineTo() {}
+        bezierCurveTo() {} quadraticCurveTo() {} arc() {}
+        arcTo() {} ellipse() {} rect() {}
+      }
+    }
+
     // ── Init pdfjs (legacy build — required for Node.js; avoids DOMMatrix/browser APIs) ──
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
     const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')

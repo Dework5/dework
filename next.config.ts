@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Keep @napi-rs/canvas and pdfjs-dist as external so their native binaries work in serverless
-  serverExternalPackages: ['canvas', 'pdfjs-dist'],
+  // canvas needs to be external (native .node binary)
+  // pdfjs-dist is bundled by Turbopack (NOT external) so its legacy polyfills
+  // run correctly inside the bundle context instead of raw Node.js require()
+  serverExternalPackages: ['canvas'],
 
   images: {
     remotePatterns: [
