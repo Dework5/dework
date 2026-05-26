@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import type { PreRenderedImages } from '@/lib/types'
 
 const PDFReader = dynamic(() => import('./PDFReader'), {
   ssr: false,
@@ -54,9 +55,10 @@ interface Props {
   downloadUrl?:     string
   publicationName?: string
   issueTitle?:      string
+  preRendered?:     PreRenderedImages | null
 }
 
-export function PDFReaderWrapper({ pdfUrl, issueId, totalPages, coverUrl, backUrl, downloadUrl, publicationName, issueTitle }: Props) {
+export function PDFReaderWrapper({ pdfUrl, issueId, totalPages, coverUrl, backUrl, downloadUrl, publicationName, issueTitle, preRendered }: Props) {
   return (
     <PDFReader
       pdfUrl={pdfUrl}
@@ -67,6 +69,7 @@ export function PDFReaderWrapper({ pdfUrl, issueId, totalPages, coverUrl, backUr
       downloadUrl={downloadUrl}
       publicationName={publicationName}
       issueTitle={issueTitle}
+      preRendered={preRendered}
     />
   )
 }

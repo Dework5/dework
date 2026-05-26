@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
 import * as pdfjsLib from 'pdfjs-dist'
+import type { PreRenderedImages } from '@/lib/types'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
@@ -15,6 +16,8 @@ interface PDFReaderProps {
   downloadUrl?:     string
   publicationName?: string
   issueTitle?:      string
+  /** When provided, skip browser-side PDF rendering and use pre-rendered images directly. */
+  preRendered?:     PreRenderedImages | null
 }
 
 const GOLD = '#C8961E'
@@ -64,7 +67,7 @@ function playPageSound() {
 
 export default function PDFReader({
   pdfUrl, issueId, totalPages, coverUrl,
-  backUrl, downloadUrl,
+  backUrl, downloadUrl, preRendered,
 }: PDFReaderProps) {
 
   const [pdf,         setPdf]         = useState<pdfjsLib.PDFDocumentProxy | null>(null)
@@ -97,6 +100,22 @@ export default function PDFReader({
   const idleTimer     = useRef<ReturnType<typeof setTimeout> | null>(null)
   const touchStartX   = useRef(0)
   const flipReady     = useRef(false)
+
+  // ── Pre-rendered mode: skip PDF loading, use stored images directly ───
+  useEffect(() => {
+    if (!preRendered) return
+    // Hydrate refs from the stored data (synchronous — must happen before calcScale)
+    isSpreadPDF.current = preRendered.isSpreadPDF
+    isAllSpread.current = preRendered.isAllSpread
+    pageDims.current    = preRendered.pageDimensions
+    // Batch all state updates
+    setPageUrls(preRendered.slots)
+    setNumPages(preRendered.totalPdfPages)
+    setIsLoading(false)
+    setPdfReady(true)
+  // calcScale intentionally excluded: runs via the resize listener effect below
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preRendered])
 
   // ── Scale ──────────────────────────────────────────────────────────────
   const calcScale = useCallback(() => {
@@ -162,6 +181,7 @@ export default function PDFReader({
 
   // ── Load PDF ───────────────────────────────────────────────────────────
   useEffect(() => {
+    if (preRendered) return   // ← skip: images already loaded from DB
     setIsLoading(true); setError(null); setLoadSlow(false); setPdfReady(false)
     setPageUrls({})               // clear old PDF's images
     isSpreadPDF.current = false   // reset for incoming PDF
@@ -207,7 +227,8 @@ export default function PDFReader({
       clearTimeout(slow); setError('No se pudo cargar el PDF.'); setIsLoading(false)
     })
     return () => { clearTimeout(slow); task.destroy().catch(() => {}) }
-  }, [pdfUrl, calcScale])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfUrl, calcScale, preRendered])
 
   // ── Render a single PDF page → JPEG data URL ──────────────────────────
   const renderPage = useCallback(async (pageNum: number) => {
@@ -254,6 +275,7 @@ export default function PDFReader({
 
   // ── Render pages: priority order (cover → first 2 spreads → rest) ──────
   useEffect(() => {
+    if (preRendered) return   // ← skip: all images already in pageUrls
     if (!pdf || numPages === 0) return
     // Priority: first 6 pages (cover + 2 double-page spreads)
     const priority = Math.min(6, numPages)
@@ -264,7 +286,7 @@ export default function PDFReader({
         for (let i = priority + 1; i <= numPages; i++) renderPage(i)
       }, 600)
     }
-  }, [pdf, numPages, renderPage])
+  }, [pdf, numPages, renderPage, preRendered])
 
   // ── Initialise PageFlip once container + first page are ready ─────────
   useEffect(() => {

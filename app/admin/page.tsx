@@ -36,7 +36,10 @@ export default function AdminPage() {
   const [editNumber, setEditNumber] = useState('')
   const [editPublished, setEditPublished] = useState(true)
   const [editSaving, setEditSaving] = useState(false)
-  const [deleting, setDeleting] = useState<Record<string, boolean>>({})
+  const [deleting,     setDeleting]     = useState<Record<string, boolean>>({})
+  const [rendering,    setRendering]    = useState<Record<string, boolean>>({})
+  const [renderResult, setRenderResult] = useState<Record<string, { ok: boolean; msg: string }>>({})
+  const [showMigrationSQL, setShowMigrationSQL] = useState(false)
 
   useEffect(() => {
     const auth = sessionStorage.getItem('adminAuth')
@@ -168,6 +171,40 @@ export default function AdminPage() {
       setIssues(prev => prev.filter(i => i.id !== issue.id))
     } catch (e) { alert(e instanceof Error ? e.message : 'Error') }
     setDeleting(prev => ({ ...prev, [issue.id]: false }))
+  }
+
+  // ── Server-side pre-render issue pages ────────────────────────────
+  const renderIssue = async (issue: Issue) => {
+    setRendering(prev => ({ ...prev, [issue.id]: true }))
+    setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } }))
+    try {
+      const pw  = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+      const res = await fetch('/api/render-issue', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: pw },
+        body:    JSON.stringify({ issueId: issue.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        const msg = data.error || 'Error desconocido'
+        // If it's a DB column error, show the migration SQL helper
+        if (msg.includes('ALTER TABLE')) setShowMigrationSQL(true)
+        setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg } }))
+      } else {
+        setRenderResult(prev => ({
+          ...prev,
+          [issue.id]: { ok: true, msg: `✓ ${data.slots} páginas renderizadas` },
+        }))
+        // Mark issue as having pre-rendered images in local state
+        setIssues(prev => prev.map(i =>
+          i.id === issue.id ? { ...i, page_images_json: { isSpreadPDF: data.isSpreadPDF, isAllSpread: data.isAllSpread, pageDimensions: { w: 595, h: 842 }, totalPdfPages: 0, slots: {} } } : i
+        ))
+        setTimeout(() => setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } })), 8000)
+      }
+    } catch (e) {
+      setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: e instanceof Error ? e.message : 'Error' } }))
+    }
+    setRendering(prev => ({ ...prev, [issue.id]: false }))
   }
 
   // ── Sync publication descriptions ─────────────────────────────────
@@ -369,13 +406,14 @@ export default function AdminPage() {
                     <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">#</th>
                     <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Título</th>
                     <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Estado</th>
+                    <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Páginas</th>
                     <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {issues.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-[#888] text-sm">
+                      <td colSpan={6} className="px-6 py-12 text-center text-[#888] text-sm">
                         No hay ediciones todavía. Subí la primera desde "Subir edición".
                       </td>
                     </tr>
@@ -392,6 +430,35 @@ export default function AdminPage() {
                           {issue.is_published ? 'Publicada' : 'Borrador'}
                         </span>
                       </td>
+
+                      {/* ── Render cell ── */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => renderIssue(issue)}
+                            disabled={rendering[issue.id]}
+                            title={issue.page_images_json ? 'Re-renderizar páginas' : 'Renderizar páginas (pre-rendering)'}
+                            className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50 ${
+                              issue.page_images_json
+                                ? 'border-blue-200 text-blue-600 hover:bg-blue-50'
+                                : 'border-[#E5E5E5] text-[#555] hover:border-[#080808]'
+                            }`}
+                          >
+                            {rendering[issue.id]
+                              ? <><span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />Procesando…</>
+                              : issue.page_images_json
+                                ? <>↺ Re-render</>
+                                : <>⚡ Renderizar</>
+                            }
+                          </button>
+                          {renderResult[issue.id]?.msg && (
+                            <span className={`text-xs ${renderResult[issue.id].ok ? 'text-green-600' : 'text-red-500'}`}>
+                              {renderResult[issue.id].ok ? renderResult[issue.id].msg : '✗ Error'}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <a href={`/revistas/${(publications.find(p => p.id === issue.publication_id))?.slug || ''}/${issue.issue_number}`}
@@ -456,6 +523,41 @@ export default function AdminPage() {
           </div>
         )}
 
+
+      {/* ── Migration SQL helper modal ── */}
+      {showMigrationSQL && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold text-[#080808]">Configuración requerida (una vez)</h3>
+              <button onClick={() => setShowMigrationSQL(false)} className="text-[#AAA] hover:text-[#080808] text-lg leading-none">✕</button>
+            </div>
+            <p className="text-sm text-[#555]">
+              Ejecutá este SQL en el <strong>SQL Editor</strong> de tu proyecto Supabase para agregar la columna de imágenes pre-renderizadas:
+            </p>
+            <pre className="bg-[#F5F5F5] rounded-lg p-4 text-xs font-mono text-[#333] select-all overflow-x-auto">
+              {`ALTER TABLE issues\n  ADD COLUMN IF NOT EXISTS page_images_json jsonb;`}
+            </pre>
+            <p className="text-xs text-[#888]">
+              También creá un bucket público llamado <strong>page-images</strong> en Storage → New bucket.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText('ALTER TABLE issues\n  ADD COLUMN IF NOT EXISTS page_images_json jsonb;')
+                }}
+                className="flex-1 bg-[#080808] text-white py-2 rounded-lg text-sm hover:bg-[#333] transition-colors"
+              >
+                Copiar SQL
+              </button>
+              <button onClick={() => setShowMigrationSQL(false)}
+                className="px-4 border border-[#E5E5E5] rounded-lg text-sm text-[#444] hover:bg-[#F5F5F5]">
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Edit modal ── */}
       {editIssue && (

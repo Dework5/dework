@@ -67,6 +67,7 @@ export default async function ReaderPage({ params }: Props) {
       downloadUrl={issue.pdf_url || undefined}
       publicationName={publication.short_name || publication.name}
       issueTitle={issue.title || `#${issue.issue_number}`}
+      preRendered={issue.page_images_json ?? null}
     />
   )
 }
