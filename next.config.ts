@@ -2,10 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Keep @napi-rs/canvas and pdfjs-dist as external so their native binaries work in serverless
-  // canvas needs to be external (native .node binary)
-  // pdfjs-dist is bundled by Turbopack (NOT external) so its legacy polyfills
-  // run correctly inside the bundle context instead of raw Node.js require()
-  serverExternalPackages: ['canvas'],
+  // @napi-rs/canvas: external (native Skia binary) AND provides DOMMatrix
+  // that pdfjs-dist/legacy needs internally at init time
+  // pdfjs-dist: bundled by Turbopack (NOT external) — avoids Node.js globals issue
+  serverExternalPackages: ['@napi-rs/canvas'],
 
   images: {
     remotePatterns: [
@@ -52,7 +52,8 @@ const nextConfig: NextConfig = {
 Object.assign(nextConfig, {
   outputFileTracingIncludes: {
     '/api/render-issue': [
-      './node_modules/canvas/**/*',
+      './node_modules/@napi-rs/canvas/**/*',
+      './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
       './node_modules/pdfjs-dist/legacy/build/**/*',
     ],
   },

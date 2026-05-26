@@ -52,18 +52,11 @@ export async function POST(req: NextRequest) {
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
-    // ── Polyfill browser globals pdfjs-dist needs in Node.js ──────────────────
-    // pdfjs-dist v5 legacy uses Path2D, ImageData, etc. at init time
-    if (typeof (globalThis as any).Path2D === 'undefined') {
-      (globalThis as any).Path2D = class Path2D {
-        constructor(_path?: string | Path2D) {}
-        addPath() {} closePath() {} moveTo() {} lineTo() {}
-        bezierCurveTo() {} quadraticCurveTo() {} arc() {}
-        arcTo() {} ellipse() {} rect() {}
-      }
-    }
+    // ── Init canvas first — @napi-rs/canvas also sets up DOMMatrix globally ──
+    // pdfjs-dist/legacy requires DOMMatrix at init; @napi-rs/canvas provides it
+    const { createCanvas } = await import('@napi-rs/canvas')
 
-    // ── Init pdfjs (legacy build — required for Node.js; avoids DOMMatrix/browser APIs) ──
+    // ── Init pdfjs (legacy build — Node.js compatible) ────────────────────
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
     const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')
     ;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `file://${workerPath}`
@@ -100,15 +93,7 @@ export async function POST(req: NextRequest) {
 
     // ── Phase 1: Render all pages sequentially (CPU-bound) ─────────────────
     // Collect { key, buffer, path } for every slot. Upload happens after.
-    const { createCanvas } = await import('canvas')
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-
-    // Helper: async JPEG buffer with quality (canvas npm uses 0-1 range)
-    const toJpeg = (c: any): Promise<Buffer> =>
-      new Promise((res, rej) =>
-        c.toBuffer((err: Error | null, buf: Buffer) => err ? rej(err) : res(buf),
-          'image/jpeg', { quality: JPEG_QUALITY / 100 })
-      )
 
     type Slot = { key: string; buffer: Buffer; path: string }
     const pending: Slot[] = []
@@ -135,11 +120,11 @@ export async function POST(req: NextRequest) {
           const sx      = side === 'L' ? 0 : halfW
           halfCtx.drawImage(canvas as any, sx, 0, halfW, canvas.height, 0, 0, halfW, canvas.height)
           const key = `${pageNum}_${side}`
-          pending.push({ key, buffer: await toJpeg(half), path: `${issueId}/${key}.jpg` })
+          pending.push({ key, buffer: half.toBuffer('image/jpeg', JPEG_QUALITY), path: `${issueId}/${key}.jpg` })
         }
       } else {
         const key = String(pageNum)
-        pending.push({ key, buffer: await toJpeg(canvas), path: `${issueId}/${key}.jpg` })
+        pending.push({ key, buffer: canvas.toBuffer('image/jpeg', JPEG_QUALITY), path: `${issueId}/${key}.jpg` })
       }
     }
 
