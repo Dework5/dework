@@ -1,11 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Keep @napi-rs/canvas and pdfjs-dist as external so their native binaries work in serverless
-  // @napi-rs/canvas: external (native Skia binary) AND provides DOMMatrix
-  // that pdfjs-dist/legacy needs internally at init time
-  // pdfjs-dist: bundled by Turbopack (NOT external) — avoids Node.js globals issue
-  serverExternalPackages: ['@napi-rs/canvas'],
+  // Both packages are external so Turbopack never bundles them.
+  // External packages are lazily loaded on first import() call — this means
+  // we control the init order inside the POST handler:
+  //   1. import('@napi-rs/canvas') → sets globalThis.Path2D + DOMMatrix
+  //   2. import('pdfjs-dist/...')  → pdfjs module init runs NOW, sees our globals ✓
+  // If pdfjs-dist were bundled, Turbopack could evaluate it at Lambda cold-start
+  // BEFORE our import() fires, so it would capture undefined Path2D.
+  serverExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
 
   images: {
     remotePatterns: [

@@ -14,21 +14,10 @@ import { join } from 'path'
  *   -- Create a public 'page-images' bucket (Storage → New bucket → Public)
  */
 
-// ── Bootstrap @napi-rs/canvas globals synchronously at module init ─────────
-// @napi-rs/canvas is in serverExternalPackages → real Node.js module → require() works.
-// pdfjs-dist/legacy captures globalThis.Path2D and DOMMatrix at *module evaluation time*.
-// Turbopack may evaluate pdfjs-dist eagerly (before the first await import() call inside
-// POST), so these globals MUST be set here at module level — not inside the request handler.
-try {
-  const napiCanvas = require('@napi-rs/canvas')
-  if (!globalThis.Path2D)   globalThis.Path2D   = napiCanvas.Path2D
-  if (!globalThis.DOMMatrix) globalThis.DOMMatrix = napiCanvas.DOMMatrix
-} catch { /* canvas binary not available — render will fail with a clear error */ }
-
 export const maxDuration = 60   // seconds (Hobby max; Pro supports 300)
 export const dynamic    = 'force-dynamic'
 
-const RENDER_SCALE = 1.5   // 1.5× = ~892px wide for A4 — noticeably sharper for reading
+const RENDER_SCALE = 1.5   // 1.5× = ~892px wide for A4 — noticeably sharper
 const JPEG_QUALITY = 93    // 0-100
 
 export async function POST(req: NextRequest) {
@@ -62,12 +51,20 @@ export async function POST(req: NextRequest) {
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
-    // ── Load @napi-rs/canvas (external, native binary) ────────────────────
-    // globalThis.Path2D + DOMMatrix already set at module init above.
-    // We re-import here just to get createCanvas for the render loop.
-    const { createCanvas } = await import('@napi-rs/canvas')
+    // ── Step 1: Load @napi-rs/canvas and register globals ─────────────────
+    // MUST happen before pdfjs-dist is imported. Since both packages are in
+    // serverExternalPackages, neither is bundled — each loads on first import().
+    // Importing canvas first ensures globalThis.Path2D and DOMMatrix are set
+    // before pdfjs-dist's module initialisation code runs.
+    const napiCanvas = await import('@napi-rs/canvas')
+    const { createCanvas } = napiCanvas
 
-    // ── Init pdfjs (legacy build — Node.js compatible) ────────────────────
+    // Always overwrite — never guard with typeof. On warm Lambdas the module
+    // cache is reused but globals must still be correct.
+    ;(globalThis as any).Path2D   = napiCanvas.Path2D
+    ;(globalThis as any).DOMMatrix = napiCanvas.DOMMatrix
+
+    // ── Step 2: Load pdfjs-dist (now that globals are ready) ──────────────
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
     const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')
     ;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `file://${workerPath}`
@@ -103,7 +100,6 @@ export async function POST(req: NextRequest) {
     await db.storage.createBucket('page-images', { public: true }).catch(() => {})
 
     // ── Phase 1: Render all pages sequentially (CPU-bound) ─────────────────
-    // Collect { key, buffer, path } for every slot. Upload happens after.
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 
     type Slot = { key: string; buffer: Buffer; path: string }
