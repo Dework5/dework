@@ -22,26 +22,10 @@ interface PDFReaderProps {
 
 const GOLD = '#C8961E'
 
-// Airy horizontal wood-plank background — very light, matches aflip reference
-const WOOD_BG: React.CSSProperties = {
-  backgroundColor: '#edeae4',
-  backgroundImage: `repeating-linear-gradient(180deg,
-    #f8f6f2  0px,
-    #f6f4f0 10px,
-    #edebe7 11px,
-    #f6f4f0 12px,
-    #f4f2ee 23px,
-    #ebe9e5 24px,
-    #f4f2ee 25px,
-    #f2f0ec 36px,
-    #e9e7e3 37px,
-    #f2f0ec 38px,
-    #f0ede9 44px,
-    #a6a39e 45px,
-    #cecbc4 46px,
-    #e4e1db 47px,
-    #f8f6f2 48px
-  )`,
+// Clean dark reading environment — editorial, consistent with the site theme
+const READER_BG: React.CSSProperties = {
+  backgroundColor: '#111111',
+  backgroundImage: 'radial-gradient(ellipse 90% 80% at 50% 48%, #181614 0%, #0c0b0a 100%)',
 }
 
 // Play a subtle page-turn sound
@@ -67,7 +51,7 @@ function playPageSound() {
 
 export default function PDFReader({
   pdfUrl, issueId, totalPages, coverUrl,
-  backUrl, downloadUrl, preRendered,
+  backUrl, downloadUrl, publicationName, issueTitle, preRendered,
 }: PDFReaderProps) {
 
   const [pdf,         setPdf]         = useState<pdfjsLib.PDFDocumentProxy | null>(null)
@@ -481,15 +465,15 @@ export default function PDFReader({
 
   const iconBtn: React.CSSProperties = {
     background: 'none', border: 'none', cursor: 'pointer', padding: 6,
-    color: 'rgba(0,0,0,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    color: 'rgba(255,255,255,0.50)', display: 'flex', alignItems: 'center', justifyContent: 'center',
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center" style={{ height: '100vh', ...WOOD_BG }}>
+      <div className="flex items-center justify-center" style={{ height: '100vh', ...READER_BG }}>
         <div className="text-center space-y-4 px-6">
-          <p className="text-sm" style={{ color: 'rgba(0,0,0,0.45)' }}>{error}</p>
-          <button onClick={() => window.location.reload()} className="text-[11px] tracking-widest uppercase border-b" style={{ color: 'rgba(0,0,0,0.4)', borderColor: 'rgba(0,0,0,0.2)' }}>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>{error}</p>
+          <button onClick={() => window.location.reload()} className="text-[11px] tracking-widest uppercase border-b" style={{ color: 'rgba(255,255,255,0.4)', borderColor: 'rgba(255,255,255,0.2)' }}>
             Reintentar
           </button>
         </div>
@@ -499,7 +483,7 @@ export default function PDFReader({
 
   return (
     <div
-      style={{ height: '100vh', overflow: 'hidden', ...WOOD_BG, display: 'flex', flexDirection: 'column', userSelect: 'none' }}
+      style={{ height: '100vh', overflow: 'hidden', ...READER_BG, display: 'flex', flexDirection: 'column', userSelect: 'none' }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -508,11 +492,24 @@ export default function PDFReader({
 
         {/* Back button — top-left */}
         <div style={{ position: 'absolute', top: 14, left: 16, zIndex: 30, opacity: ctrlVisible ? 1 : 0, transition: 'opacity 0.5s', pointerEvents: ctrlVisible ? 'auto' : 'none' }}>
-          <Link href={backUrl} style={{ ...iconBtn, gap: 5, textDecoration: 'none', color: 'rgba(0,0,0,0.40)', display: 'flex', alignItems: 'center' }}>
+          <Link href={backUrl} style={{ ...iconBtn, gap: 5, textDecoration: 'none', color: 'rgba(255,255,255,0.50)', display: 'flex', alignItems: 'center' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
             <span className="hidden sm:inline text-[10px] tracking-[0.2em] uppercase">Volver</span>
           </Link>
         </div>
+
+        {/* Title — top-center */}
+        {(publicationName || issueTitle) && (
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 30,
+            height: 44, display: 'flex', alignItems: 'center', pointerEvents: 'none',
+            opacity: ctrlVisible ? 1 : 0, transition: 'opacity 0.5s',
+            maxWidth: 'calc(100% - 220px)', overflow: 'hidden' }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.20em',
+              textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {publicationName}{publicationName && issueTitle ? ' · ' : ''}{issueTitle}
+            </span>
+          </div>
+        )}
 
         {/* Top-right: zoom + audio + fullscreen */}
         <div style={{ position: 'absolute', top: 10, right: 14, zIndex: 30, display: 'flex', gap: 2, opacity: ctrlVisible ? 1 : 0, transition: 'opacity 0.5s', pointerEvents: ctrlVisible ? 'auto' : 'none' }}>
@@ -524,7 +521,7 @@ export default function PDFReader({
               </svg>
             </button>
           )}
-          <button onClick={() => setAudioOn(a => !a)} style={{ ...iconBtn, color: audioOn ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.18)' }}>
+          <button onClick={() => setAudioOn(a => !a)} style={{ ...iconBtn, color: audioOn ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.20)' }}>
             {audioOn
               ? <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
               : <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
@@ -541,7 +538,7 @@ export default function PDFReader({
         {/* Download — bottom-right */}
         {downloadUrl && (
           <div style={{ position: 'absolute', bottom: 10, right: 14, zIndex: 30, opacity: ctrlVisible ? 1 : 0, transition: 'opacity 0.5s', pointerEvents: ctrlVisible ? 'auto' : 'none' }}>
-            <a href={downloadUrl} download style={{ ...iconBtn, color: 'rgba(0,0,0,0.35)' }}>
+            <a href={downloadUrl} download style={{ ...iconBtn, color: 'rgba(255,255,255,0.45)' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             </a>
           </div>
@@ -621,9 +618,9 @@ export default function PDFReader({
                 <div onClick={goPrev} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 52,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: canPrev ? 'pointer' : 'default', zIndex: 6 }}>
                   {canPrev && (
-                    <div style={{ background: 'rgba(0,0,0,0.13)', borderRadius: '50%', width: 34, height: 34,
+                    <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '50%', width: 34, height: 34,
                       display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(0,0,0,0.55)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.75)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
                     </div>
                   )}
                 </div>
@@ -631,9 +628,9 @@ export default function PDFReader({
                 <div onClick={goNext} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 52,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: canNext ? 'pointer' : 'default', zIndex: 6 }}>
                   {canNext && (
-                    <div style={{ background: 'rgba(0,0,0,0.13)', borderRadius: '50%', width: 34, height: 34,
+                    <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '50%', width: 34, height: 34,
                       display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(0,0,0,0.55)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.75)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
                     </div>
                   )}
                 </div>
@@ -662,9 +659,9 @@ export default function PDFReader({
                     display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
                     paddingLeft: 10, cursor: canPrev ? 'pointer' : 'default' }}>
                   {canPrev && (
-                    <div style={{ background: 'rgba(0,0,0,0.15)', borderRadius: '50%',
+                    <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '50%',
                       width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(0,0,0,0.55)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.75)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
                     </div>
                   )}
                 </div>
@@ -675,9 +672,9 @@ export default function PDFReader({
                     display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
                     paddingRight: 10, cursor: canNext ? 'pointer' : 'default' }}>
                   {canNext && (
-                    <div style={{ background: 'rgba(0,0,0,0.15)', borderRadius: '50%',
+                    <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: '50%',
                       width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(0,0,0,0.55)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.75)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
                     </div>
                   )}
                 </div>
@@ -686,11 +683,11 @@ export default function PDFReader({
                 <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0, zIndex: 7, pointerEvents: 'none',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                   {currentPage <= 2 && (
-                    <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.28)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       tocá los bordes o deslizá para pasar
                     </span>
                   )}
-                  <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.32)', letterSpacing: '0.22em' }}>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.40)', letterSpacing: '0.22em' }}>
                     {currentPage} / {totalSlots}
                   </span>
                 </div>
@@ -707,7 +704,7 @@ export default function PDFReader({
               style={{
                 position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
                 zIndex: 10, background: 'none', border: 'none', cursor: 'pointer', padding: '10px 6px',
-                color: 'rgba(0,0,0,0.22)', opacity: ctrlVisible ? 1 : 0,
+                color: 'rgba(255,255,255,0.25)', opacity: ctrlVisible ? 1 : 0,
                 transition: 'opacity 0.5s', pointerEvents: ctrlVisible ? 'auto' : 'none',
               }}
             >
@@ -720,7 +717,7 @@ export default function PDFReader({
               style={{
                 position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
                 zIndex: 10, background: 'none', border: 'none', cursor: 'pointer', padding: '10px 6px',
-                color: 'rgba(0,0,0,0.22)', opacity: ctrlVisible ? 1 : 0,
+                color: 'rgba(255,255,255,0.25)', opacity: ctrlVisible ? 1 : 0,
                 transition: 'opacity 0.5s', pointerEvents: ctrlVisible ? 'auto' : 'none',
               }}
             >
@@ -975,12 +972,12 @@ export default function PDFReader({
 
       {/* ── Bottom: progress bar + page counter ── */}
       <div style={{ flexShrink: 0 }}>
-        <div style={{ height: 3, background: 'rgba(0,0,0,0.12)' }}>
+        <div style={{ height: 3, background: 'rgba(255,255,255,0.08)' }}>
           <div style={{ height: '100%', background: `linear-gradient(90deg, ${GOLD}, #E8C050)`, width: `${progress}%`, transition: 'width 0.55s ease' }} />
         </div>
-        <div style={{ height: 33, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(216,212,204,0.97)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ height: 33, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(14,13,12,0.97)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           {!isLoading && numPages > 0 && (
-            <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', letterSpacing: '0.28em', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', letterSpacing: '0.28em', textTransform: 'uppercase' }}>
               {currentPage}&thinsp;/&thinsp;{totalSlots}
             </span>
           )}
