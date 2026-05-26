@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server'
-import { join } from 'path'
 
 /**
  * POST /api/render-issue
@@ -55,10 +54,14 @@ export async function POST(req: NextRequest) {
     }
 
     // ── pdfjs-dist v3 legacy CJS build ────────────────────────────────────
-    // v3 uses pdf.js (CJS), not pdf.mjs (ESM) — more compatible with Turbopack
+    // v3 CJS — both modules are external (not bundled by Turbopack).
+    // Loading pdf.worker.js registers WorkerMessageHandler globally so pdfjs
+    // can run entirely in the same Node.js thread (no worker_threads needed).
+    // DO NOT set GlobalWorkerOptions.workerSrc — pdfjs uses the registered
+    // handler automatically. Setting a file:// URL causes worker_threads to
+    // fail, which then causes fake-worker fallback to also fail.
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js')
-    const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.js')
-    ;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `file://${workerPath}`
+    await import('pdfjs-dist/legacy/build/pdf.worker.js')
 
     const doc = await (pdfjsLib as any).getDocument({
       data: pdfBuffer,
