@@ -58,20 +58,20 @@ export async function POST(req: NextRequest) {
     const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')
     ;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `file://${workerPath}`
 
-    // ── Node canvas factory — pdfjs uses this for any internal canvas ──────
-    const NodeCanvasFactory = {
+    // ── Node canvas factory — pdfjs-dist v5 requires a CLASS (constructor) ──
+    class NodeCanvasFactory {
       create(w: number, h: number) {
         const c = createCanvas(Math.ceil(w), Math.ceil(h))
         return { canvas: c, context: c.getContext('2d') }
-      },
+      }
       reset(cc: any, w: number, h: number) {
         cc.canvas.width  = Math.ceil(w)
         cc.canvas.height = Math.ceil(h)
-      },
+      }
       destroy(cc: any) {
         cc.canvas.width = 0
         cc.canvas.height = 0
-      },
+      }
     }
 
     const doc = await pdfjsLib.getDocument({
