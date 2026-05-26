@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/copy-pdfjs-worker.js && next build",
     "start": "next start"
   },
   "dependencies": {
@@ -15,13 +15,13 @@
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
+    "page-flip": "^2.0.7",
     "pdfjs-dist": "3.11.174",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "tus-js-client": "^4.2.3",
-    "page-flip": "^2.0.7"
+    "tus-js-client": "^4.2.3"
   },
-"devDependencies": {
+  "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
