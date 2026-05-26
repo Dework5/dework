@@ -4,14 +4,6 @@ const nextConfig: NextConfig = {
   // Keep @napi-rs/canvas and pdfjs-dist as external so their native binaries work in serverless
   serverExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
 
-  // Include the pdfjs worker file and canvas native binary in the render-issue function bundle
-  outputFileTracingIncludes: {
-    '/api/render-issue': [
-      './node_modules/pdfjs-dist/build/pdf.worker.min.mjs',
-      './node_modules/@napi-rs/canvas/**',
-    ],
-  },
-
   images: {
     remotePatterns: [
       {
