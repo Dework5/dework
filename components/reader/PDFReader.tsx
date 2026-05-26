@@ -77,6 +77,7 @@ export default function PDFReader({
   const [audioOn,      setAudioOn]      = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [ctrlVisible,  setCtrlVisible]  = useState(true)
+  const [coverClosed,  setCoverClosed]  = useState(false)  // user hasn't opened the book yet
 
   const scaleRef      = useRef(1)
   const pageDims      = useRef({ w: 595, h: 842 })
@@ -183,23 +184,25 @@ export default function PDFReader({
       canvas.height  = viewport.height
       const ctx      = canvas.getContext('2d')!
       await page.render({ canvasContext: ctx, viewport, canvas }).promise
-      const url = canvas.toDataURL('image/jpeg', 0.88)
+      const url = canvas.toDataURL('image/jpeg', 0.80)  // 0.80 = faster encode, still good quality
       setPageUrls(prev => ({ ...prev, [pageNum]: url }))
       if (pageNum === 1) setPdfReady(true)
     } catch { /* cancelled */ }
     renderingSet.current.delete(pageNum)
   }, [pdf])
 
-  // ── Render first pages when PDF loads, continue in background ─────────
+  // ── Render pages: priority order (cover → first 2 spreads → rest) ──────
   useEffect(() => {
     if (!pdf || numPages === 0) return
-    // Render first 8 pages immediately (≈ covers what user sees first)
-    const first = Math.min(8, numPages)
-    for (let i = 1; i <= first; i++) renderPage(i)
-    // Rest in background after short delay so first pages get priority
-    setTimeout(() => {
-      for (let i = first + 1; i <= numPages; i++) renderPage(i)
-    }, 1200)
+    // Priority: first 6 pages (cover + 2 double-page spreads)
+    const priority = Math.min(6, numPages)
+    for (let i = 1; i <= priority; i++) renderPage(i)
+    // Remaining pages in background
+    if (numPages > priority) {
+      setTimeout(() => {
+        for (let i = priority + 1; i <= numPages; i++) renderPage(i)
+      }, 600)
+    }
   }, [pdf, numPages, renderPage])
 
   // ── Initialise PageFlip once container + first page are ready ─────────
@@ -346,36 +349,45 @@ export default function PDFReader({
           </div>
         )}
 
-        {/* ── Cover overlay: shown while PDF renders, fades out ── */}
-        {coverUrl && !pdfReady && (
-          <div style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ padding: 3, background: `linear-gradient(145deg, #E8C040, #C8921A, #A87010, #D4A830)`, boxShadow: '0 6px 36px rgba(0,0,0,0.22)' }}>
-              <div style={{ position: 'relative', width: estW, height: estH, overflow: 'hidden' }}>  {/* cover = one page wide */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={coverUrl} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 28 }}>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {[0, 140, 280].map(d => (
-                      <div key={d} className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: `${d}ms`, opacity: 0.85 }} />
-                    ))}
+        {/* ── Cover screen: single page, shown until user opens the book ── */}
+        {!coverClosed && (
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 20,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: pdfReady ? 'pointer' : 'default',
+            }}
+            onClick={pdfReady ? () => { setCoverClosed(true); requestAnimationFrame(() => pageFlipRef.current?.flipNext()) } : undefined}
+          >
+            <div style={{ padding: 3, background: 'linear-gradient(145deg, #E8C040, #C8921A, #A87010, #D4A830)', boxShadow: '0 6px 36px rgba(0,0,0,0.22)' }}>
+              <div style={{ position: 'relative', width: estW, height: estH, overflow: 'hidden' }}>
+                {/* Cover image (or gradient fallback) */}
+                {coverUrl
+                  ? /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={coverUrl} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #E8E4DF 20%, #D8D4CC 80%)' }} />
+                }
+                {/* Loading indicator */}
+                {!pdfReady && (
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 55%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 24 }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {[0, 140, 280].map(d => (
+                        <div key={d} className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: `${d}ms`, opacity: 0.85 }} />
+                      ))}
+                    </div>
+                    {loadSlow && <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: 11, marginTop: 8, textAlign: 'center', lineHeight: 1.6 }}>Edición en alta resolución.<br/>Un momento…</p>}
                   </div>
-                  {loadSlow && <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 10, textAlign: 'center', lineHeight: 1.6 }}>Edición en alta resolución.<br />Un momento…</p>}
-                </div>
+                )}
+                {/* "Tap to open" hint once ready */}
+                {pdfReady && (
+                  <div style={{ position: 'absolute', bottom: 14, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.88)', background: 'rgba(0,0,0,0.28)', padding: '4px 14px', borderRadius: 20 }}>
+                      Tocar para abrir
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        )}
-
-        {/* No-cover loading fallback */}
-        {isLoading && !coverUrl && (
-          <div style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {[0, 150, 300].map(d => (
-                <div key={d} className="w-2 h-2 rounded-full animate-bounce" style={{ animationDelay: `${d}ms`, background: GOLD }} />
-              ))}
-            </div>
-            <p style={{ color: 'rgba(0,0,0,0.35)', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Cargando…</p>
-            {loadSlow && <p style={{ color: 'rgba(0,0,0,0.3)', fontSize: 12, maxWidth: 240, textAlign: 'center', lineHeight: 1.7 }}>Las ediciones son de alta resolución.<br />Puede tardar unos momentos.</p>}
           </div>
         )}
 
@@ -384,8 +396,8 @@ export default function PDFReader({
           padding: 3,
           background: 'linear-gradient(145deg, #E8C040 0%, #C8921A 35%, #A87010 60%, #D4A830 100%)',
           boxShadow: '0 6px 36px rgba(0,0,0,0.22), 0 2px 10px rgba(0,0,0,0.14)',
-          // Hide until first page is rendered to avoid flash
-          visibility: pdfReady ? 'visible' : 'hidden',
+          // Hidden behind the cover overlay until the book opens
+          visibility: (pdfReady && coverClosed) ? 'visible' : 'hidden',
           zIndex: 2,
         }}>
           {/*
