@@ -17,9 +17,8 @@ import { join } from 'path'
 export const maxDuration = 60   // seconds (Hobby max; Pro supports 300)
 export const dynamic    = 'force-dynamic'
 
-const RENDER_SCALE = 1.0   // 1.0× = original PDF resolution (~595px wide for A4)
-                            // Sharp enough for web; much faster than 1.4/1.8×
-const JPEG_QUALITY = 82    // 0-100
+const RENDER_SCALE = 1.5   // 1.5× = ~892px wide for A4 — noticeably sharper for reading
+const JPEG_QUALITY = 93    // 0-100
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,7 +53,13 @@ export async function POST(req: NextRequest) {
 
     // ── Init canvas first — @napi-rs/canvas also sets up DOMMatrix globally ──
     // pdfjs-dist/legacy requires DOMMatrix at init; @napi-rs/canvas provides it
-    const { createCanvas } = await import('@napi-rs/canvas')
+    const { createCanvas, Path2D: NapiPath2D } = await import('@napi-rs/canvas')
+
+    // Expose @napi-rs/canvas's Path2D globally so pdfjs-dist creates compatible
+    // Path2D instances (its internal ones cause InvalidArg when passed to canvas ctx)
+    if (typeof (globalThis as any).Path2D === 'undefined') {
+      ;(globalThis as any).Path2D = NapiPath2D
+    }
 
     // ── Init pdfjs (legacy build — Node.js compatible) ────────────────────
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
