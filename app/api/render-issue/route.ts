@@ -45,26 +45,55 @@ export async function POST(req: NextRequest) {
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
     // ── @napi-rs/canvas: external native binary ───────────────────────────
-    const { createCanvas } = await import('@napi-rs/canvas')
-
-    // Set DOMMatrix globally so pdfjs-dist can use it for transforms
     const napiCanvas = await import('@napi-rs/canvas')
+    const { createCanvas } = napiCanvas
+
+    // Pre-set DOMMatrix and Path2D so pdfjs skips its require('canvas') polyfills.
+    // pdfjs checks: if (globalThis.DOMMatrix || !isNodeJS) return  (same for Path2D).
     if (napiCanvas.DOMMatrix && !(globalThis as any).DOMMatrix) {
       ;(globalThis as any).DOMMatrix = napiCanvas.DOMMatrix
     }
+    if (napiCanvas.Path2D && !(globalThis as any).Path2D) {
+      ;(globalThis as any).Path2D = napiCanvas.Path2D
+    }
 
     // ── pdfjs-dist v3 legacy CJS build ────────────────────────────────────
-    // v3 CJS — both modules are external (not bundled by Turbopack).
+    // Both modules are external (not bundled by Turbopack).
     // Loading pdf.worker.js registers WorkerMessageHandler globally so pdfjs
     // can run entirely in the same Node.js thread (no worker_threads needed).
-    // DO NOT set GlobalWorkerOptions.workerSrc — pdfjs uses the registered
-    // handler automatically. Setting a file:// URL causes worker_threads to
-    // fail, which then causes fake-worker fallback to also fail.
+    // DO NOT set GlobalWorkerOptions.workerSrc.
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js')
     await import('pdfjs-dist/legacy/build/pdf.worker.js')
 
+    // ── Custom CanvasFactory using @napi-rs/canvas ────────────────────────
+    // pdfjs's default NodeCanvasFactory calls require('canvas') (the npm
+    // 'canvas' package) inside _createCanvas(). That package is not installed —
+    // we use @napi-rs/canvas instead. Providing a custom factory here ensures
+    // every intermediate canvas pdfjs creates internally (for masks, patterns,
+    // etc.) also uses @napi-rs/canvas, avoiding the "Cannot find module 'canvas'"
+    // error at render time.
+    class NapiCanvasFactory {
+      create(width: number, height: number) {
+        const canvas = createCanvas(width, height)
+        return { canvas, context: canvas.getContext('2d') }
+      }
+      reset(canvasAndContext: any, width: number, height: number) {
+        if (!canvasAndContext.canvas) return
+        canvasAndContext.canvas.width  = width
+        canvasAndContext.canvas.height = height
+      }
+      destroy(canvasAndContext: any) {
+        if (!canvasAndContext.canvas) return
+        canvasAndContext.canvas.width  = 0
+        canvasAndContext.canvas.height = 0
+        delete canvasAndContext.canvas
+        delete canvasAndContext.context
+      }
+    }
+
     const doc = await (pdfjsLib as any).getDocument({
       data: pdfBuffer,
+      canvasFactory: new NapiCanvasFactory(),
       isEvalSupported: false,
       useSystemFonts: true,
       disableRange: true,
