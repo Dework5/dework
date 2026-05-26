@@ -89,6 +89,11 @@ export default function PDFReader({
   const [ctrlVisible,  setCtrlVisible]  = useState(true)
   const [coverClosed,  setCoverClosed]  = useState(false)  // user hasn't opened the book yet
   const [zoomOpen,     setZoomOpen]     = useState(false)  // reading-zoom overlay
+  const [zoomLevel,    setZoomLevel]    = useState(1)      // 1x–5x
+  const [zoomPan,      setZoomPan]      = useState({ x: 0, y: 0 })
+  const [isDraggingZoom, setIsDraggingZoom] = useState(false)
+  const zoomDragRef  = useRef({ on: false, sx: 0, sy: 0, px: 0, py: 0, moved: false })
+  const zoomPinchRef = useRef(0)
 
   const scaleRef      = useRef(1)
   const pageDims      = useRef({ w: 595, h: 842 })   // from PDF page 1
@@ -138,6 +143,28 @@ export default function PDFReader({
     window.addEventListener('resize', calcScale)
     return () => window.removeEventListener('resize', calcScale)
   }, [calcScale])
+
+  // ── Reset zoom when overlay closes ────────────────────────────────────
+  useEffect(() => {
+    if (!zoomOpen) { setZoomLevel(1); setZoomPan({ x: 0, y: 0 }); setIsDraggingZoom(false) }
+  }, [zoomOpen])
+
+  // ── Non-passive wheel zoom on the overlay ─────────────────────────────
+  useEffect(() => {
+    if (!zoomOpen) return
+    const el = document.getElementById('zoom-overlay-inner')
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      setZoomLevel(z => {
+        const next = Math.max(1, Math.min(5, z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)))
+        if (next <= 1) setZoomPan({ x: 0, y: 0 })
+        return next
+      })
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [zoomOpen])
 
   // ── Fullscreen ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -628,69 +655,149 @@ export default function PDFReader({
 
       {/* ── Reading-zoom overlay ─────────────────────────────────────────── */}
       {zoomOpen && (() => {
-        // In two-page mode: left slot = currentPage-1, right slot = currentPage
         const leftUrl  = getSlotUrl(currentPage - 1)
         const rightUrl = getSlotUrl(currentPage)
+        const zBtnStyle: React.CSSProperties = {
+          background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)',
+          borderRadius: 8, cursor: 'pointer', color: 'white', width: 40, height: 40,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 300,
+        }
         return (
           <div
+            id="zoom-overlay-inner"
             style={{
               position: 'fixed', inset: 0, zIndex: 200,
-              background: 'rgba(0,0,0,0.92)',
+              background: 'rgba(0,0,0,0.93)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'auto', cursor: 'zoom-out',
-              WebkitOverflowScrolling: 'touch',
+              cursor: isDraggingZoom ? 'grabbing' : zoomLevel > 1 ? 'grab' : 'default',
+              userSelect: 'none', WebkitUserSelect: 'none',
+              overflow: 'hidden',
             }}
-            onClick={() => setZoomOpen(false)}
+            onClick={() => { if (!zoomDragRef.current.moved) setZoomOpen(false) }}
+            onMouseDown={e => {
+              zoomDragRef.current = { on: true, moved: false, sx: e.clientX, sy: e.clientY, px: zoomPan.x, py: zoomPan.y }
+              setIsDraggingZoom(true)
+            }}
+            onMouseMove={e => {
+              if (!zoomDragRef.current.on) return
+              const dx = e.clientX - zoomDragRef.current.sx
+              const dy = e.clientY - zoomDragRef.current.sy
+              if (Math.abs(dx) + Math.abs(dy) > 4) zoomDragRef.current.moved = true
+              setZoomPan({ x: zoomDragRef.current.px + dx, y: zoomDragRef.current.py + dy })
+            }}
+            onMouseUp={() => { zoomDragRef.current.on = false; setIsDraggingZoom(false) }}
+            onMouseLeave={() => { zoomDragRef.current.on = false; setIsDraggingZoom(false) }}
+            onTouchStart={e => {
+              if (e.touches.length === 2) {
+                const dx = e.touches[1].clientX - e.touches[0].clientX
+                const dy = e.touches[1].clientY - e.touches[0].clientY
+                zoomPinchRef.current = Math.sqrt(dx * dx + dy * dy)
+              } else {
+                zoomDragRef.current = { on: true, moved: false, sx: e.touches[0].clientX, sy: e.touches[0].clientY, px: zoomPan.x, py: zoomPan.y }
+              }
+            }}
+            onTouchMove={e => {
+              if (e.touches.length === 2) {
+                const dx = e.touches[1].clientX - e.touches[0].clientX
+                const dy = e.touches[1].clientY - e.touches[0].clientY
+                const dist = Math.sqrt(dx * dx + dy * dy)
+                const factor = dist / (zoomPinchRef.current || dist)
+                zoomPinchRef.current = dist
+                setZoomLevel(z => Math.max(1, Math.min(5, z * factor)))
+              } else if (zoomDragRef.current.on) {
+                const ddx = e.touches[0].clientX - zoomDragRef.current.sx
+                const ddy = e.touches[0].clientY - zoomDragRef.current.sy
+                zoomDragRef.current.moved = true
+                setZoomPan({ x: zoomDragRef.current.px + ddx, y: zoomDragRef.current.py + ddy })
+              }
+            }}
+            onTouchEnd={() => { zoomDragRef.current.on = false }}
           >
-            {/* Pages — side by side at max readable height */}
+            {/* Pages with zoom transform */}
             <div
-              style={{ display: 'flex', gap: 2, padding: '16px 8px', cursor: 'default' }}
+              style={{
+                display: 'flex', gap: 2,
+                transform: `scale(${zoomLevel}) translate(${zoomPan.x / zoomLevel}px, ${zoomPan.y / zoomLevel}px)`,
+                transformOrigin: 'center center',
+                transition: isDraggingZoom ? 'none' : 'transform 0.12s ease',
+                willChange: 'transform',
+              }}
               onClick={e => e.stopPropagation()}
             >
               {leftUrl && (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={leftUrl} alt="Página izquierda"
-                  style={{ height: 'calc(100vh - 32px)', width: 'auto', display: 'block',
-                    boxShadow: '0 4px 32px rgba(0,0,0,0.6)' }} />
+                <img src={leftUrl} alt="Página izquierda" draggable={false}
+                  style={{ height: 'calc(100vh - 80px)', width: 'auto', display: 'block',
+                    boxShadow: '0 4px 32px rgba(0,0,0,0.6)', pointerEvents: 'none' }} />
               )}
               {rightUrl && (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={rightUrl} alt="Página derecha"
-                  style={{ height: 'calc(100vh - 32px)', width: 'auto', display: 'block',
-                    boxShadow: '0 4px 32px rgba(0,0,0,0.6)' }} />
+                <img src={rightUrl} alt="Página derecha" draggable={false}
+                  style={{ height: 'calc(100vh - 80px)', width: 'auto', display: 'block',
+                    boxShadow: '0 4px 32px rgba(0,0,0,0.6)', pointerEvents: 'none' }} />
               )}
             </div>
 
-            {/* Close button */}
+            {/* Zoom controls bar */}
+            <div
+              style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+                display: 'flex', alignItems: 'center', gap: 8, zIndex: 201,
+                background: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: '6px 12px',
+                backdropFilter: 'blur(8px)',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button style={zBtnStyle} title="Alejar"
+                onClick={e => { e.stopPropagation(); setZoomLevel(z => { const nz = Math.max(1, z / 1.35); if (nz <= 1) setZoomPan({ x: 0, y: 0 }); return nz }) }}>
+                −
+              </button>
+              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, minWidth: 44, textAlign: 'center', letterSpacing: '0.05em' }}>
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button style={zBtnStyle} title="Acercar"
+                onClick={e => { e.stopPropagation(); setZoomLevel(z => Math.min(5, z * 1.35)) }}>
+                +
+              </button>
+              {zoomLevel > 1 && (
+                <button style={{ ...zBtnStyle, fontSize: 11, width: 'auto', padding: '0 10px', marginLeft: 4 }} title="Restablecer zoom"
+                  onClick={e => { e.stopPropagation(); setZoomLevel(1); setZoomPan({ x: 0, y: 0 }) }}>
+                  1:1
+                </button>
+              )}
+            </div>
+
+            {/* Close */}
             <button
-              onClick={() => setZoomOpen(false)}
-              style={{
-                position: 'fixed', top: 14, right: 16, zIndex: 201,
+              onClick={e => { e.stopPropagation(); setZoomOpen(false) }}
+              style={{ position: 'fixed', top: 14, right: 16, zIndex: 201,
                 background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
                 borderRadius: '50%', width: 38, height: 38, cursor: 'pointer',
                 color: 'white', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >✕</button>
+              }}>✕</button>
 
-            {/* Prev / Next in zoom mode */}
+            {/* Prev / Next */}
             <button
-              onClick={e => { e.stopPropagation(); pageFlipRef.current?.flipPrev() }}
+              onClick={e => { e.stopPropagation(); pageFlipRef.current?.flipPrev(); setZoomLevel(1); setZoomPan({ x: 0, y: 0 }) }}
               style={{ position: 'fixed', left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 201,
                 background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 6, cursor: 'pointer',
                 color: 'white', padding: '12px 8px', display: 'flex', alignItems: 'center' }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-              </svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
             </button>
             <button
-              onClick={e => { e.stopPropagation(); pageFlipRef.current?.flipNext() }}
+              onClick={e => { e.stopPropagation(); pageFlipRef.current?.flipNext(); setZoomLevel(1); setZoomPan({ x: 0, y: 0 }) }}
               style={{ position: 'fixed', right: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 201,
                 background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 6, cursor: 'pointer',
                 color: 'white', padding: '12px 8px', display: 'flex', alignItems: 'center' }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-              </svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
             </button>
+
+            {/* Hint */}
+            {zoomLevel === 1 && (
+              <div style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
+                color: 'rgba(255,255,255,0.45)', fontSize: 11, letterSpacing: '0.08em', pointerEvents: 'none' }}>
+                scroll para hacer zoom · arrastrá para mover
+              </div>
+            )}
           </div>
         )
       })()}

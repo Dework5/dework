@@ -16,7 +16,7 @@ export const dynamic    = 'force-dynamic'
 
 const RENDER_SCALE    = 1.5
 const JPEG_QUALITY    = 93
-const PAGES_PER_CALL  = 15   // max pages per Lambda invocation
+const PAGES_PER_CALL  = 8    // max pages per Lambda invocation (keeps each batch under 40s → safe on 60s limit)
 
 export async function POST(req: NextRequest) {
   try {
