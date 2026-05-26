@@ -1,14 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Both packages are external so Turbopack never bundles them.
-  // External packages are lazily loaded on first import() call — this means
-  // we control the init order inside the POST handler:
-  //   1. import('@napi-rs/canvas') → sets globalThis.Path2D + DOMMatrix
-  //   2. import('pdfjs-dist/...')  → pdfjs module init runs NOW, sees our globals ✓
-  // If pdfjs-dist were bundled, Turbopack could evaluate it at Lambda cold-start
-  // BEFORE our import() fires, so it would capture undefined Path2D.
-  serverExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
+  // @napi-rs/canvas: external (native Skia binary — must NOT be bundled)
+  // pdfjs-dist: bundled by Turbopack (ESM .mjs files can't be loaded as
+  //             external on Vercel Lambda — causes non-JSON 500 responses)
+  serverExternalPackages: ['@napi-rs/canvas'],
 
   images: {
     remotePatterns: [

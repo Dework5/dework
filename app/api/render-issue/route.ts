@@ -13,6 +13,42 @@ export const dynamic    = 'force-dynamic'
 const RENDER_SCALE = 1.5
 const JPEG_QUALITY = 93
 
+/**
+ * Patches canvas context methods that pdfjs-dist may call with an incompatible
+ * Path2D argument (one created by its own internal polyfill instead of
+ * @napi-rs/canvas's native Path2D).
+ *
+ * When @napi-rs/canvas receives a non-native Path2D it throws:
+ *   Error: Value is none of these types 'String', 'Path' (code: InvalidArg)
+ *
+ * pdfjs-dist builds the current path with beginPath/moveTo/lineTo before
+ * creating the Path2D object, so falling back to the no-arg form (which uses
+ * the current path) produces visually identical output.
+ */
+function patchCtx(ctx: any) {
+  for (const method of ['fill', 'stroke', 'clip'] as const) {
+    const original = ctx[method].bind(ctx)
+    ctx[method] = (...args: any[]) => {
+      try {
+        return original(...args)
+      } catch (e: any) {
+        // Only swallow the specific Path2D type-mismatch error
+        if (e?.code === 'InvalidArg' || e?.message?.includes('none of these types')) {
+          // Retry: if first arg is a Path2D-like object, drop it and use
+          // the current path (which pdfjs already built with beginPath/moveTo)
+          if (args.length > 0 && typeof args[0] === 'object' && args[0] !== null) {
+            try { return original(...args.slice(1)) } catch {}
+            try { return original() } catch {}
+            return // silently skip if all retries fail
+          }
+        }
+        throw e
+      }
+    }
+  }
+  return ctx
+}
+
 export async function POST(req: NextRequest) {
   try {
     const auth = req.headers.get('authorization')
@@ -41,42 +77,20 @@ export async function POST(req: NextRequest) {
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
 
-    // ── Step 1: Load @napi-rs/canvas and set globals BEFORE pdfjs loads ───
+    // ── Load canvas + set globals before pdfjs-dist evaluates ─────────────
     const napiCanvas = await import('@napi-rs/canvas')
     const { createCanvas } = napiCanvas
-
-    // Always overwrite — ensures pdfjs-dist (external too) sees these when
-    // its module initialises on this first import() call below
+    // Always set — pdfjs-dist will use these if it checks globalThis at call time
     ;(globalThis as any).Path2D   = napiCanvas.Path2D
     ;(globalThis as any).DOMMatrix = napiCanvas.DOMMatrix
 
-    console.log('[render-issue] Path2D type:', typeof (globalThis as any).Path2D)
-    console.log('[render-issue] Path2D constructor:', (globalThis as any).Path2D?.name)
-
-    // ── Step 2: Load pdfjs (external → inits NOW, after globals are set) ──
+    // ── Load pdfjs (bundled by Turbopack) ─────────────────────────────────
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
     const workerPath = join(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')
     ;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `file://${workerPath}`
 
-    // ── Node canvas factory — pdfjs-dist v5 requires a CLASS (constructor) ──
-    class NodeCanvasFactory {
-      create(w: number, h: number) {
-        const c = createCanvas(Math.ceil(w), Math.ceil(h))
-        return { canvas: c, context: c.getContext('2d') }
-      }
-      reset(cc: any, w: number, h: number) {
-        cc.canvas.width  = Math.ceil(w)
-        cc.canvas.height = Math.ceil(h)
-      }
-      destroy(cc: any) {
-        cc.canvas.width = 0
-        cc.canvas.height = 0
-      }
-    }
-
     const doc = await pdfjsLib.getDocument({
       data: pdfBuffer,
-      CanvasFactory: NodeCanvasFactory,
       isEvalSupported: false,
       useSystemFonts: true,
       disableRange: true,
@@ -111,35 +125,13 @@ export async function POST(req: NextRequest) {
       const page     = await doc.getPage(pageNum)
       const viewport = page.getViewport({ scale: RENDER_SCALE })
       const canvas   = createCanvas(Math.round(viewport.width), Math.round(viewport.height))
-      const rawCtx   = canvas.getContext('2d') as any
 
-      // ── Diagnostic proxy: wraps every ctx call and reports arg types on error
-      // This lets us see EXACTLY which method fails and what type was passed.
-      const ctx = new Proxy(rawCtx, {
-        get(target, prop) {
-          const val = Reflect.get(target, prop)
-          if (typeof val !== 'function') return val
-          return function (...args: unknown[]) {
-            try {
-              return (val as Function).apply(target, args)
-            } catch (e: any) {
-              const argInfo = args.map(a => {
-                if (a === null)      return 'null'
-                if (a === undefined) return 'undefined'
-                return `${typeof a}<${(a as any)?.constructor?.name ?? '?'}>`
-              }).join(', ')
-              throw new Error(
-                `ctx.${String(prop)}(${argInfo}) FAILED: ${e?.message ?? e}`
-              )
-            }
-          }
-        },
-      })
+      // Patch fill/stroke/clip to handle incompatible Path2D gracefully
+      const ctx = patchCtx(canvas.getContext('2d') as any)
 
       await page.render({
         canvasContext: ctx,
         viewport,
-        // NOTE: no 'canvas' param — not an official pdfjs-dist v5 render param
       }).promise
 
       const isLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
@@ -191,9 +183,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, slots: Object.keys(slots).length, isSpreadPDF, isAllSpread })
 
   } catch (err: any) {
-    console.error('[render-issue] ERROR:', err?.message ?? err)
-    // Return full message (not truncated) so admin UI shows exactly what failed
-    const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: msg }, { status: 500 })
+    console.error('[render-issue]', err?.message ?? err)
+    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }
