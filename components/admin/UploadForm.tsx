@@ -128,6 +128,22 @@ export function UploadForm({ publications }: UploadFormProps) {
       const data = await createRes.json()
       if (!createRes.ok) throw new Error(data.error || 'Error guardando la edicion.')
 
+      const issueId = data.issue?.id
+      if (issueId) {
+        let startPage = 1
+        let done = false
+        while (!done) {
+          const rRes = await fetch('/api/render-issue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-dw-admin': pw },
+            body: JSON.stringify({ issueId, startPage }),
+          })
+          if (!rRes.ok) break
+          const rData = await rRes.json()
+          done = rData.done
+          startPage = rData.nextStartPage
+        }
+      }
       setProgress(100)
       setStatus('success')
       setMessage('Edicion publicada correctamente!')
