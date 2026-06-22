@@ -135,7 +135,7 @@ export function UploadForm({ publications }: UploadFormProps) {
         while (!done) {
           const rRes = await fetch('/api/render-issue', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-dw-admin': pw },
+            headers: { 'Content-Type': 'application/json', Authorization: pw },
             body: JSON.stringify({ issueId, startPage }),
           })
           if (!rRes.ok) break
