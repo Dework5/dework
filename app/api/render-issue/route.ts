@@ -131,7 +131,8 @@ export async function POST(req: NextRequest) {
     // Render + upload each page immediately (no accumulation in memory)
     for (let pageNum = batchStart; pageNum <= batchEnd; pageNum++) {
       const page     = await doc.getPage(pageNum)
-      const viewport = page.getViewport({ scale: RENDER_SCALE })
+      const naturalRotation = page.rotate || 0
+      const viewport = page.getViewport({ scale: RENDER_SCALE, rotation: 0 })
       const canvas   = createCanvas(Math.round(viewport.width), Math.round(viewport.height))
       const ctx      = canvas.getContext('2d')
 
@@ -140,15 +141,29 @@ export async function POST(req: NextRequest) {
         viewport,
       }).promise
 
+      let renderCanvas = canvas
+      if (naturalRotation !== 0) {
+        const rRad = (naturalRotation * Math.PI) / 180
+        const absSin = Math.abs(Math.round(Math.sin(rRad)))
+        const absCos = Math.abs(Math.round(Math.cos(rRad)))
+        const rotW = canvas.width * absCos + canvas.height * absSin
+        const rotH = canvas.width * absSin + canvas.height * absCos
+        renderCanvas = createCanvas(rotW, rotH)
+        const rCtx = renderCanvas.getContext('2d')
+        rCtx.translate(rotW / 2, rotH / 2)
+        rCtx.rotate(rRad)
+        rCtx.drawImage(canvas as any, -canvas.width / 2, -canvas.height / 2)
+      }
+
       const isLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
 
       if (isLandscape) {
-        const halfW = Math.round(canvas.width / 2)
+        const halfW = Math.round(renderCanvas.width / 2)
         for (const side of ['L', 'R'] as const) {
           const half    = createCanvas(halfW, canvas.height)
           const halfCtx = half.getContext('2d')
           const sx      = side === 'L' ? 0 : halfW
-          halfCtx.drawImage(canvas as any, sx, 0, halfW, canvas.height, 0, 0, halfW, canvas.height)
+          halfCtx.drawImage(renderCanvas as any, sx, 0, halfW, renderCanvas.height, 0, 0, halfW, renderCanvas.height)
           const key  = `${pageNum}_${side}`
           const path = `${issueId}/${key}.jpg`
           const buf  = half.toBuffer('image/jpeg', JPEG_QUALITY)
@@ -161,7 +176,7 @@ export async function POST(req: NextRequest) {
       } else {
         const key  = String(pageNum)
         const path = `${issueId}/${key}.jpg`
-        const buf  = canvas.toBuffer('image/jpeg', JPEG_QUALITY)
+        const buf  = renderCanvas.toBuffer('image/jpeg', JPEG_QUALITY)
         const { error } = await db.storage
           .from('page-images')
           .upload(path, buf, { contentType: 'image/jpeg', upsert: true })
