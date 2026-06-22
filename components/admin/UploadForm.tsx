@@ -20,16 +20,8 @@ async function uploadPdfDirect(
   supabaseUrl: string,
   onProgress: (pct: number) => void
 ): Promise<string> {
-  // 1. Get signed upload URL from server (service_role key stays server-side)
-  const signRes = await fetch('/api/admin/sign-upload', {
-    method: 'POST',
-    headers: { 'x-dw-admin': pw, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path }),
-  })
-  if (!signRes.ok) throw new Error('No se pudo obtener URL de subida: ' + signRes.status)
-  const { uploadUrl } = await signRes.json()
-
-  // 2. Upload directly browser → Supabase (no Vercel proxy, any file size)
+  // POST PDF directly to edge function → streams to Supabase server-side
+  // Same origin = no CORS, Edge runtime = no size limit
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.upload.onprogress = (e) => {
@@ -37,13 +29,16 @@ async function uploadPdfDirect(
     }
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(`${supabaseUrl}/storage/v1/object/public/pdfs/${path}`)
+        try { resolve(JSON.parse(xhr.responseText).url) }
+        catch { reject(new Error('Respuesta invalida del servidor')) }
       } else {
-        reject(new Error(`Upload fallido: ${xhr.status} ${xhr.responseText}`))
+        reject(new Error(`Upload fallido: ${xhr.status} ${xhr.responseText.substring(0, 200)}`))
       }
     }
     xhr.onerror = () => reject(new Error('Error de red al subir PDF'))
-    xhr.open('PUT', uploadUrl)
+    xhr.open('POST', '/api/admin/pdf-upload')
+    xhr.setRequestHeader('x-dw-admin', pw)
+    xhr.setRequestHeader('x-pdf-path', path)
     xhr.setRequestHeader('Content-Type', 'application/pdf')
     xhr.send(file)
   })
