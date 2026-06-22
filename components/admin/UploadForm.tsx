@@ -33,6 +33,7 @@ function uploadPdfTus(
         cacheControl: '3600',
       },
       chunkSize: 6 * 1024 * 1024,
+      storeFingerprintForResuming: false,
       onError:   (err) => reject(err),
       onProgress: (loaded, total) => {
         if (total) onProgress(Math.round((loaded / total) * 100))
