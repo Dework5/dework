@@ -23,8 +23,10 @@ export async function POST(req: Request) {
     return new Response(text, { status: res.status })
   }
 
-  return new Response(await res.text(), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  })
+  const data = await res.json()
+  // Supabase may return relative URL — always return absolute
+  const rawUrl: string = data.url ?? data.signedURL ?? ''
+  const uploadUrl = rawUrl.startsWith('http') ? rawUrl : `${supabaseUrl}${rawUrl}`
+
+  return Response.json({ uploadUrl })
 }
