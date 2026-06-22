@@ -4,16 +4,15 @@
 
 export const runtime = 'edge'
 
-const TUS_BASE   = () => `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`
-const SVC_KEY    = () => process.env.SUPABASE_SERVICE_ROLE_KEY!
-const ADMIN_PW   = () => process.env.NEXT_PUBLIC_ADMIN_PASSWORD!
+const TUS_BASE = () => `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`
+const SVC_KEY = () => process.env.SUPABASE_SERVICE_ROLE_KEY!
+const ADMIN_PW = () => process.env.NEXT_PUBLIC_ADMIN_PASSWORD!
 const PROXY_BASE = '/api/admin/tus'
 
 async function handler(req: Request): Promise<Response> {
-  const url  = new URL(req.url)
-  const slug = url.pathname.replace(/^.*\/api\/admin\/tus/, '') // '' o '/pdfs/...'
+  const url = new URL(req.url)
+  const slug = url.pathname.replace(/^.*\/api\/admin\/tus/, '')
 
-  // Verificar contraseña solo en la creación del upload (POST sin slug)
   if (req.method === 'POST' && slug === '') {
     const pw = req.headers.get('x-dw-admin')
     if (pw !== ADMIN_PW()) return new Response('Unauthorized', { status: 401 })
@@ -21,7 +20,6 @@ async function handler(req: Request): Promise<Response> {
 
   const target = `${TUS_BASE()}${slug}${url.search}`
 
-  // Copiar headers, agregar service_role, limpiar los propios
   const headers = new Headers()
   for (const [k, v] of req.headers.entries()) {
     const lk = k.toLowerCase()
@@ -30,34 +28,27 @@ async function handler(req: Request): Promise<Response> {
   }
   headers.set('authorization', `Bearer ${SVC_KEY()}`)
 
-  // Armar request hacia Supabase
   const init: RequestInit & { duplex?: string } = { method: req.method, headers }
   if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-    init.body   = req.body
+    init.body = req.body
     init.duplex = 'half'
   }
 
   const upstream = await fetch(target, init)
 
-  // Reescribir header Location para que el cliente siga usando nuestro proxy
+  // Rewrite Location header so client continues using our proxy
+  // Works for both absolute URLs (https://supabase.co/...) and relative paths (/storage/...)
   const resHeaders = new Headers()
   for (const [k, v] of upstream.headers.entries()) {
-        resHeaders.set(k, k.toLowerCase() === 'location'
-      ? v.replace(TUS_BASE(), PROXY_BASE)
-          .replace(/^\/storage\/v1\/upload\/resumable/, PROXY_BASE)
+    resHeaders.set(k, k.toLowerCase() === 'location'
+      ? (v.includes('://') ? new URL(v).pathname : v)
+          .replace('/storage/v1/upload/resumable', PROXY_BASE)
       : v
     )
   }
 
-  return new Response(upstream.body, {
-    status:  upstream.status,
-    headers: resHeaders,
-  })
+  return new Response(upstream.body, { status: upstream.status, headers: resHeaders })
 }
 
-export const GET     = handler
-export const HEAD    = handler
-export const POST    = handler
-export const PATCH   = handler
-export const OPTIONS = handler
-export const DELETE  = handler
+export const GET = handler; export const HEAD = handler; export const POST = handler
+export const PATCH = handler; export const OPTIONS = handler; export const DELETE = handler
