@@ -127,11 +127,13 @@ export async function POST(req: NextRequest) {
     // Merge with existing slots if this is a continuation batch
     const existing = (issue.page_images_json as any) || {}
     const slots: Record<string, string> = { ...(existing.slots ?? {}) }
+  const pageRotations: Record<number,number> = {}
 
     // Render + upload each page immediately (no accumulation in memory)
     for (let pageNum = batchStart; pageNum <= batchEnd; pageNum++) {
       const page     = await doc.getPage(pageNum)
       const naturalRotation = page.rotate || 0
+      pageRotations[pageNum] = naturalRotation
       const viewport = page.getViewport({ scale: RENDER_SCALE, rotation: 0 })
       const canvas   = createCanvas(Math.round(viewport.width), Math.round(viewport.height))
       const ctx      = canvas.getContext('2d')
@@ -214,6 +216,7 @@ export async function POST(req: NextRequest) {
       done,
       isSpreadPDF,
       isAllSpread,
+      pageRotations,
     })
 
   } catch (err: any) {
