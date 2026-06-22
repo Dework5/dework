@@ -1,4 +1,4 @@
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 const TUS_BASE = () => `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`
 const SVC_KEY = () => process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -24,20 +24,21 @@ async function handler(req: Request): Promise<Response> {
   }
   headers.set('authorization', `Bearer ${SVC_KEY()}`)
 
-  const init: RequestInit & { duplex?: string } = { method: req.method, headers }
+  let body: ArrayBuffer | undefined
   if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-    init.body = req.body
-    init.duplex = 'half'
+    body = await req.arrayBuffer()
   }
 
-  const upstream = await fetch(target, init)
+  let upstream: Response
+  try {
+    upstream = await fetch(target, { method: req.method, headers, body })
+  } catch (err) {
+    return new Response(`Proxy fetch error: ${err}. Target: ${target}`, { status: 502 })
+  }
 
-  // Rewrite Location header: extract uploadId from Supabase URL, construct proxy URL
   const resHeaders = new Headers()
   for (const [k, v] of upstream.headers.entries()) {
     if (k.toLowerCase() === 'location') {
-      // Works for both relative (/storage/v1/upload/resumable/{id})
-      // and absolute (https://supabase.co/storage/v1/upload/resumable/{id})
       const marker = '/upload/resumable/'
       const idx = v.indexOf(marker)
       resHeaders.set('location', idx >= 0
@@ -47,6 +48,14 @@ async function handler(req: Request): Promise<Response> {
     } else {
       resHeaders.set(k, v)
     }
+  }
+
+  if (upstream.status === 404) {
+    const upstreamText = await upstream.text()
+    return new Response(
+      `${upstreamText} [target:${target}]`,
+      { status: 404, headers: resHeaders }
+    )
   }
 
   return new Response(upstream.body, { status: upstream.status, headers: resHeaders })
