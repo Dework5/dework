@@ -27,7 +27,9 @@ async function uploadPdfDirect(
     body: JSON.stringify({ path }),
   })
   if (!signRes.ok) throw new Error('No se pudo obtener URL de subida: ' + signRes.status)
-  const { signedURL } = await signRes.json()
+  const data = await signRes.json()
+    const rawUrl: string = data.signedURL ?? data.url ?? ''
+    const uploadUrl = rawUrl.startsWith('http') ? rawUrl : `${supabaseUrl}${rawUrl}`
 
   // 2. Upload directly browser → Supabase (no Vercel proxy, any file size)
   return new Promise((resolve, reject) => {
@@ -43,7 +45,7 @@ async function uploadPdfDirect(
       }
     }
     xhr.onerror = () => reject(new Error('Error de red al subir PDF'))
-    xhr.open('PUT', signedURL)
+    xhr.open('PUT', uploadUrl)
     xhr.setRequestHeader('Content-Type', 'application/pdf')
     xhr.send(file)
   })
