@@ -42,8 +42,9 @@ async function handler(req: Request): Promise<Response> {
   // Reescribir header Location para que el cliente siga usando nuestro proxy
   const resHeaders = new Headers()
   for (const [k, v] of upstream.headers.entries()) {
-    resHeaders.set(k, k.toLowerCase() === 'location'
+        resHeaders.set(k, k.toLowerCase() === 'location'
       ? v.replace(TUS_BASE(), PROXY_BASE)
+          .replace(/^\/storage\/v1\/upload\/resumable/, PROXY_BASE)
       : v
     )
   }
