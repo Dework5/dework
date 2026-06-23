@@ -72,8 +72,9 @@ export function PDFReader({
     })
     task.promise
       .then(async doc => {
-        const page1 = await doc.getPage(1)
-        const vp = page1.getViewport({ scale: 1 })
+        const checkNum = Math.min(2, doc.numPages)
+        const checkPage = await doc.getPage(checkNum)
+        const vp = checkPage.getViewport({ scale: 1 })
         setIsLandscape(vp.width > vp.height)
         setPdf(doc); setNumPages(doc.numPages); setIsLoading(false)
       })
