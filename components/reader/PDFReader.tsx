@@ -245,3 +245,5 @@ export function PDFReader({
     </div>
   )
 }
+
+export default PDFReader
