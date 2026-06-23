@@ -1,5 +1,7 @@
 'use client'
 
+import * as tus from 'tus-js-client'
+
 import { useState, useRef } from 'react'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import { Publication } from '@/lib/types'
@@ -12,34 +14,43 @@ interface UploadFormProps {
 const inputCls = 'w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#080808] text-sm focus:outline-none focus:border-[#080808] transition-colors bg-white'
 const labelCls = 'block text-[#333] text-xs font-semibold uppercase tracking-wider mb-2'
 
-async function uploadPdfR2(
+async function uploadPdfSupabaseDirect(
   file: File,
   path: string,
   pw: string,
-  _supabaseUrl: string,
+  supabaseUrl: string,
   onProgress: (pct: number) => void
 ): Promise<string> {
-  const res = await fetch('/api/admin/r2-upload-url', {
+  // Step 1: get signed TUS URL from server (tiny request, no file data through Vercel)
+  const res = await fetch('/api/admin/sign-upload', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', authorization: pw },
+    headers: { 'Content-Type': 'application/json', 'x-dw-admin': pw },
     body: JSON.stringify({ path }),
   })
-  if (!res.ok) throw new Error('No se pudo obtener URL de subida')
-  const { signedUrl, fileUrl } = await res.json()
+  if (!res.ok) throw new Error('No se pudo obtener URL de subida firmada')
+  const { uploadUrl } = await res.json()
 
-  await new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.open('PUT', signedUrl)
-    xhr.setRequestHeader('Content-Type', 'application/pdf')
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
-    }
-    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`R2 error ${xhr.status}`)))
-    xhr.onerror = () => reject(new Error('Error de red al subir'))
-    xhr.send(file)
+  // Step 2: upload directly to Supabase TUS — bypasses Vercel, sin limite de tamanio
+  return new Promise((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      uploadUrl,
+      retryDelays: [0, 3000, 5000],
+      chunkSize: 6 * 1024 * 1024,
+      metadata: {
+        bucketName: 'pdfs',
+        objectName: path,
+        contentType: 'application/pdf',
+        cacheControl: '3600',
+      },
+      storeFingerprintForResuming: false,
+      onError: (err) => reject(err),
+      onProgress: (loaded, total) => {
+        if (total) onProgress(Math.round((loaded / total) * 100))
+      },
+      onSuccess: () => resolve(`${supabaseUrl}/storage/v1/object/public/pdfs/${path}`),
+    })
+    upload.start()
   })
-
-  return fileUrl
 }
 
 
@@ -102,7 +113,7 @@ export function UploadForm({ publications }: UploadFormProps) {
 
       // 3. Upload PDF → Supabase Storage via TUS proxy (no CORS, any file size)
       setProgressLabel('Subiendo PDF...')
-      const pdfUrl = await uploadPdfR2(pdfFile, pdfPath, pw, supabaseUrl, (pct) => {
+      const pdfUrl = await uploadPdfSupabaseDirect(pdfFile, pdfPath, pw, supabaseUrl, (pct) => {
         setProgress(25 + Math.round(pct * 0.55))
         setProgressLabel(`Subiendo PDF... ${pct}%`)
       })
