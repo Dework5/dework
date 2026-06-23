@@ -63,7 +63,7 @@ export function ContactSection() {
             </div>
 
             <div className="flex gap-8 border-t border-dw-border pt-6 mt-8 md:pt-8 md:mt-10">
-              <a href="https://www.instagram.com/dework.arg/" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/countrysandiegolarevista/?hl=es" target="_blank" rel="noopener noreferrer"
                 className="text-dw-muted text-sm hover:text-dw-white transition-colors">
                 Instagram
               </a>
