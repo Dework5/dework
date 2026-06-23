@@ -175,11 +175,24 @@ export async function POST(req: NextRequest) {
       } catch { /* ignore */ }
 
       if (autoFlipNeeded || (forceFlipPages as number[]).includes(pageNum)) {
+        // Pixel-level 180° rotation — canvas transform + drawImage is unreliable in napi-rs
+        const srcCtx = renderCanvas.getContext('2d') as any
+        const imgData = srcCtx.getImageData(0, 0, renderCanvas.width, renderCanvas.height)
         const flipped = createCanvas(renderCanvas.width, renderCanvas.height)
-        const fCtx = flipped.getContext('2d')
-        fCtx.translate(renderCanvas.width, renderCanvas.height)
-        fCtx.rotate(Math.PI)
-        fCtx.drawImage(renderCanvas as any, 0, 0)
+        const fCtx   = flipped.getContext('2d') as any
+        const dst    = fCtx.createImageData(renderCanvas.width, renderCanvas.height)
+        const { data, width, height } = imgData
+        for (let row = 0; row < height; row++) {
+          for (let col = 0; col < width; col++) {
+            const s = (row * width + col) * 4
+            const d = ((height - 1 - row) * width + (width - 1 - col)) * 4
+            dst.data[d]     = data[s]
+            dst.data[d + 1] = data[s + 1]
+            dst.data[d + 2] = data[s + 2]
+            dst.data[d + 3] = data[s + 3]
+          }
+        }
+        fCtx.putImageData(dst, 0, 0)
         renderCanvas = flipped
       }
 
