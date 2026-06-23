@@ -158,8 +158,23 @@ export async function POST(req: NextRequest) {
         rCtx.drawImage(canvas as any, -canvas.width / 2, -canvas.height / 2)
       }
 
-      // Manual flip: certain pages render inverted in napi-rs despite correct PDF metadata
-      if ((forceFlipPages as number[]).includes(pageNum)) {
+      // Auto-detect pages with y-flip in content stream that render inverted in napi-rs.
+      // Some PDFs embed a negative-y transform (e.g. 1 0 0 -1 0 h cm) in the content stream
+      // for top-left-origin coordinates. Chrome handles this fine; napi-rs renders them inverted.
+      let autoFlipNeeded = false
+      try {
+        const opList = await page.getOperatorList()
+        const TRANSFORM_OP = (pdfjsLib as any).OPS?.transform ?? 9
+        for (let k = 0; k < Math.min(10, opList.fnArray.length); k++) {
+          if (opList.fnArray[k] === TRANSFORM_OP) {
+            const m = opList.argsArray[k] as number[]
+            if (Array.isArray(m) && m[3] < 0) autoFlipNeeded = true
+            break
+          }
+        }
+      } catch { /* ignore */ }
+
+      if (autoFlipNeeded || (forceFlipPages as number[]).includes(pageNum)) {
         const flipped = createCanvas(renderCanvas.width, renderCanvas.height)
         const fCtx = flipped.getContext('2d')
         fCtx.translate(renderCanvas.width, renderCanvas.height)
