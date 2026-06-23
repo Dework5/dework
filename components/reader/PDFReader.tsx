@@ -150,7 +150,7 @@ export function PDFReader({
 
   if (error) {
     return (
-      <div style={{ background: '#1c1917' }} className="min-h-screen flex items-center justify-center">
+      <div style={{ background: '#f5f0e8' }} className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-white/40 text-sm">{error}</p>
           <button onClick={() => window.location.reload()} className="text-white/25 text-xs hover:text-white/50 transition-colors tracking-widest uppercase">Reintentar</button>
@@ -160,18 +160,18 @@ export function PDFReader({
   }
 
   return (
-    <div style={{ background: '#1c1917' }} className="min-h-screen flex flex-col select-none overflow-hidden">
-      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }} className="h-11 flex items-center px-5 gap-4 flex-shrink-0">
+    <div style={{ background: '#f5f0e8' }} className="min-h-screen flex flex-col select-none overflow-hidden">
+      <div style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }} className="h-11 flex items-center px-5 gap-4 flex-shrink-0">
         {backUrl && (
-          <Link href={backUrl} className="flex items-center gap-1 text-white/35 text-[10px] tracking-[0.2em] uppercase hover:text-white/65 transition-colors">
+          <Link href={backUrl} className="flex items-center gap-1 text-black/40 text-[10px] tracking-[0.2em] uppercase hover:text-black/65 transition-colors">
             <ChevronLeft size={11} />Volver
           </Link>
         )}
-        {title && <span className="text-white/20 text-[10px] tracking-[0.12em] uppercase flex-1 truncate">{title}</span>}
+        {title && <span className="text-black/30 text-[10px] tracking-[0.12em] uppercase flex-1 truncate">{title}</span>}
         {isMobile && (
           <button
             onClick={() => { setShowDouble(s => !s); setCurrentPage(1) }}
-            className="text-white/25 text-[9px] tracking-[0.18em] uppercase hover:text-white/55 transition-colors"
+            className="text-black/30 text-[9px] tracking-[0.18em] uppercase hover:text-black/55 transition-colors"
           >
             {showDouble ? '1 pag' : '2 pag'}
           </button>
@@ -182,9 +182,9 @@ export function PDFReader({
         <button
           onClick={() => navigate(-1)}
           disabled={!canPrev || isLoading}
-          className="absolute left-0 top-0 bottom-0 w-14 md:w-20 flex items-center justify-center z-10 disabled:pointer-events-none group"
+          className="absolute left-0 top-0 bottom-0 w-14 md:w-20 flex items-center justify-center z-10 disabled:pointer-events-none group hover:bg-black/[0.03] transition-colors"
         >
-          <ChevronLeft size={22} className="text-white/0 group-hover:text-white/40 transition-colors duration-150" />
+          <ChevronLeft size={22} className="text-black/30 group-hover:text-black/65 transition-colors duration-150" />
         </button>
 
         {isLoading ? (
@@ -202,8 +202,8 @@ export function PDFReader({
               className="block rounded-sm"
               style={{
                 boxShadow: double
-                  ? '-4px 2px 28px rgba(0,0,0,0.72), 2px 0 10px rgba(0,0,0,0.45)'
-                  : '0 6px 44px rgba(0,0,0,0.68)',
+                  ? '-4px 2px 24px rgba(0,0,0,0.16), 2px 0 8px rgba(0,0,0,0.10)'
+                  : '0 4px 32px rgba(0,0,0,0.18)',
                 maxWidth: double ? '48vw' : '92vw',
                 maxHeight: 'calc(100vh - 140px)',
               }}
@@ -213,7 +213,7 @@ export function PDFReader({
                 ref={rightCanvasRef}
                 className="block rounded-sm"
                 style={{
-                  boxShadow: '4px 2px 28px rgba(0,0,0,0.72), -2px 0 10px rgba(0,0,0,0.45)',
+                  boxShadow: '4px 2px 24px rgba(0,0,0,0.16), -2px 0 8px rgba(0,0,0,0.10)',
                   maxWidth: '48vw',
                   maxHeight: 'calc(100vh - 140px)',
                 }}
@@ -225,20 +225,20 @@ export function PDFReader({
         <button
           onClick={() => navigate(1)}
           disabled={!canNext || isLoading}
-          className="absolute right-0 top-0 bottom-0 w-14 md:w-20 flex items-center justify-center z-10 disabled:pointer-events-none group"
+          className="absolute right-0 top-0 bottom-0 w-14 md:w-20 flex items-center justify-center z-10 disabled:pointer-events-none group hover:bg-black/[0.03] transition-colors"
         >
-          <ChevronRight size={22} className="text-white/0 group-hover:text-white/40 transition-colors duration-150" />
+          <ChevronRight size={22} className="text-black/30 group-hover:text-black/65 transition-colors duration-150" />
         </button>
       </div>
 
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }} className="h-10 flex items-center justify-center gap-5 flex-shrink-0">
-        <button onClick={() => navigate(-1)} disabled={!canPrev || isLoading} className="text-white/20 hover:text-white/50 transition-colors disabled:opacity-10">
+      <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }} className="h-10 flex items-center justify-center gap-5 flex-shrink-0">
+        <button onClick={() => navigate(-1)} disabled={!canPrev || isLoading} className="text-black/25 hover:text-black/55 transition-colors disabled:opacity-10">
           <ChevronLeft size={15} />
         </button>
-        <span className="text-white/25 text-[11px] tracking-[0.25em] tabular-nums">
+        <span className="text-black/40 text-[11px] tracking-[0.25em] tabular-nums">
           {isLoading ? '...' : (pageLabel + ' / ' + numPages)}
         </span>
-        <button onClick={() => navigate(1)} disabled={!canNext || isLoading} className="text-white/20 hover:text-white/50 transition-colors disabled:opacity-10">
+        <button onClick={() => navigate(1)} disabled={!canNext || isLoading} className="text-black/25 hover:text-black/55 transition-colors disabled:opacity-10">
           <ChevronRight size={15} />
         </button>
       </div>
