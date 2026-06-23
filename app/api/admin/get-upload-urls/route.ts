@@ -14,8 +14,7 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // ── Crear bucket covers si no existe Y asegurar que sea público ─────────
-  // createBucket falla silenciosamente si ya existe → updateBucket fuerza public: true
+  // Ensure covers bucket exists and is public (createBucket is a no-op if already exists)
   await supabase.storage.createBucket('covers', {
     public: true,
     allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
@@ -29,20 +28,15 @@ export async function POST(req: NextRequest) {
   const coverPath = `${publicationId}/${issueNumber}-${timestamp}.${coverExt || 'jpg'}`
   const pdfPath   = `${publicationId}/${issueNumber}-${timestamp}.pdf`
 
-  const [coverResult, pdfResult] = await Promise.all([
-    supabase.storage.from('covers').createSignedUploadUrl(coverPath),
-    supabase.storage.from('pdfs').createSignedUploadUrl(pdfPath),
-  ])
+  // Only cover goes to Supabase — PDFs go to R2 (no size limit, no Supabase pdfs bucket needed)
+  const coverResult = await supabase.storage.from('covers').createSignedUploadUrl(coverPath)
 
-  if (coverResult.error || pdfResult.error) {
-    return NextResponse.json(
-      { error: coverResult.error?.message || pdfResult.error?.message },
-      { status: 500 }
-    )
+  if (coverResult.error) {
+    return NextResponse.json({ error: coverResult.error.message }, { status: 500 })
   }
 
   return NextResponse.json({
     cover: { signedUrl: coverResult.data.signedUrl, token: coverResult.data.token, path: coverPath },
-    pdf:   { signedUrl: pdfResult.data.signedUrl,   token: pdfResult.data.token,   path: pdfPath   },
+    pdf:   { path: pdfPath },
   })
 }
