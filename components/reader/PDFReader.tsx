@@ -5,7 +5,7 @@ import Link from 'next/link'
 import * as pdfjsLib from 'pdfjs-dist'
 import type { PreRenderedImages } from '@/lib/types'
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`
 
 interface PDFReaderProps {
   pdfUrl:           string
