@@ -1,5 +1,6 @@
 'use client'
 
+import * as tus from 'tus-js-client'
 import { useState, useRef } from 'react'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import { Publication } from '@/lib/types'
@@ -68,18 +69,32 @@ export function UploadForm({ publications }: UploadFormProps) {
       if (coverErr) throw new Error('Error subiendo la portada: ' + coverErr.message)
       setProgress(25)
 
-      // 3. Upload PDF → Supabase Storage (directo browser→Supabase, sin pasar por Vercel)
+      // 3. Upload PDF → Supabase via TUS chunked (browser→Supabase directo, cualquier tamaño)
       setProgressLabel('Subiendo PDF...')
-      setProgress(30)
-      const { error: pdfErr } = await supabasePublic.storage
-        .from('pdfs')
-        .uploadToSignedUrl(pdfUpload.path, pdfUpload.token, pdfFile, {
-          contentType: 'application/pdf',
-          upsert: true,
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      const pdfUrl = await new Promise<string>((resolve, reject) => {
+        const upload = new tus.Upload(pdfFile, {
+          endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
+          headers: { authorization: `Bearer ${pdfUpload.token}`, 'x-upsert': 'true' },
+          chunkSize: 6 * 1024 * 1024,
+          metadata: {
+            bucketName: 'pdfs',
+            objectName: pdfUpload.path,
+            contentType: 'application/pdf',
+            cacheControl: '3600',
+          },
+          storeFingerprintForResuming: false,
+          onError: (err) => reject(new Error('Error subiendo PDF: ' + err.message)),
+          onProgress: (loaded, total) => {
+            if (total) {
+              setProgress(25 + Math.round((loaded / total) * 57))
+              setProgressLabel(`Subiendo PDF... ${Math.round((loaded / total) * 100)}%`)
+            }
+          },
+          onSuccess: () => resolve(`${supabaseUrl}/storage/v1/object/public/pdfs/${pdfUpload.path}`),
         })
-      if (pdfErr) throw new Error('Error subiendo el PDF: ' + pdfErr.message)
-      const { data: pdfPublicData } = supabasePublic.storage.from('pdfs').getPublicUrl(pdfUpload.path)
-      const pdfUrl = pdfPublicData.publicUrl
+        upload.start()
+      })
       setProgress(82)
 
       // 4. Save to DB
