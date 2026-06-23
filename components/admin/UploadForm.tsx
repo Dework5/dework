@@ -31,7 +31,8 @@ function uploadPdfTus(
         contentType: 'application/pdf',
         cacheControl: '3600',
       },
-      chunkSize: 4 * 1024 * 1024,
+      uploadDataDuringCreation: false,
+      chunkSize: 2 * 1024 * 1024,
       storeFingerprintForResuming: false,
       onError: (err) => reject(err),
       onProgress: (loaded, total) => {
