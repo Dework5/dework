@@ -68,7 +68,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!isAuth) return
-    supabase.from('issues').select('*, publications(name, slug)').order('published_at', { ascending: false })
+    supabase.from('issues').select('*, publications(name, slug)').order('issue_number', { ascending: false })
       .then(({ data }) => { if (data) setIssues(data as (Issue & { views?: number })[]) })
   }, [isAuth])
 
