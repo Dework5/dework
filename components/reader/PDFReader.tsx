@@ -185,15 +185,15 @@ export function PDFReader({
     <div style={{ background: '#f5f0e8' }} className="min-h-screen flex flex-col select-none overflow-hidden">
       <div style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }} className="h-11 flex items-center px-5 gap-4 flex-shrink-0">
         {backUrl && (
-          <Link href={backUrl} className="flex items-center gap-1 text-black/40 text-[10px] tracking-[0.2em] uppercase hover:text-black/65 transition-colors">
+          <Link href={backUrl} className="flex items-center gap-1 text-black/85 text-[10px] tracking-[0.2em] uppercase hover:text-black transition-colors">
             <ChevronLeft size={11} />Volver
           </Link>
         )}
-        {title && <span className="text-black/30 text-[10px] tracking-[0.12em] uppercase flex-1 truncate">{title}</span>}
+        {title && <span className="text-black/70 text-[10px] tracking-[0.12em] uppercase flex-1 truncate">{title}</span>}
         {isMobile && (
           <button
             onClick={() => { setShowDouble(s => !s); setCurrentPage(1) }}
-            className="text-black/30 text-[9px] tracking-[0.18em] uppercase hover:text-black/55 transition-colors"
+            className="text-black/65 text-[9px] tracking-[0.18em] uppercase hover:text-black transition-colors"
           >
             {showDouble ? '1 pag' : '2 pag'}
           </button>
