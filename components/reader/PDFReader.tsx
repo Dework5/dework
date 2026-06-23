@@ -9,41 +9,34 @@ interface PDFReaderProps {
   pdfUrl: string
   issueId?: string
   totalPages?: number
-  preRendered?: string[] | null
-  [key: string]: unknown
 }
 
-export function PDFReader({ pdfUrl, issueId, totalPages, preRendered }: PDFReaderProps) {
+type RenderTaskLike = { cancel: () => void }
+
+export function PDFReader({ pdfUrl, issueId, totalPages }: PDFReaderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [pdf, setPdf] = useState<pdfjsLib.PDFDocumentProxy | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [numPages, setNumPages] = useState(totalPages || 0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const renderTaskRef = useRef<pdfjsLib.RenderTask | null>(null)
+  const renderTaskRef = useRef<RenderTaskLike | null>(null)
 
-  const usePreRendered = !!(preRendered && preRendered.length > 0)
-
-  // Session tracking
   useEffect(() => {
     if (!issueId) return
-    const key = 'dw_session_id'
-    let sid = sessionStorage.getItem(key)
-    if (!sid) { sid = crypto.randomUUID(); sessionStorage.setItem(key, sid) }
-    fetch('/api/track-view', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ issueId, sessionId: sid }),
-    }).catch(() => {})
+    try {
+      const key = 'dw_session_id'
+      let sid = sessionStorage.getItem(key)
+      if (!sid) { sid = crypto.randomUUID(); sessionStorage.setItem(key, sid) }
+      fetch('/api/track-view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ issueId, sessionId: sid }),
+      }).catch(() => {})
+    } catch (_) {}
   }, [issueId])
 
-  // Load PDF
   useEffect(() => {
-    if (usePreRendered) {
-      setNumPages(preRendered!.length)
-      setIsLoading(false)
-      return
-    }
     setIsLoading(true)
     setError(null)
     const task = pdfjsLib.getDocument({
@@ -52,25 +45,14 @@ export function PDFReader({ pdfUrl, issueId, totalPages, preRendered }: PDFReade
       cMapPacked: true,
     })
     task.promise
-      .then((doc) => {
-        setPdf(doc)
-        setNumPages(doc.numPages)
-        setIsLoading(false)
-      })
-      .catch(() => {
-        setError('No se pudo cargar la revista. Por favor, intentá de nuevo.')
-        setIsLoading(false)
-      })
+      .then((doc) => { setPdf(doc); setNumPages(doc.numPages); setIsLoading(false) })
+      .catch(() => { setError('No se pudo cargar la revista. Por favor, intentá de nuevo.'); setIsLoading(false) })
     return () => { task.destroy().catch(() => {}) }
-  }, [pdfUrl, usePreRendered, preRendered])
+  }, [pdfUrl])
 
-  // Render current page to canvas
   const renderPage = useCallback(async (pageNum: number) => {
     if (!pdf || !canvasRef.current) return
-    if (renderTaskRef.current) {
-      renderTaskRef.current.cancel()
-      renderTaskRef.current = null
-    }
+    if (renderTaskRef.current) { renderTaskRef.current.cancel(); renderTaskRef.current = null }
     try {
       const page = await pdf.getPage(pageNum)
       const canvas = canvasRef.current
@@ -86,17 +68,13 @@ export function PDFReader({ pdfUrl, issueId, totalPages, preRendered }: PDFReade
       renderTaskRef.current = task
       await task.promise
     } catch (err: unknown) {
-      if ((err as { name?: string })?.name !== 'RenderingCancelledException') {
-        console.error('Render error:', err)
-      }
+      const e = err as { name?: string }
+      if (e?.name !== 'RenderingCancelledException') console.error('Render error:', err)
     }
   }, [pdf])
 
-  useEffect(() => {
-    if (pdf && !usePreRendered) renderPage(currentPage)
-  }, [pdf, currentPage, renderPage, usePreRendered])
+  useEffect(() => { if (pdf) renderPage(currentPage) }, [pdf, currentPage, renderPage])
 
-  // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') setCurrentPage((p) => Math.min(p + 1, numPages))
@@ -111,7 +89,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages, preRendered }: PDFReade
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] bg-black text-white">
+      <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] bg-black">
         <div className="text-center space-y-4 px-6">
           <p className="text-dw-muted">{error}</p>
           <button onClick={() => window.location.reload()}
@@ -126,13 +104,7 @@ export function PDFReader({ pdfUrl, issueId, totalPages, preRendered }: PDFReade
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-3.5rem)] bg-black py-8 pb-24 px-4">
       <div className="flex items-center justify-center w-full flex-1">
-        {usePreRendered ? (
-          <img
-            src={preRendered![currentPage - 1]}
-            alt={`Página ${currentPage}`}
-            className="max-w-full max-h-[calc(100vh-8rem)] object-contain shadow-2xl"
-          />
-        ) : isLoading ? (
+        {isLoading ? (
           <div className="flex flex-col items-center gap-4">
             <div className="w-48 h-64 md:w-64 md:h-80 bg-dw-card animate-pulse" />
             <p className="text-dw-muted text-sm animate-pulse">Cargando revista...</p>
@@ -141,7 +113,6 @@ export function PDFReader({ pdfUrl, issueId, totalPages, preRendered }: PDFReade
           <canvas ref={canvasRef} className="shadow-2xl max-w-full" style={{ display: 'block' }} />
         )}
       </div>
-
       {!isLoading && numPages > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur border-t border-dw-border flex items-center justify-center gap-6 py-4 z-40">
           <button onClick={prev} disabled={currentPage === 1}
