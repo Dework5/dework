@@ -109,7 +109,8 @@ export function PDFReader({
     if (leftCanvasRef.current) {
       renderToCanvas(currentPage, leftCanvasRef.current, leftTaskRef.current, maxW, availH)
     }
-    if (double && currentPage + 1 <= numPages && rightCanvasRef.current) {
+    const isCoverPage = currentPage === 1
+    if (double && !isCoverPage && currentPage + 1 <= numPages && rightCanvasRef.current) {
       renderToCanvas(currentPage + 1, rightCanvasRef.current, rightTaskRef.current, maxW, availH)
     } else if (rightCanvasRef.current) {
       rightCanvasRef.current.width = 0
@@ -121,8 +122,19 @@ export function PDFReader({
     const double = !isMobile || showDouble
     const step = double ? 2 : 1
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') setCurrentPage(p => Math.min(p + step, numPages))
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') setCurrentPage(p => Math.max(1, p - step))
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        setCurrentPage(p => {
+          if (!double) return Math.min(p + 1, numPages)
+          if (p === 1) return Math.min(2, numPages)
+          return Math.min(p + 2, numPages)
+        })
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        setCurrentPage(p => {
+          if (!double) return Math.max(1, p - 1)
+          if (p === 2) return 1
+          return Math.max(2, p - 2)
+        })
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -130,21 +142,31 @@ export function PDFReader({
 
   const navigate = useCallback((dir: number) => {
     const double = !isMobile || showDouble
-    const step = double ? 2 : 1
     setIsChanging(true)
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      setCurrentPage(p => Math.max(1, Math.min(p + dir * step, numPages)))
+      setCurrentPage(p => {
+        if (!double) return Math.max(1, Math.min(p + dir, numPages))
+        if (dir > 0) {
+          if (p === 1) return Math.min(2, numPages)
+          return Math.min(p + 2, numPages)
+        } else {
+          if (p === 2) return 1
+          return Math.max(2, p - 2)
+        }
+      })
       timerRef.current = setTimeout(() => setIsChanging(false), 200)
     }, 120)
   }, [isMobile, showDouble, numPages])
 
   const double = !isMobile || showDouble
-  const step = double ? 2 : 1
+  const isCover = currentPage === 1
   const canPrev = currentPage > 1
-  const canNext = currentPage + step <= numPages
+  const canNext = double
+    ? (isCover ? numPages > 1 : currentPage + 2 <= numPages)
+    : currentPage < numPages
   const title = [publicationName, issueTitle].filter(Boolean).join(' ')
-  const pageLabel = (double && currentPage + 1 <= numPages)
+  const pageLabel = (double && !isCover && currentPage + 1 <= numPages)
     ? (String(currentPage) + ' – ' + String(currentPage + 1))
     : String(currentPage)
 
@@ -208,7 +230,7 @@ export function PDFReader({
                 maxHeight: 'calc(100vh - 140px)',
               }}
             />
-            {double && currentPage + 1 <= numPages && (
+            {double && !isCover && currentPage + 1 <= numPages && (
               <canvas
                 ref={rightCanvasRef}
                 className="block rounded-sm"
