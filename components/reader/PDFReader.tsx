@@ -32,6 +32,7 @@ export function PDFReader({
   const [currentPage, setCurrentPage] = useState(1)
   const [numPages, setNumPages] = useState(totalPages || 0)
   const [isMobile, setIsMobile] = useState(false)
+  const [isLandscape, setIsLandscape] = useState(false)
   const [showDouble, setShowDouble] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isChanging, setIsChanging] = useState(false)
@@ -70,7 +71,12 @@ export function PDFReader({
       cMapPacked: true,
     })
     task.promise
-      .then(doc => { setPdf(doc); setNumPages(doc.numPages); setIsLoading(false) })
+      .then(async doc => {
+        const page1 = await doc.getPage(1)
+        const vp = page1.getViewport({ scale: 1 })
+        setIsLandscape(vp.width > vp.height)
+        setPdf(doc); setNumPages(doc.numPages); setIsLoading(false)
+      })
       .catch(() => { setError('No se pudo cargar la revista.'); setIsLoading(false) })
     return () => { task.destroy().catch(() => {}) }
   }, [pdfUrl])
@@ -103,7 +109,7 @@ export function PDFReader({
 
   useEffect(() => {
     if (!pdf) return
-    const double = !isMobile || showDouble
+    const double = !isLandscape && (!isMobile || showDouble)
     const availH = window.innerHeight - 44 - 40 - 48
     const maxW = double ? Math.min((window.innerWidth - 16) / 2, 580) : Math.min(window.innerWidth - 24, 760)
     if (leftCanvasRef.current) {
@@ -119,7 +125,7 @@ export function PDFReader({
   }, [pdf, currentPage, isMobile, showDouble, numPages, renderToCanvas])
 
   useEffect(() => {
-    const double = !isMobile || showDouble
+    const double = !isLandscape && (!isMobile || showDouble)
     const step = double ? 2 : 1
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -141,7 +147,7 @@ export function PDFReader({
   }, [numPages, isMobile, showDouble])
 
   const navigate = useCallback((dir: number) => {
-    const double = !isMobile || showDouble
+    const double = !isLandscape && (!isMobile || showDouble)
     setIsChanging(true)
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
@@ -159,7 +165,7 @@ export function PDFReader({
     }, 120)
   }, [isMobile, showDouble, numPages])
 
-  const double = !isMobile || showDouble
+  const double = !isLandscape && (!isMobile || showDouble)
   const isCover = currentPage === 1
   const canPrev = currentPage > 1
   const canNext = double
