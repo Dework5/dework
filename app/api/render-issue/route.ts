@@ -26,10 +26,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { issueId, startPage = 1, endPage } = body as {
+    const { issueId, startPage = 1, endPage, forceFlipPages = [] } = body as {
       issueId?: string
       startPage?: number
       endPage?: number
+      forceFlipPages?: number[]
     }
     if (!issueId) return NextResponse.json({ error: 'Missing issueId' }, { status: 400 })
 
@@ -155,6 +156,16 @@ export async function POST(req: NextRequest) {
         rCtx.translate(rotW / 2, rotH / 2)
         rCtx.rotate(rRad)
         rCtx.drawImage(canvas as any, -canvas.width / 2, -canvas.height / 2)
+      }
+
+      // Manual flip: certain pages render inverted in napi-rs despite correct PDF metadata
+      if ((forceFlipPages as number[]).includes(pageNum)) {
+        const flipped = createCanvas(renderCanvas.width, renderCanvas.height)
+        const fCtx = flipped.getContext('2d')
+        fCtx.translate(renderCanvas.width, renderCanvas.height)
+        fCtx.rotate(Math.PI)
+        fCtx.drawImage(renderCanvas as any, 0, 0)
+        renderCanvas = flipped
       }
 
       const isLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
