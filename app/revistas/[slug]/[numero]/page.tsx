@@ -51,7 +51,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function proxyPdf(url: string | null | undefined): string | undefined {
   if (!url) return undefined
-  if (url.includes('.r2.dev/')) return `/api/pdf-proxy?url=${encodeURIComponent(url)}`
   return url
 }
 
