@@ -22,11 +22,14 @@ export async function POST(req: NextRequest) {
 
   const { data: coverPublic } = supabase.storage.from('covers').getPublicUrl(coverPath)
 
-  // Si llega pdfUrl directo (R2) lo usa, sino construye la URL de Supabase Storage
+  // pdfUrl (R2 public URL) is required; pdfPath is legacy fallback for old Supabase uploads
   let resolvedPdfUrl = pdfUrl
   if (!resolvedPdfUrl && pdfPath) {
     const { data: pdfPublic } = supabase.storage.from('pdfs').getPublicUrl(pdfPath)
     resolvedPdfUrl = pdfPublic.publicUrl
+  }
+  if (!resolvedPdfUrl) {
+    return NextResponse.json({ error: 'PDF URL es requerida' }, { status: 400 })
   }
 
   const { data: issue, error: dbError } = await supabase
@@ -61,8 +64,7 @@ export async function POST(req: NextRequest) {
     revalidatePath(`/revistas/${pub.slug}/${issueNumber}`)
   }
 
-  // ── Fire-and-forget: trigger server-side page pre-rendering automatically ──
-  // Runs in its own serverless invocation so it doesn't block this response.
+  // Fire-and-forget: trigger server-side page pre-rendering automatically
   try {
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
