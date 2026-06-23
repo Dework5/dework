@@ -1,7 +1,5 @@
 'use client'
 
-import * as tus from 'tus-js-client'
-
 import { useState, useRef } from 'react'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import { Publication } from '@/lib/types'
@@ -13,45 +11,6 @@ interface UploadFormProps {
 
 const inputCls = 'w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#080808] text-sm focus:outline-none focus:border-[#080808] transition-colors bg-white'
 const labelCls = 'block text-[#333] text-xs font-semibold uppercase tracking-wider mb-2'
-
-async function uploadPdfSupabaseDirect(
-  file: File,
-  path: string,
-  pw: string,
-  supabaseUrl: string,
-  onProgress: (pct: number) => void
-): Promise<string> {
-  // Step 1: get signed TUS URL from server (tiny request, no file data through Vercel)
-  const res = await fetch('/api/admin/sign-upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-dw-admin': pw },
-    body: JSON.stringify({ path }),
-  })
-  if (!res.ok) throw new Error('No se pudo obtener URL de subida firmada')
-  const { uploadUrl } = await res.json()
-
-  // Step 2: upload directly to Supabase TUS — bypasses Vercel, sin limite de tamanio
-  return new Promise((resolve, reject) => {
-    const upload = new tus.Upload(file, {
-      uploadUrl,
-      retryDelays: [0, 3000, 5000],
-      chunkSize: 6 * 1024 * 1024,
-      metadata: {
-        bucketName: 'pdfs',
-        objectName: path,
-        contentType: 'application/pdf',
-        cacheControl: '3600',
-      },
-      storeFingerprintForResuming: false,
-      onError: (err) => reject(err),
-      onProgress: (loaded, total) => {
-        if (total) onProgress(Math.round((loaded / total) * 100))
-      },
-      onSuccess: () => resolve(`${supabaseUrl}/storage/v1/object/public/pdfs/${path}`),
-    })
-    upload.start()
-  })
-}
 
 
 export function UploadForm({ publications }: UploadFormProps) {
@@ -83,10 +42,8 @@ export function UploadForm({ publications }: UploadFormProps) {
     setProgressLabel('Preparando subida...')
 
     const pw          = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL   || ''
     const coverExt    = coverFile.name.split('.').pop() || 'jpg'
     const timestamp   = Date.now()
-    const pdfPath     = `${publicationId}/${issueNumber}-${timestamp}.pdf`
 
     try {
       // 1. Get signed URL for cover (Supabase Storage)
@@ -97,7 +54,7 @@ export function UploadForm({ publications }: UploadFormProps) {
         body: JSON.stringify({ publicationId, issueNumber, coverExt }),
       })
       if (!urlsRes.ok) { const e = await urlsRes.json(); throw new Error(e.error || 'Error URLs portada') }
-      const { cover: coverUpload } = await urlsRes.json()
+      const { cover: coverUpload, pdf: pdfUpload } = await urlsRes.json()
       setProgress(10)
 
       // 2. Upload cover → Supabase Storage (signed URL, works fine client-side)
@@ -111,12 +68,18 @@ export function UploadForm({ publications }: UploadFormProps) {
       if (coverErr) throw new Error('Error subiendo la portada: ' + coverErr.message)
       setProgress(25)
 
-      // 3. Upload PDF → Supabase Storage via TUS proxy (no CORS, any file size)
+      // 3. Upload PDF → Supabase Storage (directo browser→Supabase, sin pasar por Vercel)
       setProgressLabel('Subiendo PDF...')
-      const pdfUrl = await uploadPdfSupabaseDirect(pdfFile, pdfPath, pw, supabaseUrl, (pct) => {
-        setProgress(25 + Math.round(pct * 0.55))
-        setProgressLabel(`Subiendo PDF... ${pct}%`)
-      })
+      setProgress(30)
+      const { error: pdfErr } = await supabasePublic.storage
+        .from('pdfs')
+        .uploadToSignedUrl(pdfUpload.path, pdfUpload.token, pdfFile, {
+          contentType: 'application/pdf',
+          upsert: true,
+        })
+      if (pdfErr) throw new Error('Error subiendo el PDF: ' + pdfErr.message)
+      const { data: pdfPublicData } = supabasePublic.storage.from('pdfs').getPublicUrl(pdfUpload.path)
+      const pdfUrl = pdfPublicData.publicUrl
       setProgress(82)
 
       // 4. Save to DB
