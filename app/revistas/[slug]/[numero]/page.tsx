@@ -49,6 +49,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+function proxyPdf(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
+  if (url.includes('.r2.dev/')) return `/api/pdf-proxy?url=${encodeURIComponent(url)}`
+  return url
+}
+
 export default async function ReaderPage({ params }: Props) {
   const { slug, numero } = await params
   const result = await getIssue(slug, numero)
@@ -59,7 +65,7 @@ export default async function ReaderPage({ params }: Props) {
 
   return (
     <PDFReaderWrapper
-      pdfUrl={issue.pdf_url}
+      pdfUrl={proxyPdf(issue.pdf_url) ?? ''}
       issueId={issue.id}
       totalPages={issue.page_count}
       coverUrl={issue.cover_url || undefined}
