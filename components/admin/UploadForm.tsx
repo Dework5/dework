@@ -4,7 +4,6 @@ import { useState, useRef } from 'react'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import { Publication } from '@/lib/types'
 import { supabase as supabasePublic } from '@/lib/supabase'
-import * as tus from 'tus-js-client'
 
 interface UploadFormProps {
   publications: Publication[]
@@ -13,37 +12,34 @@ interface UploadFormProps {
 const inputCls = 'w-full border border-[#E5E5E5] rounded-lg px-4 py-3 text-[#080808] text-sm focus:outline-none focus:border-[#080808] transition-colors bg-white'
 const labelCls = 'block text-[#333] text-xs font-semibold uppercase tracking-wider mb-2'
 
-function uploadPdfTus(
+async function uploadPdfR2(
   file: File,
   path: string,
   pw: string,
-  supabaseUrl: string,
+  _supabaseUrl: string,
   onProgress: (pct: number) => void
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const upload = new tus.Upload(file, {
-      endpoint: '/api/admin/tus',
-      retryDelays: [0, 3000, 5000],
-      headers: { 'x-dw-admin': pw },
-      metadata: {
-        bucketName: 'pdfs',
-        objectName: path,
-        contentType: 'application/pdf',
-        cacheControl: '3600',
-      },
-      uploadDataDuringCreation: false,
-      chunkSize: 2 * 1024 * 1024,
-      storeFingerprintForResuming: false,
-      onError: (err) => reject(err),
-      onProgress: (loaded, total) => {
-        if (total) onProgress(Math.round((loaded / total) * 100))
-      },
-      onSuccess: () => {
-        resolve(`${supabaseUrl}/storage/v1/object/public/pdfs/${path}`)
-      },
-    })
-    upload.start()
+  const res = await fetch('/api/admin/r2-upload-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', authorization: pw },
+    body: JSON.stringify({ path }),
   })
+  if (!res.ok) throw new Error('No se pudo obtener URL de subida')
+  const { signedUrl, fileUrl } = await res.json()
+
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', signedUrl)
+    xhr.setRequestHeader('Content-Type', 'application/pdf')
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
+    }
+    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`R2 error ${xhr.status}`)))
+    xhr.onerror = () => reject(new Error('Error de red al subir'))
+    xhr.send(file)
+  })
+
+  return fileUrl
 }
 
 
@@ -106,7 +102,7 @@ export function UploadForm({ publications }: UploadFormProps) {
 
       // 3. Upload PDF → Supabase Storage via TUS proxy (no CORS, any file size)
       setProgressLabel('Subiendo PDF...')
-      const pdfUrl = await uploadPdfTus(pdfFile, pdfPath, pw, supabaseUrl, (pct) => {
+      const pdfUrl = await uploadPdfR2(pdfFile, pdfPath, pw, supabaseUrl, (pct) => {
         setProgress(25 + Math.round(pct * 0.55))
         setProgressLabel(`Subiendo PDF... ${pct}%`)
       })
