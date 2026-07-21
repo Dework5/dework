@@ -95,9 +95,12 @@ export function PDFReader({
       const page = await pdf.getPage(pageNum)
       const base = page.getViewport({ scale: 1 })
       const scale = Math.min(maxW / base.width, maxH / base.height)
-      const vp = page.getViewport({ scale })
+      const dpr = window.devicePixelRatio || 1
+      const vp = page.getViewport({ scale: scale * dpr })
       canvas.width = Math.floor(vp.width)
       canvas.height = Math.floor(vp.height)
+      canvas.style.width  = Math.floor(vp.width  / dpr) + 'px'
+      canvas.style.height = Math.floor(vp.height / dpr) + 'px'
       const ctx = canvas.getContext('2d')
       if (!ctx) return
       const t = page.render({ canvasContext: ctx, viewport: vp })
