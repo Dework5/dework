@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
           const key  = `${pageNum}_${side}`
           const path = `${issueId}/${key}.jpg`
           const buf  = half.toBuffer('image/jpeg', JPEG_QUALITY)
-          const { error } = await db.storage.from('page-images').upload(path, buf, { contentType: 'image/jpeg', upsert: true })
+          const { error } = await db.storage.from('page-images').upload(path, buf, { contentType: 'image/jpeg', upsert: true, cacheControl: '31536000' })
           if (error) throw new Error(`Upload failed [${key}]: ${error.message}`)
           slots[key] = `${SUPABASE_URL}/storage/v1/object/public/page-images/${path}`
         }
@@ -213,7 +213,7 @@ export async function POST(req: NextRequest) {
         const key  = String(pageNum)
         const path = `${issueId}/${key}.jpg`
         const buf  = renderCanvas.toBuffer('image/jpeg', JPEG_QUALITY)
-        const { error } = await db.storage.from('page-images').upload(path, buf, { contentType: 'image/jpeg', upsert: true })
+        const { error } = await db.storage.from('page-images').upload(path, buf, { contentType: 'image/jpeg', upsert: true, cacheControl: '31536000' })
         if (error) throw new Error(`Upload failed [${key}]: ${error.message}`)
         slots[key] = `${SUPABASE_URL}/storage/v1/object/public/page-images/${path}`
       }
@@ -268,3 +268,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }
+
