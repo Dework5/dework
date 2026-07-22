@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { AdminLogin } from '@/components/admin/AdminLogin'
@@ -178,6 +178,7 @@ export default function AdminPage() {
   const renderIssue = async (issue: Issue) => {
     setRendering(prev => ({ ...prev, [issue.id]: true }))
     setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } }))
+    setIssues(prev => prev.map(i => i.id === issue.id ? { ...i, images_status: 'processing' as const } : i))
     try {
       const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
       let startPage   = 1
@@ -216,7 +217,7 @@ export default function AdminPage() {
           }))
           setIssues(prev => prev.map(i =>
             i.id === issue.id
-              ? { ...i, page_images_json: { isSpreadPDF: data.isSpreadPDF, isAllSpread: data.isAllSpread, pageDimensions: { w: 595, h: 842 }, totalPdfPages: data.totalPdfPages, slots: {} } }
+              ? { ...i, images_status: 'ready' as const, page_images_json: { isSpreadPDF: data.isSpreadPDF, isAllSpread: data.isAllSpread, pageDimensions: { w: 595, h: 842 }, totalPdfPages: data.totalPdfPages, slots: {} } }
               : i
           ))
           setTimeout(() => setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } })), 8000)
@@ -227,8 +228,22 @@ export default function AdminPage() {
       }
     } catch (e) {
       setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: e instanceof Error ? e.message : 'Error' } }))
+      setIssues(prev => prev.map(i => i.id === issue.id ? { ...i, images_status: 'partial_error' as const } : i))
     }
     setRendering(prev => ({ ...prev, [issue.id]: false }))
+  }
+
+  // ── images_status badge helper ────────────────────────────────────
+  const imgStatusBadge = (status?: Issue['images_status']) => {
+    if (!status || status === 'pending')
+      return <span className="inline-flex text-xs px-2 py-0.5 rounded-full bg-[#F0F0F0] text-[#888]">Sin render</span>
+    if (status === 'processing')
+      return <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700"><span className="w-2 h-2 border border-yellow-500 border-t-transparent rounded-full animate-spin" />Procesando</span>
+    if (status === 'ready')
+      return <span className="inline-flex text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">✓ Listo</span>
+    if (status === 'partial_error')
+      return <span className="inline-flex text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-600">Error parcial</span>
+    return null
   }
 
   // ── Sync publication descriptions ─────────────────────────────────
@@ -430,7 +445,7 @@ export default function AdminPage() {
                     <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">#</th>
                     <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Título</th>
                     <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Estado</th>
-                    <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Páginas</th>
+                    <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Imágenes</th>
                     <th className="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Acciones</th>
                   </tr>
                 </thead>
@@ -455,32 +470,35 @@ export default function AdminPage() {
                         </span>
                       </td>
 
-                      {/* ── Render cell ── */}
+                      {/* ── Images status + Render cell ── */}
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => renderIssue(issue)}
-                            disabled={rendering[issue.id]}
-                            title={issue.page_images_json ? 'Re-renderizar páginas' : 'Renderizar páginas (pre-rendering)'}
-                            className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50 ${
-                              issue.page_images_json
-                                ? 'border-blue-200 text-blue-600 hover:bg-blue-50'
-                                : 'border-[#E5E5E5] text-[#555] hover:border-[#080808]'
-                            }`}
-                          >
-                            {rendering[issue.id]
-                              ? <><span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />Procesando…</>
-                              : issue.page_images_json
-                                ? <>↺ Re-render</>
-                                : <>⚡ Renderizar</>
-                            }
-                          </button>
-                          {renderResult[issue.id]?.msg && (
-                            <span className={`text-xs max-w-[180px] truncate ${renderResult[issue.id].ok ? 'text-green-600' : 'text-red-500'}`}
-                              title={renderResult[issue.id].msg}>
-                              {renderResult[issue.id].msg}
-                            </span>
-                          )}
+                        <div className="flex flex-col gap-1.5">
+                          {imgStatusBadge(issue.images_status)}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => renderIssue(issue)}
+                              disabled={rendering[issue.id]}
+                              title={issue.images_status === 'ready' ? 'Re-renderizar páginas' : 'Renderizar páginas (pre-rendering)'}
+                              className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50 ${
+                                issue.images_status === 'ready'
+                                  ? 'border-blue-200 text-blue-600 hover:bg-blue-50'
+                                  : 'border-[#E5E5E5] text-[#555] hover:border-[#080808]'
+                              }`}
+                            >
+                              {rendering[issue.id]
+                                ? <><span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />Procesando…</>
+                                : issue.images_status === 'ready'
+                                  ? <>↺ Re-render</>
+                                  : <>⚡ Renderizar</>
+                              }
+                            </button>
+                            {renderResult[issue.id]?.msg && (
+                              <span className={`text-xs max-w-[160px] truncate ${renderResult[issue.id].ok ? 'text-green-600' : 'text-red-500'}`}
+                                title={renderResult[issue.id].msg}>
+                                {renderResult[issue.id].msg}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
 
@@ -640,3 +658,4 @@ export default function AdminPage() {
     </div>
   )
 }
+
