@@ -35,12 +35,14 @@ export async function POST(req: NextRequest) {
   const { data: issue, error: dbError } = await supabase
     .from('issues')
     .upsert({
-      publication_id: publicationId,
-      issue_number:   issueNumber,
+      publication_id:   publicationId,
+      issue_number:     issueNumber,
       title,
-      cover_url:      coverPublic.publicUrl,
-      pdf_url:        resolvedPdfUrl,
-      is_published:   isPublished,
+      cover_url:        coverPublic.publicUrl,
+      pdf_url:          resolvedPdfUrl,
+      is_published:     isPublished,
+      images_status:    'pending',
+      page_images_json: null,
     }, { onConflict: 'publication_id,issue_number', ignoreDuplicates: false })
     .select()
     .single()
