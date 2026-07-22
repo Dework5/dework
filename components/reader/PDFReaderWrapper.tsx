@@ -44,9 +44,10 @@ interface Props {
   publicationName?: string
   issueTitle?:      string
   preRendered?:     PreRenderedImages | null
+  imagesStatus?:    'pending' | 'processing' | 'ready' | 'partial_error'
 }
 
-export function PDFReaderWrapper({ pdfUrl, issueId, totalPages, coverUrl, backUrl, downloadUrl, publicationName, issueTitle, preRendered }: Props) {
+export function PDFReaderWrapper({ pdfUrl, issueId, totalPages, coverUrl, backUrl, downloadUrl, publicationName, issueTitle, preRendered, imagesStatus }: Props) {
   return (
     <PDFReader
       pdfUrl={pdfUrl}
@@ -58,6 +59,7 @@ export function PDFReaderWrapper({ pdfUrl, issueId, totalPages, coverUrl, backUr
       publicationName={publicationName}
       issueTitle={issueTitle}
       preRendered={preRendered}
+      imagesStatus={imagesStatus}
     />
   )
 }
