@@ -1,9 +1,9 @@
-﻿import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
+import { Suspense } from 'react'
 import { createServerClient } from '@/lib/supabase-server'
-import { PDFReaderWrapper } from '@/components/reader/PDFReaderWrapper'
+import { PDFReaderWrapper, LoadingFallback } from '@/components/reader/PDFReaderWrapper'
 
-// ISR: cache reader pages for 60 s
 export const revalidate = 60
 
 interface Props {
@@ -62,32 +62,34 @@ export default async function ReaderPage({ params }: Props) {
 
   const { issue, publication } = result
 
-  const pageTexts: Record<string, string> = (issue.page_texts_json as Record<string, string>) ?? {}
-  const seoText = Object.values(pageTexts).join(' ')
+  const seoText = issue.page_texts_json
+    ? Object.values(issue.page_texts_json as Record<string, string>).join(' ')
+    : null
 
   return (
     <>
-      {seoText && (
+      {seoText ? (
         <p
           aria-hidden="true"
           style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
         >
           {seoText}
         </p>
-      )}
-      <PDFReaderWrapper
-        pdfUrl={proxyPdf(issue.pdf_url) ?? ''}
-        issueId={issue.id}
-        totalPages={issue.page_count}
-        coverUrl={issue.cover_url || undefined}
-        backUrl={`/revistas/${slug}`}
-        downloadUrl={issue.pdf_url || undefined}
-        publicationName={publication.name}
-        issueTitle={`#${issue.issue_number}`}
-        preRendered={issue.page_images_json ?? null}
-        imagesStatus={issue.images_status ?? 'pending'}
-      />
+      ) : null}
+      <Suspense fallback={<LoadingFallback />}>
+        <PDFReaderWrapper
+          pdfUrl={proxyPdf(issue.pdf_url) ?? ''}
+          issueId={issue.id}
+          totalPages={issue.page_count}
+          coverUrl={issue.cover_url || undefined}
+          backUrl={`/revistas/${slug}`}
+          downloadUrl={issue.pdf_url || undefined}
+          publicationName={publication.name}
+          issueTitle={`#${issue.issue_number}`}
+          preRendered={issue.page_images_json ?? null}
+          imagesStatus={issue.images_status ?? 'pending'}
+        />
+      </Suspense>
     </>
   )
 }
-
