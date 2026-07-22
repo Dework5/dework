@@ -73,6 +73,7 @@ export default async function ReaderPage({ params }: Props) {
       publicationName={publication.name}
       issueTitle={`#${issue.issue_number}`}
       preRendered={issue.page_images_json ?? null}
+      imagesStatus={issue.images_status ?? 'pending'}
     />
   )
 }
