@@ -1,4 +1,4 @@
-/** Stored in issues.page_images_json after server-side pre-rendering */
+﻿/** Stored in issues.page_images_json after server-side pre-rendering */
 export interface PreRenderedImages {
   isSpreadPDF: boolean
   isAllSpread: boolean
@@ -38,6 +38,7 @@ export interface Issue {
   created_at: string
   page_images_json?: PreRenderedImages | null
   images_status?: 'pending' | 'processing' | 'ready' | 'partial_error'
+  page_texts_json?: Record<string, string> | null
   publication?: Publication
 }
 
@@ -59,3 +60,4 @@ export interface PageView {
 export interface PublicationWithLatestIssue extends Publication {
   latest_issue?: Issue | null
 }
+
