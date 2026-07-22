@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Minimize2 } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 import type { PreRenderedImages } from '@/lib/types'
 
@@ -34,12 +34,15 @@ export function PDFReader({
     Object.keys(preRendered.slots).length > 0
   )
 
+  // ── Canvas / task refs ───────────────────────────────────────────────────
   const leftCanvasRef  = useRef<HTMLCanvasElement>(null)
   const rightCanvasRef = useRef<HTMLCanvasElement>(null)
   const leftTaskRef    = useRef<{ current: RenderTaskLike | null }>({ current: null })
   const rightTaskRef   = useRef<{ current: RenderTaskLike | null }>({ current: null })
   const timerRef       = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const contentRef     = useRef<HTMLDivElement>(null)
 
+  // ── Reader state ─────────────────────────────────────────────────────────
   const [pdf,         setPdf]         = useState<pdfjsLib.PDFDocumentProxy | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [numPages,    setNumPages]    = useState(totalPages || 0)
@@ -50,7 +53,40 @@ export function PDFReader({
   const [isChanging,  setIsChanging]  = useState(false)
   const [error,       setError]       = useState<string | null>(null)
 
-  // Mobile detection
+  // ── Zoom / pan state ─────────────────────────────────────────────────────
+  const [zoom, setZoom] = useState(1)
+  const [panX, setPanX] = useState(0)
+  const [panY, setPanY] = useState(0)
+  const zoomRef           = useRef(1)
+  const panRef            = useRef({ x: 0, y: 0 })
+  // drag
+  const isDragging        = useRef(false)
+  const dragStart         = useRef({ x: 0, y: 0 })
+  const panAtDragStart    = useRef({ x: 0, y: 0 })
+  // pinch
+  const isPinching        = useRef(false)
+  const pinchDist         = useRef<number | null>(null)
+  const pinchZoomStart    = useRef(1)
+  // swipe / double-tap
+  const swipeStart        = useRef<{ x: number; y: number } | null>(null)
+  const lastTapTime       = useRef(0)
+  // navigate ref for touch handler (avoids stale closure)
+  const navigateRef       = useRef<((dir: number) => void) | null>(null)
+
+  const applyZoom = useCallback((z: number, px = panRef.current.x, py = panRef.current.y) => {
+    const newZ  = Math.max(0.5, Math.min(4, z))
+    const newPx = newZ <= 1.01 ? 0 : px
+    const newPy = newZ <= 1.01 ? 0 : py
+    zoomRef.current = newZ
+    panRef.current  = { x: newPx, y: newPy }
+    setZoom(newZ)
+    setPanX(newPx)
+    setPanY(newPy)
+  }, [])
+
+  const resetZoom = useCallback(() => applyZoom(1, 0, 0), [applyZoom])
+
+  // ── Mobile detection ─────────────────────────────────────────────────────
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
     check()
@@ -58,7 +94,7 @@ export function PDFReader({
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  // View tracking
+  // ── View tracking ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!issueId) return
     try {
@@ -73,7 +109,7 @@ export function PDFReader({
     } catch (_) {}
   }, [issueId])
 
-  // Load: use pre-rendered images when ready, otherwise load PDF.js
+  // ── Load: pre-rendered images or PDF.js fallback ─────────────────────────
   useEffect(() => {
     if (imagesReady && preRendered) {
       setNumPages(preRendered.totalPdfPages)
@@ -102,21 +138,21 @@ export function PDFReader({
     return () => { task.destroy().catch(() => {}) }
   }, [pdfUrl, imagesReady, preRendered])
 
-  // Prefetch adjacent images to eliminate load delay on next/prev turn
+  // ── Prefetch adjacent images ──────────────────────────────────────────────
   useEffect(() => {
     if (!imagesReady || !preRendered?.slots) return
     const neighbors = [currentPage - 1, currentPage + 1].filter(n => n >= 1 && n <= numPages)
     for (const n of neighbors) {
       if (preRendered.isSpreadPDF) {
-        const l = preRendered.slots[`${n}_L`]; if (l) { const i = new Image(); i.src = l }
-        const r = preRendered.slots[`${n}_R`]; if (r) { const i = new Image(); i.src = r }
+        const l = preRendered.slots[`${n}_L`]; if (l) { const img = new Image(); img.src = l }
+        const r = preRendered.slots[`${n}_R`]; if (r) { const img = new Image(); img.src = r }
       } else {
-        const u = preRendered.slots[String(n)]; if (u) { const i = new Image(); i.src = u }
+        const u = preRendered.slots[String(n)]; if (u) { const img = new Image(); img.src = u }
       }
     }
   }, [currentPage, imagesReady, preRendered, numPages])
 
-  // PDF.js canvas rendering (fallback when images not ready)
+  // ── PDF.js canvas rendering ───────────────────────────────────────────────
   const renderToCanvas = useCallback(async (
     pageNum:  number,
     canvas:   HTMLCanvasElement,
@@ -165,10 +201,12 @@ export function PDFReader({
     }
   }, [pdf, currentPage, isMobile, showDouble, numPages, isLandscape, imagesReady, renderToCanvas])
 
-  // Keyboard navigation
+  // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {
     const double = !isLandscape && (!isMobile || showDouble)
     const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { resetZoom(); return }
+      if (zoomRef.current > 1.01) return
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         setCurrentPage(p => {
           if (!double) return Math.min(p + 1, numPages)
@@ -185,9 +223,123 @@ export function PDFReader({
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [numPages, isMobile, showDouble, isLandscape])
+  }, [numPages, isMobile, showDouble, isLandscape, resetZoom])
 
+  // ── Ctrl+wheel zoom ───────────────────────────────────────────────────────
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return
+      e.preventDefault()
+      const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12
+      applyZoom(zoomRef.current * factor)
+    }
+    window.addEventListener('wheel', onWheel, { passive: false })
+    return () => window.removeEventListener('wheel', onWheel)
+  }, [applyZoom])
+
+  // ── Mouse drag pan ────────────────────────────────────────────────────────
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (zoomRef.current <= 1.01) return
+    isDragging.current     = true
+    dragStart.current      = { x: e.clientX, y: e.clientY }
+    panAtDragStart.current = { ...panRef.current }
+    e.preventDefault()
+  }, [])
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return
+      const dx = e.clientX - dragStart.current.x
+      const dy = e.clientY - dragStart.current.y
+      applyZoom(zoomRef.current, panAtDragStart.current.x + dx, panAtDragStart.current.y + dy)
+    }
+    const onMouseUp = () => { isDragging.current = false }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [applyZoom])
+
+  // ── Touch: pinch-to-zoom + drag pan + swipe nav + double-tap reset ────────
+  useEffect(() => {
+    const el = contentRef.current
+    if (!el) return
+
+    const getDist = (t: TouchList) => {
+      const dx = t[0].clientX - t[1].clientX
+      const dy = t[0].clientY - t[1].clientY
+      return Math.sqrt(dx * dx + dy * dy)
+    }
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        isPinching.current     = true
+        pinchDist.current      = getDist(e.touches)
+        pinchZoomStart.current = zoomRef.current
+        swipeStart.current     = null
+      } else if (e.touches.length === 1) {
+        const t = e.touches[0]
+        const now = Date.now()
+        if (now - lastTapTime.current < 300 && zoomRef.current !== 1) {
+          resetZoom()
+        }
+        lastTapTime.current = now
+        swipeStart.current  = { x: t.clientX, y: t.clientY }
+        if (zoomRef.current > 1.01) {
+          isDragging.current     = true
+          dragStart.current      = { x: t.clientX, y: t.clientY }
+          panAtDragStart.current = { ...panRef.current }
+        }
+      }
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && isPinching.current && pinchDist.current !== null) {
+        e.preventDefault()
+        const dist   = getDist(e.touches)
+        const factor = dist / pinchDist.current
+        applyZoom(pinchZoomStart.current * factor)
+      } else if (e.touches.length === 1 && isDragging.current && zoomRef.current > 1.01) {
+        e.preventDefault()
+        const dx = e.touches[0].clientX - dragStart.current.x
+        const dy = e.touches[0].clientY - dragStart.current.y
+        applyZoom(zoomRef.current, panAtDragStart.current.x + dx, panAtDragStart.current.y + dy)
+      }
+    }
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) {
+        isPinching.current = false
+        pinchDist.current  = null
+      }
+      if (e.touches.length === 0) {
+        isDragging.current = false
+        if (swipeStart.current && zoomRef.current <= 1.01 && e.changedTouches.length === 1) {
+          const dx = e.changedTouches[0].clientX - swipeStart.current.x
+          const dy = e.changedTouches[0].clientY - swipeStart.current.y
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+            navigateRef.current?.(dx < 0 ? 1 : -1)
+          }
+        }
+        swipeStart.current = null
+      }
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchmove',  onTouchMove,  { passive: false })
+    el.addEventListener('touchend',   onTouchEnd,   { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove',  onTouchMove)
+      el.removeEventListener('touchend',   onTouchEnd)
+    }
+  }, [applyZoom, resetZoom])
+
+  // ── navigate ──────────────────────────────────────────────────────────────
   const navigate = useCallback((dir: number) => {
+    if (zoomRef.current > 1.01) return
     const double = !isLandscape && (!isMobile || showDouble)
     setIsChanging(true)
     if (timerRef.current) clearTimeout(timerRef.current)
@@ -206,41 +358,47 @@ export function PDFReader({
     }, 120)
   }, [isMobile, showDouble, numPages, isLandscape])
 
-  const double     = !isLandscape && (!isMobile || showDouble)
-  const isCover    = currentPage === 1
-  const canPrev    = currentPage > 1
-  const canNext    = double
+  useEffect(() => { navigateRef.current = navigate }, [navigate])
+
+  // ── Derived values ────────────────────────────────────────────────────────
+  const double    = !isLandscape && (!isMobile || showDouble)
+  const isCover   = currentPage === 1
+  const canPrev   = currentPage > 1
+  const canNext   = double
     ? (isCover ? numPages > 1 : currentPage + 2 <= numPages)
     : currentPage < numPages
-  const title      = [publicationName, issueTitle].filter(Boolean).join(' ')
-  const pageLabel  = (double && !isCover && currentPage + 1 <= numPages)
+  const title     = [publicationName, issueTitle].filter(Boolean).join(' ')
+  const pageLabel = (double && !isCover && currentPage + 1 <= numPages)
     ? `${currentPage} – ${currentPage + 1}`
     : String(currentPage)
+  const isZoomed  = zoom > 1.01
 
+  // ── Image helpers ─────────────────────────────────────────────────────────
   const slot = (n: number, side?: 'L' | 'R') => {
     if (!preRendered?.slots) return ''
     return (side ? preRendered.slots[`${n}_${side}`] : preRendered.slots[String(n)]) || ''
   }
 
   const imgStyle = (pos: 'single' | 'left' | 'right'): React.CSSProperties => ({
-    display:    'block',
-    objectFit:  'contain',
-    maxHeight:  'calc(100vh - 140px)',
-    maxWidth:   pos === 'single' ? '92vw' : '48vw',
-    boxShadow:  pos === 'single'
+    display:          'block',
+    objectFit:        'contain',
+    maxHeight:        'calc(100vh - 140px)',
+    maxWidth:         pos === 'single' ? '92vw' : '48vw',
+    boxShadow:        pos === 'single'
       ? '0 4px 32px rgba(0,0,0,0.18)'
       : pos === 'left'
         ? '-4px 2px 24px rgba(0,0,0,0.16), 2px 0 8px rgba(0,0,0,0.10)'
         : '4px 2px 24px rgba(0,0,0,0.16), -2px 0 8px rgba(0,0,0,0.10)',
-    borderRadius: '2px',
+    borderRadius:     '2px',
+    userSelect:       'none',
+    WebkitUserSelect: 'none',
+    pointerEvents:    'none',
   })
 
   const renderImages = () => {
     if (!preRendered) return null
     const { isSpreadPDF, isAllSpread } = preRendered
-
     if (isSpreadPDF) {
-      // Page 1 of a mixed-spread PDF is a portrait cover
       if (!isAllSpread && currentPage === 1) {
         return <img src={slot(1)} alt="Portada" style={imgStyle('single')} />
       }
@@ -251,8 +409,6 @@ export function PDFReader({
         </>
       )
     }
-
-    // Portrait PDF: standard single or double page
     const rightUrl = (!isCover && double && currentPage + 1 <= numPages) ? slot(currentPage + 1) : null
     return (
       <>
@@ -277,7 +433,7 @@ export function PDFReader({
 
   return (
     <div style={{ background: '#f5f0e8' }} className="min-h-screen flex flex-col select-none overflow-hidden">
-      {/* Top bar */}
+      {/* ── Top bar ─────────────────────────────────────────────────── */}
       <div style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }} className="h-11 flex items-center px-5 gap-4 flex-shrink-0">
         {backUrl && (
           <Link href={backUrl} className="flex items-center gap-1 text-black/85 text-[10px] tracking-[0.2em] uppercase hover:text-black transition-colors">
@@ -295,15 +451,23 @@ export function PDFReader({
         )}
       </div>
 
-      {/* Main canvas / image area */}
-      <div className="flex-1 flex items-center justify-center relative py-6 overflow-hidden">
-        <button
-          onClick={() => navigate(-1)}
-          disabled={!canPrev || isLoading}
-          className="absolute left-0 top-0 bottom-0 w-14 md:w-20 flex items-center justify-center z-10 disabled:pointer-events-none group hover:bg-black/[0.03] transition-colors"
-        >
-          <ChevronLeft size={22} className="text-black/30 group-hover:text-black/65 transition-colors duration-150" />
-        </button>
+      {/* ── Main content area ────────────────────────────────────────── */}
+      <div
+        ref={contentRef}
+        className="flex-1 flex items-center justify-center relative py-6 overflow-hidden"
+        style={{ cursor: isZoomed ? (isDragging.current ? 'grabbing' : 'grab') : 'default' }}
+        onMouseDown={onMouseDown}
+      >
+        {/* Nav arrows hidden when zoomed */}
+        {!isZoomed && (
+          <button
+            onClick={() => navigate(-1)}
+            disabled={!canPrev || isLoading}
+            className="absolute left-0 top-0 bottom-0 w-14 md:w-20 flex items-center justify-center z-10 disabled:pointer-events-none group hover:bg-black/[0.03] transition-colors"
+          >
+            <ChevronLeft size={22} className="text-black/30 group-hover:text-black/65 transition-colors duration-150" />
+          </button>
+        )}
 
         {isLoading ? (
           <div className="flex items-center gap-0.5">
@@ -313,7 +477,13 @@ export function PDFReader({
         ) : (
           <div
             className="flex items-start"
-            style={{ opacity: isChanging ? 0 : 1, transition: 'opacity 0.18s ease-out' }}
+            style={{
+              opacity:         isChanging ? 0 : 1,
+              transition:      'opacity 0.18s ease-out',
+              transform:       `translate(${panX}px, ${panY}px) scale(${zoom})`,
+              transformOrigin: 'center center',
+              willChange:      'transform',
+            }}
           >
             {imagesReady ? renderImages() : (
               <>
@@ -344,26 +514,64 @@ export function PDFReader({
           </div>
         )}
 
-        <button
-          onClick={() => navigate(1)}
-          disabled={!canNext || isLoading}
-          className="absolute right-0 top-0 bottom-0 w-14 md:w-20 flex items-center justify-center z-10 disabled:pointer-events-none group hover:bg-black/[0.03] transition-colors"
-        >
-          <ChevronRight size={22} className="text-black/30 group-hover:text-black/65 transition-colors duration-150" />
-        </button>
+        {/* Reset zoom button, visible only when zoomed */}
+        {isZoomed && !isLoading && (
+          <button
+            onClick={resetZoom}
+            title="Restablecer zoom (Esc)"
+            className="absolute top-3 right-3 z-20 bg-black/10 hover:bg-black/20 text-black/55 rounded-full p-2 transition-colors"
+          >
+            <Minimize2 size={13} />
+          </button>
+        )}
+
+        {!isZoomed && (
+          <button
+            onClick={() => navigate(1)}
+            disabled={!canNext || isLoading}
+            className="absolute right-0 top-0 bottom-0 w-14 md:w-20 flex items-center justify-center z-10 disabled:pointer-events-none group hover:bg-black/[0.03] transition-colors"
+          >
+            <ChevronRight size={22} className="text-black/30 group-hover:text-black/65 transition-colors duration-150" />
+          </button>
+        )}
       </div>
 
-      {/* Bottom pagination bar */}
-      <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }} className="h-10 flex items-center justify-center gap-5 flex-shrink-0">
-        <button onClick={() => navigate(-1)} disabled={!canPrev || isLoading} className="text-black/25 hover:text-black/55 transition-colors disabled:opacity-10">
-          <ChevronLeft size={15} />
-        </button>
-        <span className="text-black/40 text-[11px] tracking-[0.25em] tabular-nums">
-          {isLoading ? '…' : `${pageLabel} / ${numPages}`}
-        </span>
-        <button onClick={() => navigate(1)} disabled={!canNext || isLoading} className="text-black/25 hover:text-black/55 transition-colors disabled:opacity-10">
-          <ChevronRight size={15} />
-        </button>
+      {/* ── Bottom bar ───────────────────────────────────────────────── */}
+      <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }} className="h-10 flex items-center justify-between px-5 flex-shrink-0">
+        {/* Pagination */}
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} disabled={!canPrev || isLoading || isZoomed} className="text-black/25 hover:text-black/55 transition-colors disabled:opacity-20">
+            <ChevronLeft size={15} />
+          </button>
+          <span className="text-black/40 text-[11px] tracking-[0.25em] tabular-nums">
+            {isLoading ? '…' : `${pageLabel} / ${numPages}`}
+          </span>
+          <button onClick={() => navigate(1)} disabled={!canNext || isLoading || isZoomed} className="text-black/25 hover:text-black/55 transition-colors disabled:opacity-20">
+            <ChevronRight size={15} />
+          </button>
+        </div>
+        {/* Zoom controls */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => applyZoom(zoomRef.current / 1.25)}
+            disabled={zoom <= 0.51}
+            className="text-black/30 hover:text-black/60 transition-colors disabled:opacity-20 p-1"
+            title="Alejar"
+          >
+            <ZoomOut size={14} />
+          </button>
+          <span className="text-[10px] text-black/30 tabular-nums w-9 text-center select-none">
+            {Math.round(zoom * 100)}%
+          </span>
+          <button
+            onClick={() => applyZoom(zoomRef.current * 1.25)}
+            disabled={zoom >= 3.99}
+            className="text-black/30 hover:text-black/60 transition-colors disabled:opacity-20 p-1"
+            title="Acercar"
+          >
+            <ZoomIn size={14} />
+          </button>
+        </div>
       </div>
     </div>
   )
