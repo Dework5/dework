@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+﻿import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { createServerClient } from '@/lib/supabase-server'
 import { PDFReaderWrapper } from '@/components/reader/PDFReaderWrapper'
@@ -62,18 +62,32 @@ export default async function ReaderPage({ params }: Props) {
 
   const { issue, publication } = result
 
+  const pageTexts: Record<string, string> = (issue.page_texts_json as Record<string, string>) ?? {}
+  const seoText = Object.values(pageTexts).join(' ')
+
   return (
-    <PDFReaderWrapper
-      pdfUrl={proxyPdf(issue.pdf_url) ?? ''}
-      issueId={issue.id}
-      totalPages={issue.page_count}
-      coverUrl={issue.cover_url || undefined}
-      backUrl={`/revistas/${slug}`}
-      downloadUrl={issue.pdf_url || undefined}
-      publicationName={publication.name}
-      issueTitle={`#${issue.issue_number}`}
-      preRendered={issue.page_images_json ?? null}
-      imagesStatus={issue.images_status ?? 'pending'}
-    />
+    <>
+      {seoText && (
+        <p
+          aria-hidden="true"
+          style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
+        >
+          {seoText}
+        </p>
+      )}
+      <PDFReaderWrapper
+        pdfUrl={proxyPdf(issue.pdf_url) ?? ''}
+        issueId={issue.id}
+        totalPages={issue.page_count}
+        coverUrl={issue.cover_url || undefined}
+        backUrl={`/revistas/${slug}`}
+        downloadUrl={issue.pdf_url || undefined}
+        publicationName={publication.name}
+        issueTitle={`#${issue.issue_number}`}
+        preRendered={issue.page_images_json ?? null}
+        imagesStatus={issue.images_status ?? 'pending'}
+      />
+    </>
   )
 }
+
