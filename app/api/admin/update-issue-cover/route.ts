@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       .upload(storagePath, buffer, {
         contentType: file.type || 'image/jpeg',
         upsert: true,
+        cacheControl: '86400',
       })
 
     if (uploadError) {
@@ -80,3 +81,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: String(e) }, { status: 500 })
   }
 }
+
