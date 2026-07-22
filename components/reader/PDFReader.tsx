@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
@@ -41,6 +41,8 @@ export function PDFReader({
   const rightTaskRef   = useRef<{ current: RenderTaskLike | null }>({ current: null })
   const timerRef       = useRef<ReturnType<typeof setTimeout> | null>(null)
   const contentRef     = useRef<HTMLDivElement>(null)
+  const thumbStripRef  = useRef<HTMLDivElement>(null)
+  const activeThumbRef = useRef<HTMLButtonElement | null>(null)
 
   // ── Reader state ─────────────────────────────────────────────────────────
   const [pdf,         setPdf]         = useState<pdfjsLib.PDFDocumentProxy | null>(null)
@@ -48,7 +50,7 @@ export function PDFReader({
   const [numPages,    setNumPages]    = useState(totalPages || 0)
   const [isMobile,    setIsMobile]    = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
-  const [showDouble,  setShowDouble]  = useState(false)
+  const [showDouble,  setShowDouble]  = useState(true)
   const [isLoading,   setIsLoading]   = useState(true)
   const [isChanging,  setIsChanging]  = useState(false)
   const [error,       setError]       = useState<string | null>(null)
@@ -184,7 +186,7 @@ export function PDFReader({
 
   useEffect(() => {
     if (!pdf || imagesReady) return
-    const double = !isLandscape && (!isMobile || showDouble)
+    const double = !isLandscape && (!isMobile && showDouble)
     const availH = window.innerHeight - 44 - 40 - 48
     const maxW   = double
       ? Math.min((window.innerWidth - 16) / 2, 580)
@@ -203,7 +205,7 @@ export function PDFReader({
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {
-    const double = !isLandscape && (!isMobile || showDouble)
+    const double = !isLandscape && (!isMobile && showDouble)
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { resetZoom(); return }
       if (zoomRef.current > 1.01) return
@@ -340,7 +342,7 @@ export function PDFReader({
   // ── navigate ──────────────────────────────────────────────────────────────
   const navigate = useCallback((dir: number) => {
     if (zoomRef.current > 1.01) return
-    const double = !isLandscape && (!isMobile || showDouble)
+    const double = !isLandscape && (!isMobile && showDouble)
     setIsChanging(true)
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
@@ -360,8 +362,13 @@ export function PDFReader({
 
   useEffect(() => { navigateRef.current = navigate }, [navigate])
 
+  // Auto-scroll thumbnail strip so the active thumb stays visible
+  useEffect(() => {
+    activeThumbRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }, [currentPage])
+
   // ── Derived values ────────────────────────────────────────────────────────
-  const double    = !isLandscape && (!isMobile || showDouble)
+  const double    = !isLandscape && (!isMobile && showDouble)
   const isCover   = currentPage === 1
   const canPrev   = currentPage > 1
   const canNext   = double
@@ -441,12 +448,12 @@ export function PDFReader({
           </Link>
         )}
         {title && <span className="text-black/70 text-[10px] tracking-[0.12em] uppercase flex-1 truncate">{title}</span>}
-        {isMobile && !isLandscape && (
+        {!isMobile && !isLandscape && (
           <button
             onClick={() => { setShowDouble(s => !s); setCurrentPage(1) }}
             className="text-black/65 text-[9px] tracking-[0.18em] uppercase hover:text-black transition-colors"
           >
-            {showDouble ? '1 pag' : '2 pag'}
+            {showDouble ? '1 pág' : '2 págs'}
           </button>
         )}
       </div>
@@ -536,6 +543,46 @@ export function PDFReader({
         )}
       </div>
 
+      {/* ── Thumbnail strip ─────────────────────────────────────────── */}
+      {imagesReady && !isLoading && !isZoomed && preRendered && (
+        <div
+          ref={thumbStripRef}
+          className="flex gap-1.5 px-4 py-2 overflow-x-auto flex-shrink-0"
+          style={{ background: 'rgba(0,0,0,0.05)', borderTop: '1px solid rgba(0,0,0,0.07)', scrollbarWidth: 'none' }}
+        >
+          {Array.from({ length: numPages }, (_, i) => i + 1).map(n => {
+            const isActivePage = n === currentPage || (double && !isCover && n === currentPage + 1)
+            const thumbUrl = preRendered.isSpreadPDF
+              ? (preRendered.slots[`${n}_L`] || '')
+              : (preRendered.slots[String(n)] || '')
+            if (!thumbUrl) return null
+            return (
+              <button
+                key={n}
+                ref={n === currentPage ? activeThumbRef : undefined}
+                onClick={() => { resetZoom(); setCurrentPage(n) }}
+                title={`Pág. ${n}`}
+                className="flex-shrink-0 focus:outline-none"
+                style={{ opacity: isActivePage ? 1 : 0.38, transition: 'opacity 0.15s' }}
+              >
+                <img
+                  src={thumbUrl}
+                  alt={`Pág. ${n}`}
+                  style={{
+                    height: 52,
+                    width: 'auto',
+                    borderRadius: 2,
+                    display: 'block',
+                    border: isActivePage ? '2px solid rgba(0,0,0,0.75)' : '2px solid transparent',
+                    pointerEvents: 'none',
+                  }}
+                />
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* ── Bottom bar ───────────────────────────────────────────────── */}
       <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }} className="h-10 flex items-center justify-between px-5 flex-shrink-0">
         {/* Pagination */}
@@ -578,3 +625,4 @@ export function PDFReader({
 }
 
 export default PDFReader
+
