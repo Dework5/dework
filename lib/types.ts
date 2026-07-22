@@ -37,6 +37,7 @@ export interface Issue {
   published_at: string
   created_at: string
   page_images_json?: PreRenderedImages | null
+  images_status?: 'pending' | 'processing' | 'ready' | 'partial_error'
   publication?: Publication
 }
 
