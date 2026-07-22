@@ -1,4 +1,4 @@
-﻿﻿﻿'use client'
+﻿﻿﻿﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { AdminLogin } from '@/components/admin/AdminLogin'
@@ -238,12 +238,14 @@ export default function AdminPage() {
   }
 
   const bulkRender = async () => {
-    const pending = issues.filter(i => i.images_status !== 'ready')
-    if (pending.length === 0) { alert('Todas las ediciones ya tienen imágenes listas.'); return }
+    const pending = issues.filter(i => i.images_status !== 'ready' || !i.page_texts_json)
+    if (pending.length === 0) { alert('Todas las ediciones ya están procesadas e indexadas.'); return }
     setBulkRendering(true)
     setBulkProgress({ done: 0, total: pending.length })
     for (let idx = 0; idx < pending.length; idx++) {
-      await renderIssue(pending[idx])
+      const issue = pending[idx]
+      if (issue.images_status !== 'ready') await renderIssue(issue)
+      await extractText(issue)
       setBulkProgress(prev => ({ ...prev, done: idx + 1 }))
     }
     setBulkRendering(false)
@@ -490,7 +492,7 @@ export default function AdminPage() {
                   className="text-[#444] border border-[#E5E5E5] bg-white text-xs px-4 py-2.5 rounded-lg hover:border-[#080808] transition-colors disabled:opacity-50 flex items-center gap-2">
                   {bulkRendering
                     ? <><span className="w-3 h-3 border border-[#AAA] border-t-transparent rounded-full animate-spin" />{bulkProgress.done}/{bulkProgress.total} procesando…</>
-                    : <>⚡ Reprocesar pendientes ({issues.filter(i => i.images_status !== 'ready').length})</>
+                    : <>⚡ Reprocesar + indexar ({issues.filter(i => i.images_status !== 'ready' || !i.page_texts_json).length})</>
                   }
                 </button>
                 <button onClick={() => setActiveTab('upload')}
@@ -744,6 +746,8 @@ export default function AdminPage() {
     </div>
   )
 }
+
+
 
 
 
