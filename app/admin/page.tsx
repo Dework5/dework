@@ -1,4 +1,4 @@
-﻿'use client'
+﻿﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { AdminLogin } from '@/components/admin/AdminLogin'
@@ -36,9 +36,11 @@ export default function AdminPage() {
   const [editNumber, setEditNumber] = useState('')
   const [editPublished, setEditPublished] = useState(true)
   const [editSaving, setEditSaving] = useState(false)
-  const [deleting,     setDeleting]     = useState<Record<string, boolean>>({})
-  const [rendering,    setRendering]    = useState<Record<string, boolean>>({})
-  const [renderResult, setRenderResult] = useState<Record<string, { ok: boolean; msg: string }>>({})
+  const [deleting,       setDeleting]       = useState<Record<string, boolean>>({})
+  const [rendering,      setRendering]      = useState<Record<string, boolean>>({})
+  const [renderResult,   setRenderResult]   = useState<Record<string, { ok: boolean; msg: string }>>({})
+  const [extracting,     setExtracting]     = useState<Record<string, boolean>>({})
+  const [extractResult,  setExtractResult]  = useState<Record<string, { ok: boolean; msg: string }>>({})
   const [showMigrationSQL, setShowMigrationSQL] = useState(false)
 
   useEffect(() => {
@@ -231,6 +233,43 @@ export default function AdminPage() {
       setIssues(prev => prev.map(i => i.id === issue.id ? { ...i, images_status: 'partial_error' as const } : i))
     }
     setRendering(prev => ({ ...prev, [issue.id]: false }))
+  }
+
+  // ── Extract PDF text for SEO ──────────────────────────────────────
+  const extractText = async (issue: Issue) => {
+    setExtracting(prev => ({ ...prev, [issue.id]: true }))
+    setExtractResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: 'Extrayendo…' } }))
+    try {
+      const pw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || ''
+      let startPage     = 1
+      let totalPages    = 0
+      let pagesExtracted = 0
+      while (true) {
+        const res  = await fetch('/api/extract-text', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: pw },
+          body:    JSON.stringify({ issueId: issue.id, startPage }),
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          setExtractResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: data.error || 'Error' } }))
+          break
+        }
+        totalPages     = data.totalPdfPages ?? totalPages
+        pagesExtracted += data.pagesExtracted ?? 0
+        if (data.done) {
+          setExtractResult(prev => ({ ...prev, [issue.id]: { ok: true, msg: `✓ ${pagesExtracted} págs. indexadas` } }))
+          setIssues(prev => prev.map(i => i.id === issue.id ? { ...i, page_texts_json: {} } : i))
+          setTimeout(() => setExtractResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } })), 6000)
+          break
+        }
+        setExtractResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: `Extrayendo… ${pagesExtracted}/${totalPages}` } }))
+        startPage = data.nextStartPage
+      }
+    } catch (e) {
+      setExtractResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: e instanceof Error ? e.message : 'Error' } }))
+    }
+    setExtracting(prev => ({ ...prev, [issue.id]: false }))
   }
 
   // ── images_status badge helper ────────────────────────────────────
@@ -499,6 +538,29 @@ export default function AdminPage() {
                               </span>
                             )}
                           </div>
+                          {/* Text extraction sub-action */}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => extractText(issue)}
+                              disabled={extracting[issue.id]}
+                              title="Extraer texto para SEO"
+                              className="text-xs px-2.5 py-1 rounded border border-[#E5E5E5] text-[#777] hover:border-[#080808] transition-colors flex items-center gap-1 disabled:opacity-50"
+                            >
+                              {extracting[issue.id]
+                                ? <><span className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" />…</>
+                                : issue.page_texts_json ? '📝 Re-extraer' : '📝 Texto SEO'
+                              }
+                            </button>
+                            {issue.page_texts_json && !extractResult[issue.id]?.msg && (
+                              <span className="text-xs text-green-600">✓ indexado</span>
+                            )}
+                            {extractResult[issue.id]?.msg && (
+                              <span className={`text-xs max-w-[140px] truncate ${extractResult[issue.id].ok ? 'text-green-600' : 'text-red-500'}`}
+                                title={extractResult[issue.id].msg}>
+                                {extractResult[issue.id].msg}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
 
@@ -658,4 +720,5 @@ export default function AdminPage() {
     </div>
   )
 }
+
 
