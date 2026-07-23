@@ -195,7 +195,8 @@ export function PDFReader({
       const inErrorPages = (preRendered?.errorPages ?? []).includes(currentPage)
       const hasValidSlot = !inErrorPages && (
         preRendered?.isSpreadPDF
-          ? !!(preRendered.slots?.[`${currentPage}_L`] || preRendered.slots?.[`${currentPage}_R`])
+          // support old _L/_R format AND new Cloudinary plain-key format
+          ? !!(preRendered.slots?.[`${currentPage}_L`] || preRendered.slots?.[`${currentPage}_R`] || preRendered.slots?.[String(currentPage)])
           : !!(preRendered?.slots ?? {})[String(currentPage)]
       )
       if (hasValidSlot) return
@@ -420,6 +421,28 @@ export function PDFReader({
     if (!preRendered) return null
     const { isSpreadPDF, isAllSpread } = preRendered
     if (isSpreadPDF) {
+      // Cloudinary format: full landscape image in a plain-key slot (no _L/_R)
+      const fullSpreadUrl = preRendered.slots?.[String(currentPage)]
+      if (fullSpreadUrl && !preRendered.slots?.[`${currentPage}_L`]) {
+        return (
+          <img
+            src={fullSpreadUrl}
+            alt={`Pág. ${currentPage}`}
+            style={{
+              display:          'block',
+              objectFit:        'contain',
+              maxHeight:        'calc(100vh - 140px)',
+              maxWidth:         '96vw',
+              boxShadow:        '0 4px 32px rgba(0,0,0,0.18)',
+              borderRadius:     '2px',
+              userSelect:       'none',
+              WebkitUserSelect: 'none',
+              pointerEvents:    'none',
+            }}
+          />
+        )
+      }
+      // Legacy format: separate _L and _R halves
       if (!isAllSpread && currentPage === 1) {
         return <img src={slot(1)} alt="Portada" style={imgStyle('single')} />
       }
@@ -508,7 +531,7 @@ export function PDFReader({
           >
             {(imagesReady &&
               (preRendered?.isSpreadPDF
-                ? !!(preRendered?.slots?.[`${currentPage}_L`] || preRendered?.slots?.[`${currentPage}_R`])
+                ? !!(preRendered?.slots?.[`${currentPage}_L`] || preRendered?.slots?.[`${currentPage}_R`] || preRendered?.slots?.[String(currentPage)])
                 : !!slot(currentPage)) &&
               !(preRendered?.errorPages ?? []).includes(currentPage)) ? renderImages() : (
               <>
@@ -570,8 +593,9 @@ export function PDFReader({
         >
           {Array.from({ length: numPages }, (_, i) => i + 1).map(n => {
             const isActivePage = n === currentPage || (double && !isCover && n === currentPage + 1)
+            // Support both Cloudinary (plain key) and legacy (_L/_R) spread formats
             const thumbUrl = preRendered.isSpreadPDF
-              ? (preRendered.slots[`${n}_L`] || '')
+              ? (preRendered.slots[String(n)] || preRendered.slots[`${n}_L`] || '')
               : (preRendered.slots[String(n)] || '')
             if (!thumbUrl) return null
             return (
