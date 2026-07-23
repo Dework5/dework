@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -34,11 +34,12 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { issueId: id, startPage = 1, endPage, forceFlipPages = [] } = body as {
+    const { issueId: id, startPage = 1, endPage, forceFlipPages = [], forceErrorPages = [] } = body as {
       issueId?: string
       startPage?: number
       endPage?: number
       forceFlipPages?: number[]
+      forceErrorPages?: number[]
     }
     issueId = id
     if (!issueId) return NextResponse.json({ error: 'Missing issueId' }, { status: 400 })
@@ -140,6 +141,14 @@ export async function POST(req: NextRequest) {
     const pageRotations: Record<number, number> = {}
 
     for (let pageNum = batchStart; pageNum <= batchEnd; pageNum++) {
+      // Skip pages explicitly marked as broken — remove any existing stored slot
+      if ((forceErrorPages as number[]).includes(pageNum)) {
+        const removePath = `${issueId}/${pageNum}.jpg`
+        await db.storage.from('page-images').remove([removePath]).catch(() => {})
+        delete slots[String(pageNum)]
+        batchErrorPages.push(pageNum)
+        continue
+      }
       try {
         const page            = await doc.getPage(pageNum)
         const naturalRotation = page.rotate || 0
@@ -277,7 +286,7 @@ export async function POST(req: NextRequest) {
       fetch(`${baseUrl}/api/render-issue`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '' },
-        body:    JSON.stringify({ issueId, startPage: nextStart }),
+        body:    JSON.stringify({ issueId, startPage: nextStart, forceErrorPages }),
       }).catch(() => {})
     }
 
@@ -304,3 +313,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }
+
+
