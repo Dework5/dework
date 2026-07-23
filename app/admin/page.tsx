@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿'use client'
+﻿﻿﻿﻿﻿﻿﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { AdminLogin } from '@/components/admin/AdminLogin'
@@ -76,7 +76,12 @@ export default function AdminPage() {
       .then(({ data }) => { if (data) setIssues(data as (Issue & { views?: number })[]) })
   }, [isAuth])
 
-  const handleLogout = () => { sessionStorage.removeItem('adminAuth'); setIsAuth(false) }
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuth')
+    setIsAuth(false)
+    setRenderResult({})
+    setExtractResult({})
+  }
 
   const loadStats = async () => {
     if (!selectedIssue) return
@@ -752,6 +757,7 @@ export default function AdminPage() {
     </div>
   )
 }
+
 
 
 
