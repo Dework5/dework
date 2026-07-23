@@ -1,4 +1,4 @@
-﻿'use client'
+﻿﻿'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
@@ -117,10 +117,11 @@ export function PDFReader({
       setNumPages(preRendered.totalPdfPages)
       setIsLandscape(preRendered.isSpreadPDF)
       setIsLoading(false)
-      return
+      if ((preRendered.errorPages?.length ?? 0) === 0) return
+    } else {
+      setIsLoading(true)
+      setError(null)
     }
-    setIsLoading(true)
-    setError(null)
     const task = pdfjsLib.getDocument({
       url:        pdfUrl,
       cMapUrl:    '//cdnjs.cloudflare.com/ajax/libs/pdf.js/' + pdfjsLib.version + '/cmaps/',
@@ -128,15 +129,19 @@ export function PDFReader({
     })
     task.promise
       .then(async doc => {
-        const checkNum  = Math.min(2, doc.numPages)
-        const checkPage = await doc.getPage(checkNum)
-        const vp        = checkPage.getViewport({ scale: 1 })
-        setIsLandscape(vp.width > vp.height)
+        if (!imagesReady) {
+          const checkNum  = Math.min(2, doc.numPages)
+          const checkPage = await doc.getPage(checkNum)
+          const vp        = checkPage.getViewport({ scale: 1 })
+          setIsLandscape(vp.width > vp.height)
+          setNumPages(doc.numPages)
+          setIsLoading(false)
+        }
         setPdf(doc)
-        setNumPages(doc.numPages)
-        setIsLoading(false)
       })
-      .catch(() => { setError('No se pudo cargar la revista.'); setIsLoading(false) })
+      .catch(() => {
+        if (!imagesReady) { setError('No se pudo cargar la revista.'); setIsLoading(false) }
+      })
     return () => { task.destroy().catch(() => {}) }
   }, [pdfUrl, imagesReady, preRendered])
 
@@ -185,7 +190,13 @@ export function PDFReader({
   }, [pdf])
 
   useEffect(() => {
-    if (!pdf || imagesReady) return
+    if (!pdf) return
+    if (imagesReady) {
+      const slotKey = String(currentPage)
+      const hasValidSlot = !!(preRendered?.slots ?? {})[slotKey] &&
+                           !(preRendered?.errorPages ?? []).includes(currentPage)
+      if (hasValidSlot) return
+    }
     const double = !isLandscape && (!isMobile && showDouble)
     const availH = window.innerHeight - 44 - 40 - 48
     const maxW   = double
@@ -492,7 +503,7 @@ export function PDFReader({
               willChange:      'transform',
             }}
           >
-            {imagesReady ? renderImages() : (
+            {(imagesReady && !!slot(currentPage) && !(preRendered?.errorPages ?? []).includes(currentPage)) ? renderImages() : (
               <>
                 <canvas
                   ref={leftCanvasRef}
@@ -625,4 +636,6 @@ export function PDFReader({
 }
 
 export default PDFReader
+
+
 
