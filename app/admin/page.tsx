@@ -1,4 +1,4 @@
-﻿﻿﻿﻿'use client'
+﻿﻿﻿﻿﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { AdminLogin } from '@/components/admin/AdminLogin'
@@ -188,6 +188,7 @@ export default function AdminPage() {
       let startPage   = 1
       let totalPages  = 0
       let pagesRendered = 0
+      let allErrorPages: number[] = []
 
       while (true) {
         setRenderResult(prev => ({
@@ -213,18 +214,23 @@ export default function AdminPage() {
 
         totalPages    = data.totalPdfPages ?? totalPages
         pagesRendered += data.pagesRendered ?? 0
+        if (data.allErrorPages?.length) allErrorPages = data.allErrorPages
 
         if (data.done) {
+          const errNote = allErrorPages.length > 0
+            ? ` (⚠ págs. ${allErrorPages.join(', ')} con error)`
+            : ''
+          const finalStatus = allErrorPages.length > 0 ? 'partial_error' as const : 'ready' as const
           setRenderResult(prev => ({
             ...prev,
-            [issue.id]: { ok: true, msg: `✓ ${pagesRendered} páginas renderizadas` },
+            [issue.id]: { ok: allErrorPages.length === 0, msg: `✓ ${pagesRendered} págs. renderizadas${errNote}` },
           }))
           setIssues(prev => prev.map(i =>
             i.id === issue.id
-              ? { ...i, images_status: 'ready' as const, page_images_json: { isSpreadPDF: data.isSpreadPDF, isAllSpread: data.isAllSpread, pageDimensions: { w: 595, h: 842 }, totalPdfPages: data.totalPdfPages, slots: {} } }
+              ? { ...i, images_status: finalStatus, page_images_json: { isSpreadPDF: data.isSpreadPDF, isAllSpread: data.isAllSpread, pageDimensions: { w: 595, h: 842 }, totalPdfPages: data.totalPdfPages, slots: {}, errorPages: allErrorPages } }
               : i
           ))
-          setTimeout(() => setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } })), 8000)
+          setTimeout(() => setRenderResult(prev => ({ ...prev, [issue.id]: { ok: false, msg: '' } })), 10000)
           break
         }
 
@@ -746,6 +752,7 @@ export default function AdminPage() {
     </div>
   )
 }
+
 
 
 
