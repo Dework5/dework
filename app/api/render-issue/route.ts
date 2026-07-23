@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -9,6 +9,10 @@ import { NextRequest, NextResponse } from 'next/server'
  * Batches of 3 pages to stay within Vercel Hobby's 10s function limit.
  * Self-chains: at the end of each batch, fires the next one automatically.
  * Status updates: pending → processing → ready (or partial_error on failure).
+ *
+ * FIX 10: per-page try-catch + buffer-size guard + tighter autoFlip detection.
+ * autoFlipNeeded now only checks operator index 0 (page-level CTM) to avoid
+ * false-positives triggered by object-local transform matrices on complex pages.
  */
 
 export const maxDuration = 60
@@ -17,6 +21,7 @@ export const dynamic    = 'force-dynamic'
 const RENDER_SCALE   = 2.0   // 2× for sharp text on HiDPI screens
 const JPEG_QUALITY   = 90
 const PAGES_PER_CALL = 3     // 3 pages keeps each invocation safely under 10s on Hobby
+const MIN_JPEG_BYTES = 20000 // pages smaller than this are almost certainly blank/broken
 
 export async function POST(req: NextRequest) {
   let issueId: string | undefined
@@ -127,104 +132,133 @@ export async function POST(req: NextRequest) {
 
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 
-    // Merge with existing slots (safe: batches are sequential via self-chain)
-    const existing = (issue.page_images_json as any) || {}
+    // Merge with existing slots and error pages from prior batches
+    const existing        = (issue.page_images_json as any) || {}
     const slots: Record<string, string> = startPage === 1 ? {} : { ...(existing.slots ?? {}) }
+    const priorErrors: number[]         = startPage === 1 ? [] : ((existing.errorPages ?? []) as number[])
+    const batchErrorPages: number[]     = []
     const pageRotations: Record<number, number> = {}
 
     for (let pageNum = batchStart; pageNum <= batchEnd; pageNum++) {
-      const page           = await doc.getPage(pageNum)
-      const naturalRotation = page.rotate || 0
-      pageRotations[pageNum] = naturalRotation
-      const viewport = page.getViewport({ scale: RENDER_SCALE, rotation: 0 })
-      const canvas   = createCanvas(Math.round(viewport.width), Math.round(viewport.height))
-      const ctx      = canvas.getContext('2d')
-
-      await page.render({
-        canvasContext: ctx as unknown as CanvasRenderingContext2D,
-        viewport,
-      }).promise
-
-      let renderCanvas = canvas
-      if (naturalRotation !== 0) {
-        const rRad   = (naturalRotation * Math.PI) / 180
-        const absSin = Math.abs(Math.round(Math.sin(rRad)))
-        const absCos = Math.abs(Math.round(Math.cos(rRad)))
-        const rotW   = canvas.width * absCos + canvas.height * absSin
-        const rotH   = canvas.width * absSin + canvas.height * absCos
-        renderCanvas  = createCanvas(rotW, rotH)
-        const rCtx   = renderCanvas.getContext('2d')
-        rCtx.translate(rotW / 2, rotH / 2)
-        rCtx.rotate(rRad)
-        rCtx.drawImage(canvas as any, -canvas.width / 2, -canvas.height / 2)
-      }
-
-      let autoFlipNeeded = false
       try {
-        const opList     = await page.getOperatorList()
-        const TRANSFORM_OP = (pdfjsLib as any).OPS?.transform ?? 9
-        for (let k = 0; k < Math.min(10, opList.fnArray.length); k++) {
-          if (opList.fnArray[k] === TRANSFORM_OP) {
-            const m = opList.argsArray[k] as number[]
+        const page            = await doc.getPage(pageNum)
+        const naturalRotation = page.rotate || 0
+        pageRotations[pageNum] = naturalRotation
+        const viewport = page.getViewport({ scale: RENDER_SCALE, rotation: 0 })
+        const canvas   = createCanvas(Math.round(viewport.width), Math.round(viewport.height))
+        const ctx      = canvas.getContext('2d')
+
+        await page.render({
+          canvasContext: ctx as unknown as CanvasRenderingContext2D,
+          viewport,
+        }).promise
+
+        let renderCanvas = canvas
+        if (naturalRotation !== 0) {
+          const rRad   = (naturalRotation * Math.PI) / 180
+          const absSin = Math.abs(Math.round(Math.sin(rRad)))
+          const absCos = Math.abs(Math.round(Math.cos(rRad)))
+          const rotW   = canvas.width * absCos + canvas.height * absSin
+          const rotH   = canvas.width * absSin + canvas.height * absCos
+          renderCanvas  = createCanvas(rotW, rotH)
+          const rCtx   = renderCanvas.getContext('2d')
+          rCtx.translate(rotW / 2, rotH / 2)
+          rCtx.rotate(rRad)
+          rCtx.drawImage(canvas as any, -canvas.width / 2, -canvas.height / 2)
+        }
+
+        // autoFlipNeeded: only check operator at index 0 (page-level CTM).
+        // Checking further into the list risks false-positives from object-local
+        // transform matrices (e.g. a large embedded image with m[3]<0 for its own
+        // coordinate system), which caused page 12-style cropping bugs.
+        let autoFlipNeeded = false
+        try {
+          const opList     = await page.getOperatorList()
+          const TRANSFORM_OP = (pdfjsLib as any).OPS?.transform ?? 9
+          if (opList.fnArray[0] === TRANSFORM_OP) {
+            const m = opList.argsArray[0] as number[]
             if (Array.isArray(m) && m[3] < 0) autoFlipNeeded = true
-            break
           }
-        }
-      } catch { /* ignore */ }
+        } catch { /* ignore */ }
 
-      if (autoFlipNeeded || (forceFlipPages as number[]).includes(pageNum)) {
-        const srcCtx  = renderCanvas.getContext('2d') as any
-        const imgData = srcCtx.getImageData(0, 0, renderCanvas.width, renderCanvas.height)
-        const flipped = createCanvas(renderCanvas.width, renderCanvas.height)
-        const fCtx    = flipped.getContext('2d') as any
-        const dst     = fCtx.createImageData(renderCanvas.width, renderCanvas.height)
-        const { data, width, height } = imgData
-        for (let row = 0; row < height; row++) {
-          for (let col = 0; col < width; col++) {
-            const s = (row * width + col) * 4
-            const d = ((height - 1 - row) * width + (width - 1 - col)) * 4
-            dst.data[d]     = data[s]
-            dst.data[d + 1] = data[s + 1]
-            dst.data[d + 2] = data[s + 2]
-            dst.data[d + 3] = data[s + 3]
+        if (autoFlipNeeded || (forceFlipPages as number[]).includes(pageNum)) {
+          const srcCtx  = renderCanvas.getContext('2d') as any
+          const imgData = srcCtx.getImageData(0, 0, renderCanvas.width, renderCanvas.height)
+          const flipped = createCanvas(renderCanvas.width, renderCanvas.height)
+          const fCtx    = flipped.getContext('2d') as any
+          const dst     = fCtx.createImageData(renderCanvas.width, renderCanvas.height)
+          const { data, width, height } = imgData
+          for (let row = 0; row < height; row++) {
+            for (let col = 0; col < width; col++) {
+              const s = (row * width + col) * 4
+              const d = ((height - 1 - row) * width + (width - 1 - col)) * 4
+              dst.data[d]     = data[s]
+              dst.data[d + 1] = data[s + 1]
+              dst.data[d + 2] = data[s + 2]
+              dst.data[d + 3] = data[s + 3]
+            }
           }
+          fCtx.putImageData(dst, 0, 0)
+          renderCanvas = flipped
         }
-        fCtx.putImageData(dst, 0, 0)
-        renderCanvas = flipped
-      }
 
-      const isPageLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
+        const isPageLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
 
-      if (isPageLandscape) {
-        const halfW = Math.round(renderCanvas.width / 2)
-        for (const side of ['L', 'R'] as const) {
-          const half    = createCanvas(halfW, renderCanvas.height)
-          const halfCtx = half.getContext('2d')
-          const sx      = side === 'L' ? 0 : halfW
-          halfCtx.drawImage(renderCanvas as any, sx, 0, halfW, renderCanvas.height, 0, 0, halfW, renderCanvas.height)
-          const key  = `${pageNum}_${side}`
+        if (isPageLandscape) {
+          const halfW = Math.round(renderCanvas.width / 2)
+          for (const side of ['L', 'R'] as const) {
+            const half    = createCanvas(halfW, renderCanvas.height)
+            const halfCtx = half.getContext('2d')
+            const sx      = side === 'L' ? 0 : halfW
+            halfCtx.drawImage(renderCanvas as any, sx, 0, halfW, renderCanvas.height, 0, 0, halfW, renderCanvas.height)
+            const key  = `${pageNum}_${side}`
+            const path = `${issueId}/${key}.jpg`
+            const buf  = half.toBuffer('image/jpeg', JPEG_QUALITY)
+
+            // Sanity check: a half-page spread at 2× should be substantial
+            if (buf.length < MIN_JPEG_BYTES) {
+              console.warn(`[render-issue] page ${pageNum}_${side} JPEG too small (${buf.length}B) — skipped`)
+              batchErrorPages.push(pageNum)
+              continue
+            }
+
+            const { error } = await db.storage.from('page-images').upload(path, buf, { contentType: 'image/jpeg', upsert: true, cacheControl: '31536000' })
+            if (error) throw new Error(`Upload failed [${key}]: ${error.message}`)
+            slots[key] = `${SUPABASE_URL}/storage/v1/object/public/page-images/${path}`
+          }
+        } else {
+          const key  = String(pageNum)
           const path = `${issueId}/${key}.jpg`
-          const buf  = half.toBuffer('image/jpeg', JPEG_QUALITY)
+          const buf  = renderCanvas.toBuffer('image/jpeg', JPEG_QUALITY)
+
+          // Sanity check: a full portrait page at 2× should be at least 20KB
+          if (buf.length < MIN_JPEG_BYTES) {
+            console.warn(`[render-issue] page ${pageNum} JPEG too small (${buf.length}B) — skipped`)
+            batchErrorPages.push(pageNum)
+            continue
+          }
+
           const { error } = await db.storage.from('page-images').upload(path, buf, { contentType: 'image/jpeg', upsert: true, cacheControl: '31536000' })
           if (error) throw new Error(`Upload failed [${key}]: ${error.message}`)
           slots[key] = `${SUPABASE_URL}/storage/v1/object/public/page-images/${path}`
         }
-      } else {
-        const key  = String(pageNum)
-        const path = `${issueId}/${key}.jpg`
-        const buf  = renderCanvas.toBuffer('image/jpeg', JPEG_QUALITY)
-        const { error } = await db.storage.from('page-images').upload(path, buf, { contentType: 'image/jpeg', upsert: true, cacheControl: '31536000' })
-        if (error) throw new Error(`Upload failed [${key}]: ${error.message}`)
-        slots[key] = `${SUPABASE_URL}/storage/v1/object/public/page-images/${path}`
+      } catch (pageErr: any) {
+        // Per-page error: log it, mark the page, and continue with the rest of the batch
+        console.error(`[render-issue] page ${pageNum} failed:`, pageErr?.message ?? pageErr)
+        batchErrorPages.push(pageNum)
       }
     }
 
     const done           = batchEnd >= totalPdfPages
     const nextStart      = done ? null : batchEnd + 1
-    const pageImagesJson = { isSpreadPDF, isAllSpread, pageDimensions, totalPdfPages, slots }
+    const allErrorPages  = [...priorErrors, ...batchErrorPages]
+    const pageImagesJson = { isSpreadPDF, isAllSpread, pageDimensions, totalPdfPages, slots, errorPages: allErrorPages }
 
     const updatePayload: any = { page_images_json: pageImagesJson }
-    if (done) updatePayload.images_status = 'ready'
+    if (done) {
+      // Mark partial_error if any page failed; otherwise ready
+      updatePayload.images_status = allErrorPages.length > 0 ? 'partial_error' : 'ready'
+    }
 
     const { error: updateErr } = await db.from('issues').update(updatePayload).eq('id', issueId)
 
@@ -248,12 +282,14 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      ok:           true,
-      pagesRendered: batchEnd - batchStart + 1,
+      ok:              true,
+      pagesRendered:   batchEnd - batchStart + 1 - batchErrorPages.length,
+      batchErrorPages,
+      allErrorPages,
       batchStart,
       batchEnd,
       totalPdfPages,
-      nextStartPage: nextStart,
+      nextStartPage:   nextStart,
       done,
       isSpreadPDF,
       isAllSpread,
@@ -268,4 +304,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }
-
