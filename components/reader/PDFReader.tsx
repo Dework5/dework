@@ -192,9 +192,12 @@ export function PDFReader({
   useEffect(() => {
     if (!pdf) return
     if (imagesReady) {
-      const slotKey = String(currentPage)
-      const hasValidSlot = !!(preRendered?.slots ?? {})[slotKey] &&
-                           !(preRendered?.errorPages ?? []).includes(currentPage)
+      const inErrorPages = (preRendered?.errorPages ?? []).includes(currentPage)
+      const hasValidSlot = !inErrorPages && (
+        preRendered?.isSpreadPDF
+          ? !!(preRendered.slots?.[`${currentPage}_L`] || preRendered.slots?.[`${currentPage}_R`])
+          : !!(preRendered?.slots ?? {})[String(currentPage)]
+      )
       if (hasValidSlot) return
     }
     const double = !isLandscape && (!isMobile && showDouble)
@@ -503,7 +506,11 @@ export function PDFReader({
               willChange:      'transform',
             }}
           >
-            {(imagesReady && !!slot(currentPage) && !(preRendered?.errorPages ?? []).includes(currentPage)) ? renderImages() : (
+            {(imagesReady &&
+              (preRendered?.isSpreadPDF
+                ? !!(preRendered?.slots?.[`${currentPage}_L`] || preRendered?.slots?.[`${currentPage}_R`])
+                : !!slot(currentPage)) &&
+              !(preRendered?.errorPages ?? []).includes(currentPage)) ? renderImages() : (
               <>
                 <canvas
                   ref={leftCanvasRef}
@@ -636,6 +643,7 @@ export function PDFReader({
 }
 
 export default PDFReader
+
 
 
 
