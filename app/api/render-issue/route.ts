@@ -10,16 +10,13 @@ import { NextRequest, NextResponse } from 'next/server'
  * Self-chains: at the end of each batch, fires the next one automatically.
  * Status updates: pending → processing → ready (or partial_error on failure).
  *
- * FIX 10 (CMYK root cause): automatic detection of CMYK-corrupted renders.
- * pdfjs-dist in Node.js cannot decode CMYK JPEGs correctly — it renders only
- * the top-left corner of the image, stretched to fill the canvas.
- * Detection: after rendering, if the page has embedded images and the four
- * quadrants look suspiciously similar (avgMAD < 15 and overall stdDev > 10),
- * the page is automatically marked as errorPage and skipped. The reader then
- * falls back to browser PDF.js which handles CMYK correctly.
+ * CMYK detection: scans raw PDF bytes for CMYK JPEG (SOF marker Nf=4).
+ * When found, pages that have embedded raster images are skipped (errorPage).
+ * Browser PDF.js handles CMYK correctly; @napi-rs/canvas does not.
  *
- * forceErrorPages: manual override to explicitly mark specific pages as errors.
- * autoFlipNeeded: only checks operator at index 0 (page-level CTM).
+ * forceErrorPages: manual override to explicitly skip specific pages.
+ * forceFlipPages:  manual override to flip specific pages 180°.
+ * autoFlipNeeded:  checks page-level CTM at operator index 0 (or 1 if 0 is q).
  */
 
 export const maxDuration = 60
@@ -30,72 +27,36 @@ const JPEG_QUALITY   = 90
 const PAGES_PER_CALL = 3
 const MIN_JPEG_BYTES = 20000
 
-// Quadrant similarity thresholds for CMYK corner-stretch detection
-const CMYK_MAX_QUADRANT_MAD = 15  // if all quadrants avg MAD < this → suspicious
-const CMYK_MIN_STDDEV       = 10  // image must have some content (not blank)
-
 /**
- * Detects the CMYK "corner-stretch" rendering artifact.
- * When pdfjs-dist in Node renders a CMYK JPEG incorrectly, it produces
- * only the top-left corner of the image scaled up to fill the canvas.
- * This makes all four quadrants look nearly identical (same stretched corner).
- * Returns true if the canvas looks like a corner-stretch artifact.
+ * Scans raw PDF bytes for any JPEG with CMYK color space (SOF marker Nf=4).
+ * CMYK JPEGs use the DCTDecode filter and appear as raw JPEG bytes in the PDF.
+ * Returns true if at least one CMYK JPEG is found anywhere in the PDF.
  */
-function detectCMYKCorruption(canvas: any, createCanvas: (w: number, h: number) => any): boolean {
-  try {
-    const w = canvas.width, h = canvas.height
-    const ss = 8 // each quadrant downscaled to 8×8
-    const qW = Math.floor(w / 2), qH = Math.floor(h / 2)
-
-    function sampleQ(sx: number, sy: number): number[] {
-      const s = createCanvas(ss, ss)
-      const sCtx = s.getContext('2d') as any
-      sCtx.drawImage(canvas, sx, sy, qW, qH, 0, 0, ss, ss)
-      return Array.from(sCtx.getImageData(0, 0, ss, ss).data as Uint8ClampedArray)
-    }
-
-    const q = [
-      sampleQ(0,    0),
-      sampleQ(qW,   0),
-      sampleQ(0,    qH),
-      sampleQ(qW,   qH),
-    ]
-
-    // Mean absolute difference between each pair of quadrants
-    function mad(a: number[], b: number[]): number {
-      let sum = 0
-      for (let i = 0; i < a.length; i += 4) {
-        sum += (Math.abs(a[i]-b[i]) + Math.abs(a[i+1]-b[i+1]) + Math.abs(a[i+2]-b[i+2])) / 3
+function hasCMYKJpeg(data: Uint8Array): boolean {
+  const len = data.length
+  for (let i = 0; i < len - 3; i++) {
+    // JPEG Start-of-Image: 0xFF 0xD8
+    if (data[i] !== 0xFF || data[i + 1] !== 0xD8) continue
+    // Scan forward for SOF marker (max 64 KB per JPEG header)
+    let j = i + 2
+    const end = Math.min(i + 65536, len - 4)
+    while (j < end) {
+      if (data[j] !== 0xFF) { j++; continue }
+      const marker = data[j + 1]
+      if (marker === 0xD9 || marker === 0xDA) break // EOI / SOS — done with this JPEG
+      if (marker === 0xC0 || marker === 0xC1 || marker === 0xC2) {
+        // SOF0/SOF1/SOF2: byte at +9 is Nf (number of color components)
+        // 3 = RGB/YCbCr, 4 = CMYK
+        if (j + 9 < len && data[j + 9] === 4) return true
+        break // not CMYK, try next SOI
       }
-      return sum / (a.length / 4)
+      if (j + 3 >= len) break
+      const segLen = (data[j + 2] << 8) | data[j + 3]
+      if (segLen < 2) break
+      j += 2 + segLen
     }
-
-    const pairs: [number[], number[]][] = [
-      [q[0],q[1]], [q[0],q[2]], [q[0],q[3]],
-      [q[1],q[2]], [q[1],q[3]], [q[2],q[3]],
-    ]
-    const avgMad = pairs.reduce((acc, [a, b]) => acc + mad(a, b), 0) / pairs.length
-
-    // Overall pixel variance across all quadrant samples
-    const all = [...q[0], ...q[1], ...q[2], ...q[3]]
-    let mean = 0
-    const nPx = all.length / 4
-    for (let i = 0; i < all.length; i += 4) mean += (all[i] + all[i+1] + all[i+2]) / 3
-    mean /= nPx
-    let variance = 0
-    for (let i = 0; i < all.length; i += 4) {
-      const g = (all[i] + all[i+1] + all[i+2]) / 3
-      variance += (g - mean) ** 2
-    }
-    const stdDev = Math.sqrt(variance / nPx)
-
-    // Corner-stretch: quadrants very similar (low avgMad) AND image has real content (stdDev > floor)
-    // Normal page: high avgMad (different parts of page look different)
-    // Blank page: low stdDev → already caught by MIN_JPEG_BYTES check
-    return avgMad < CMYK_MAX_QUADRANT_MAD && stdDev > CMYK_MIN_STDDEV
-  } catch {
-    return false // never flag on error
   }
+  return false
 }
 
 export async function POST(req: NextRequest) {
@@ -145,6 +106,15 @@ export async function POST(req: NextRequest) {
     const pdfRes = await fetch(issue.pdf_url, { cache: 'no-store' })
     if (!pdfRes.ok) throw new Error(`Failed to fetch PDF: ${pdfRes.status}`)
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer())
+
+    // ── CMYK detection: scan raw PDF bytes once ────────────────────────────
+    // If the PDF contains any CMYK JPEG, pages with embedded images are
+    // skipped and handed off to browser PDF.js (errorPages), which decodes
+    // CMYK correctly unlike @napi-rs/canvas + pdfjs-dist in Node.js.
+    const pdfHasCMYK = hasCMYKJpeg(pdfBuffer)
+    if (pdfHasCMYK) {
+      console.log('[render-issue] CMYK JPEG detected in PDF — pages with raster images will be errorPages')
+    }
 
     const napiCanvas = await import('@napi-rs/canvas')
     const { createCanvas } = napiCanvas
@@ -221,24 +191,30 @@ export async function POST(req: NextRequest) {
     // pdfjs-dist OPS constants
     const OPS            = (pdfjsLib as any).OPS ?? {}
     const TRANSFORM_OP   = OPS.transform          ?? 9
+    const SAVE_OP        = OPS.save               ?? 26
     const PAINT_JPEG_OP  = OPS.paintJpegXObject   ?? 82
     const PAINT_IMAGE_OP = OPS.paintImageXObject   ?? 83
 
+    // Helper: delete a page's slots from storage and the slots map
+    const deleteSlot = async (pageNum: number) => {
+      const isLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
+      if (isLandscape) {
+        await db.storage.from('page-images').remove([
+          `${issueId}/${pageNum}_L.jpg`,
+          `${issueId}/${pageNum}_R.jpg`,
+        ]).catch(() => {})
+        delete slots[`${pageNum}_L`]
+        delete slots[`${pageNum}_R`]
+      } else {
+        await db.storage.from('page-images').remove([`${issueId}/${pageNum}.jpg`]).catch(() => {})
+        delete slots[String(pageNum)]
+      }
+    }
+
     for (let pageNum = batchStart; pageNum <= batchEnd; pageNum++) {
-      // Manual override: skip this page entirely, remove any existing slot
+      // Manual override: skip this page entirely
       if ((forceErrorPages as number[]).includes(pageNum)) {
-        const isLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
-        if (isLandscape) {
-          await db.storage.from('page-images').remove([
-            `${issueId}/${pageNum}_L.jpg`,
-            `${issueId}/${pageNum}_R.jpg`,
-          ]).catch(() => {})
-          delete slots[`${pageNum}_L`]
-          delete slots[`${pageNum}_R`]
-        } else {
-          await db.storage.from('page-images').remove([`${issueId}/${pageNum}.jpg`]).catch(() => {})
-          delete slots[String(pageNum)]
-        }
+        await deleteSlot(pageNum)
         batchErrorPages.push(pageNum)
         continue
       }
@@ -248,26 +224,45 @@ export async function POST(req: NextRequest) {
         const naturalRotation = page.rotate || 0
         pageRotations[pageNum] = naturalRotation
 
-        // ── Operator list: fetch BEFORE render (autoFlip detection + JPEG detection) ──
+        // ── Operator list analysis ────────────────────────────────────────
         let autoFlipNeeded    = false
         let hasEmbeddedImages = false
         try {
           const opList = await page.getOperatorList()
 
-          // autoFlip: only check the very first op (page-level CTM), not later ops
-          // which may be object-local transform matrices and cause false positives
-          if (opList.fnArray[0] === TRANSFORM_OP) {
-            const m = opList.argsArray[0] as number[]
-            if (Array.isArray(m) && m[3] < 0) autoFlipNeeded = true
+          // autoFlip: look for page-level CTM with m[3] < 0.
+          // Check index 0; if that's a save (q), also check index 1.
+          // Stop if the cm is immediately followed by a paint op (image-local transform).
+          const cmIdx = opList.fnArray[0] === TRANSFORM_OP ? 0
+                      : opList.fnArray[0] === SAVE_OP && opList.fnArray[1] === TRANSFORM_OP ? 1
+                      : -1
+          if (cmIdx >= 0) {
+            const m    = opList.argsArray[cmIdx] as number[]
+            const next = opList.fnArray[cmIdx + 1]
+            // Only treat as page-level flip if NOT immediately followed by a paint op
+            // (a cm right before Do is an image-placement transform, not a page flip)
+            if (Array.isArray(m) && m[3] < 0 && next !== PAINT_JPEG_OP && next !== PAINT_IMAGE_OP) {
+              autoFlipNeeded = true
+            }
           }
 
-          // CMYK detection: does this page have embedded raster images?
+          // CMYK gate: check whether this page has embedded raster images
           hasEmbeddedImages = opList.fnArray.some(
             (op: number) => op === PAINT_JPEG_OP || op === PAINT_IMAGE_OP
           )
         } catch { /* ignore */ }
 
-        // ── Render ──
+        // ── CMYK auto-skip ────────────────────────────────────────────────
+        // If the PDF contains CMYK JPEGs AND this page has embedded images,
+        // skip server-side render — browser PDF.js handles CMYK correctly.
+        if (pdfHasCMYK && hasEmbeddedImages) {
+          console.warn(`[render-issue] page ${pageNum} skipped (CMYK PDF + raster images) — browser fallback`)
+          await deleteSlot(pageNum)
+          batchErrorPages.push(pageNum)
+          continue
+        }
+
+        // ── Render ───────────────────────────────────────────────────────
         const viewport = page.getViewport({ scale: RENDER_SCALE, rotation: 0 })
         const canvas   = createCanvas(Math.round(viewport.width), Math.round(viewport.height))
         const ctx      = canvas.getContext('2d')
@@ -277,7 +272,7 @@ export async function POST(req: NextRequest) {
           viewport,
         }).promise
 
-        // ── Natural rotation correction ──
+        // ── Natural rotation correction ───────────────────────────────────
         let renderCanvas = canvas
         if (naturalRotation !== 0) {
           const rRad   = (naturalRotation * Math.PI) / 180
@@ -292,31 +287,7 @@ export async function POST(req: NextRequest) {
           rCtx.drawImage(canvas as any, -canvas.width / 2, -canvas.height / 2)
         }
 
-        // ── CMYK corruption auto-detection ──
-        // If the page has embedded raster images AND the render looks like a
-        // corner-stretch artifact, mark it as an errorPage (browser will use PDF.js).
-        if (hasEmbeddedImages) {
-          const corrupted = detectCMYKCorruption(renderCanvas, createCanvas)
-          if (corrupted) {
-            console.warn(`[render-issue] page ${pageNum} CMYK-corrupted (corner-stretch detected) — auto errorPage`)
-            const isLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
-            if (isLandscape) {
-              await db.storage.from('page-images').remove([
-                `${issueId}/${pageNum}_L.jpg`,
-                `${issueId}/${pageNum}_R.jpg`,
-              ]).catch(() => {})
-              delete slots[`${pageNum}_L`]
-              delete slots[`${pageNum}_R`]
-            } else {
-              await db.storage.from('page-images').remove([`${issueId}/${pageNum}.jpg`]).catch(() => {})
-              delete slots[String(pageNum)]
-            }
-            batchErrorPages.push(pageNum)
-            continue
-          }
-        }
-
-        // ── autoFlip (180° rotation for PDFs with negative Y-scale CTM) ──
+        // ── 180° flip correction ─────────────────────────────────────────
         if (autoFlipNeeded || (forceFlipPages as number[]).includes(pageNum)) {
           const srcCtx  = renderCanvas.getContext('2d') as any
           const imgData = srcCtx.getImageData(0, 0, renderCanvas.width, renderCanvas.height)
@@ -338,7 +309,7 @@ export async function POST(req: NextRequest) {
           renderCanvas = flipped
         }
 
-        // ── Upload ──
+        // ── Upload ────────────────────────────────────────────────────────
         const isPageLandscape = isSpreadPDF && (isAllSpread || pageNum > 1)
 
         if (isPageLandscape) {
@@ -417,7 +388,7 @@ export async function POST(req: NextRequest) {
       fetch(`${baseUrl}/api/render-issue`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', Authorization: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '' },
-        body:    JSON.stringify({ issueId, startPage: nextStart, forceErrorPages }),
+        body:    JSON.stringify({ issueId, startPage: nextStart, forceErrorPages, forceFlipPages }),
       }).catch(() => {})
     }
 
@@ -434,6 +405,7 @@ export async function POST(req: NextRequest) {
       isSpreadPDF,
       isAllSpread,
       pageRotations,
+      pdfHasCMYK,
     })
 
   } catch (err: any) {
