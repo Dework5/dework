@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿'use client'
+﻿﻿﻿﻿﻿﻿﻿﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { AdminLogin } from '@/components/admin/AdminLogin'
@@ -38,6 +38,7 @@ export default function AdminPage() {
   const [editSaving, setEditSaving] = useState(false)
   const [deleting,       setDeleting]       = useState<Record<string, boolean>>({})
   const [rendering,      setRendering]      = useState<Record<string, boolean>>({})
+  const [forceErrorPagesInput, setForceErrorPagesInput] = useState<Record<string, string>>({})
   const [renderResult,   setRenderResult]   = useState<Record<string, { ok: boolean; msg: string }>>({})
   const [extracting,     setExtracting]     = useState<Record<string, boolean>>({})
   const [extractResult,  setExtractResult]  = useState<Record<string, { ok: boolean; msg: string }>>({})
@@ -206,7 +207,9 @@ export default function AdminPage() {
         const res  = await fetch('/api/render-issue', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json', Authorization: pw },
-          body:    JSON.stringify({ issueId: issue.id, startPage }),
+          const parsedForceError = (forceErrorPagesInput[issue.id] ?? '')
+            .split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
+          body:    JSON.stringify({ issueId: issue.id, startPage, forceErrorPages: parsedForceError }),
         })
         const data = await res.json()
 
@@ -275,7 +278,9 @@ export default function AdminPage() {
         const res  = await fetch('/api/extract-text', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json', Authorization: pw },
-          body:    JSON.stringify({ issueId: issue.id, startPage }),
+          const parsedForceError = (forceErrorPagesInput[issue.id] ?? '')
+            .split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
+          body:    JSON.stringify({ issueId: issue.id, startPage, forceErrorPages: parsedForceError }),
         })
         const data = await res.json()
         if (!res.ok) {
@@ -568,6 +573,13 @@ export default function AdminPage() {
                                   : <>⚡ Renderizar</>
                               }
                             </button>
+                            <input
+                              type="text"
+                              placeholder="Págs. con error (ej: 12,15)"
+                              value={forceErrorPagesInput[issue.id] ?? ''}
+                              onChange={e => setForceErrorPagesInput(prev => ({ ...prev, [issue.id]: e.target.value }))}
+                              className="text-[10px] border border-[#E5E5E5] rounded px-2 py-1 w-full text-[#444] focus:outline-none focus:border-[#AAA] placeholder-[#CCC]"
+                            />
                             {renderResult[issue.id]?.msg && !rendering[issue.id] && (
                               <span className={`text-xs max-w-[160px] truncate ${renderResult[issue.id].ok ? 'text-green-600' : 'text-[#E55]'}`}
                                 title={renderResult[issue.id].msg}>
@@ -757,6 +769,7 @@ export default function AdminPage() {
     </div>
   )
 }
+
 
 
 
