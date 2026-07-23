@@ -1,4 +1,4 @@
-﻿/** Stored in issues.page_images_json after server-side pre-rendering */
+/** Stored in issues.page_images_json after server-side pre-rendering */
 export interface PreRenderedImages {
   isSpreadPDF: boolean
   isAllSpread: boolean
@@ -12,6 +12,8 @@ export interface PreRenderedImages {
    * Values: public Supabase Storage URLs.
    */
   slots: Record<string, string>
+  /** Pages that failed to render or produced a suspiciously small output (FIX 10) */
+  errorPages?: number[]
 }
 
 export interface Publication {
@@ -60,4 +62,3 @@ export interface PageView {
 export interface PublicationWithLatestIssue extends Publication {
   latest_issue?: Issue | null
 }
-
