@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿'use client'
+﻿﻿﻿﻿﻿﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { AdminLogin } from '@/components/admin/AdminLogin'
@@ -563,8 +563,8 @@ export default function AdminPage() {
                                   : <>⚡ Renderizar</>
                               }
                             </button>
-                            {renderResult[issue.id]?.msg && (
-                              <span className={`text-xs max-w-[160px] truncate ${renderResult[issue.id].ok ? 'text-green-600' : 'text-red-500'}`}
+                            {renderResult[issue.id]?.msg && !rendering[issue.id] && (
+                              <span className={`text-xs max-w-[160px] truncate ${renderResult[issue.id].ok ? 'text-green-600' : 'text-[#E55]'}`}
                                 title={renderResult[issue.id].msg}>
                                 {renderResult[issue.id].msg}
                               </span>
@@ -752,6 +752,7 @@ export default function AdminPage() {
     </div>
   )
 }
+
 
 
 
