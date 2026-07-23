@@ -204,11 +204,11 @@ export default function AdminPage() {
             : 'Renderizando…' },
         }))
 
+        const parsedForceError = (forceErrorPagesInput[issue.id] ?? '')
+          .split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
         const res  = await fetch('/api/render-issue', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json', Authorization: pw },
-          const parsedForceError = (forceErrorPagesInput[issue.id] ?? '')
-            .split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
           body:    JSON.stringify({ issueId: issue.id, startPage, forceErrorPages: parsedForceError }),
         })
         const data = await res.json()
@@ -275,11 +275,11 @@ export default function AdminPage() {
       let totalPages    = 0
       let pagesExtracted = 0
       while (true) {
+        const parsedForceError = (forceErrorPagesInput[issue.id] ?? '')
+          .split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
         const res  = await fetch('/api/extract-text', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json', Authorization: pw },
-          const parsedForceError = (forceErrorPagesInput[issue.id] ?? '')
-            .split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
           body:    JSON.stringify({ issueId: issue.id, startPage, forceErrorPages: parsedForceError }),
         })
         const data = await res.json()
