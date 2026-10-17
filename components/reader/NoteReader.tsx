@@ -97,8 +97,9 @@ export default function NoteReader({ nota, siguiente, onClose, onAbrir }: Props)
               if ('firma' in b) return <p key={i} className="italic text-right" style={{ marginTop: '1.4em' }}>{b.firma}</p>
               if ('servicio' in b) {
                 // Ficha de la guía de servicios: texto tal cual; el teléfono se puede tocar para llamar
-                const tel = b.servicio.map(l => l.replace(/<[^>]+>/g, '')).find(l => /\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}/.test(l))
-                const numero = tel?.match(/[\d\s-]{8,}/)?.[0].replace(/\D/g, '')
+                // Primer tramo de dígitos, espacios y guiones con 8 o más dígitos (los DNI llevan puntos y no entran)
+                const numero = b.servicio.map(l => l.replace(/<[^>]+>/g, '').match(/\d[\d\s-]{6,}\d/)?.[0].replace(/\D/g, ''))
+                  .find(n => !!n && n.length >= 8)
                 return (
                   <div key={i} className="flex items-center gap-4" style={{ margin: '0.9em 0', padding: '14px 16px', background: '#FBF8F2', border: `1px solid ${ORO}55`, fontSize: 16, lineHeight: 1.45 }}>
                     <div className="flex-1">
