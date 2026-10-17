@@ -476,7 +476,7 @@ export function PDFReader({
   const imgStyle = (pos: 'single' | 'left' | 'right'): React.CSSProperties => ({
     display:          'block',
     objectFit:        'contain',
-    maxHeight:        isMobile ? 'calc(100dvh - 104px)' : 'calc(100vh - 140px)',
+    maxHeight:        isMobile ? `calc(100dvh - ${verPaginas ? 218 : 140}px)` : `calc(100dvh - ${imagesReady ? 258 : 180}px)`,
     maxWidth:         pos === 'single' ? (isMobile ? '97vw' : '92vw') : '48vw',
     boxShadow:        pos === 'single'
       ? '0 4px 32px rgba(0,0,0,0.18)'
@@ -569,7 +569,7 @@ export function PDFReader({
   }
 
   return (
-    <div style={{ background: '#f5f0e8' }} className={`${isMobile ? 'h-[100dvh]' : 'min-h-screen'} flex flex-col select-none overflow-hidden`}>
+    <div style={{ background: '#f5f0e8' }} className="h-[100dvh] flex flex-col select-none overflow-hidden">
       {/* ── Top bar ─────────────────────────────────────────────────── */}
       <div style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }} className="h-11 flex items-center px-5 gap-4 flex-shrink-0">
         {backUrl && (
@@ -620,6 +620,7 @@ export function PDFReader({
           </button>
         )}
 
+        <div className="flex flex-col items-center">
         {isLoading ? (
           <div className="flex items-center gap-0.5">
             <div className="bg-white/5 animate-pulse rounded-sm" style={{ width: 200, height: 283 }} />
@@ -668,6 +669,23 @@ export function PDFReader({
             )}
           </div>
         )}
+
+        {/* Botón de lectura, justo debajo de la página (reserva su lugar para que la página no salte) */}
+        {!isLoading && !isZoomed && notas.length > 0 && (
+          <div className="h-12 flex items-end justify-center">
+            {notaActual && (
+              <button
+                onClick={() => setLectura(notaActual)}
+                className="flex items-center gap-2 rounded-full shadow-md hover:shadow-lg transition-shadow"
+                style={{ background: '#16362B', color: '#F4EFE4', padding: '9px 20px', animation: 'dwIn .3s ease-out' }}
+              >
+                <BookOpen size={15} style={{ color: '#D9C29A' }} />
+                <span className="text-[10.5px] tracking-[0.2em] uppercase whitespace-nowrap">Leer la nota</span>
+              </button>
+            )}
+          </div>
+        )}
+        </div>
 
         {/* Reset zoom button, visible only when zoomed */}
         {isZoomed && !isLoading && (
@@ -729,7 +747,7 @@ export function PDFReader({
         />
       )}
 
-      <style>{`@keyframes dwFade{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1}}@keyframes dwUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}`}</style>
+      <style>{`@keyframes dwFade{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1}}@keyframes dwIn{from{opacity:0;transform:translateY(4px)}to{opacity:1}}@keyframes dwUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}`}</style>
 
       {/* ── Thumbnail strip ─────────────────────────────────────────── */}
       {imagesReady && !isLoading && !isZoomed && preRendered && (!isMobile || verPaginas) && (
@@ -794,16 +812,6 @@ export function PDFReader({
             <ChevronRight size={15} />
           </button>
         </div>
-        {notaActual && !isZoomed && (
-          <button
-            onClick={() => setLectura(notaActual)}
-            className="flex items-center gap-1.5 rounded-full whitespace-nowrap"
-            style={{ background: '#16362B', color: '#F4EFE4', padding: '5px 12px' }}
-          >
-            <BookOpen size={12} style={{ color: '#D9C29A' }} />
-            <span className="text-[9px] tracking-[0.18em] uppercase">Leer la nota</span>
-          </button>
-        )}
         {isMobile && imagesReady && (
           <button onClick={() => setVerPaginas(v => !v)} className="flex items-center gap-1.5 text-black/60 text-[10px] tracking-[0.18em] uppercase">
             <LayoutGrid size={13} />{verPaginas ? 'Ocultar' : 'Páginas'}
