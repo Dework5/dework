@@ -589,7 +589,7 @@ export function PDFReader({
         )}
         {notas.length > 0 && !(isMobile && volverA !== null && volverA !== currentPage) && (
           <button onClick={() => setVerIndice(true)} className="flex items-center gap-1.5 text-black/75 text-[10px] tracking-[0.18em] uppercase hover:text-black transition-colors">
-            <List size={13} />Índice
+            <List size={13} />Notas
           </button>
         )}
         {!isMobile && !isLandscape && (
@@ -720,7 +720,7 @@ export function PDFReader({
         <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center" style={{ background: 'rgba(0,0,0,.45)' }} onClick={() => setVerIndice(false)}>
           <div className="w-full md:max-w-md max-h-[80dvh] overflow-y-auto rounded-t-2xl md:rounded-2xl" style={{ background: '#F4EFE4', animation: 'dwUp .25s ease-out' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 pt-5 pb-3" style={{ borderBottom: '1px solid #B08D57' }}>
-              <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: '#16362B' }}>En esta edición</span>
+              <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: '#16362B' }}>Notas de esta edición</span>
               <button onClick={() => setVerIndice(false)} aria-label="Cerrar"><X size={18} /></button>
             </div>
             {notas.map(n => (
@@ -742,8 +742,6 @@ export function PDFReader({
           siguiente={siguienteDe(lectura)}
           onClose={() => setLectura(null)}
           onAbrir={n => setLectura(n)}
-          onVerEnRevista={p => { setLectura(null); goToPage(p) }}
-          onIndice={notas.length ? () => { setLectura(null); setVolverA(null); setVerIndice(true) } : undefined}
         />
       )}
 

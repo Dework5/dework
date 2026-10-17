@@ -15,12 +15,10 @@ interface Props {
   siguiente?: Nota | null
   onClose: () => void
   onAbrir: (n: Nota) => void
-  onVerEnRevista: (pagina: number) => void
-  onIndice?: () => void
 }
 
 // Modo lectura: la nota con letra de celular, sus fotos y el estilo de la revista.
-export default function NoteReader({ nota, siguiente, onClose, onAbrir, onVerEnRevista, onIndice }: Props) {
+export default function NoteReader({ nota, siguiente, onClose, onAbrir }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [avance, setAvance] = useState(0)
 
@@ -111,13 +109,8 @@ export default function NoteReader({ nota, siguiente, onClose, onAbrir, onVerEnR
                 <ArrowRight size={22} style={{ color: '#D9C29A' }} />
               </button>
             )}
-            {onIndice && (
-              <button onClick={onIndice} className="w-full mt-4 py-3 text-[11px] tracking-[0.25em] uppercase" style={{ background: '#B08D57', color: CREMA }}>
-                Volver al índice
-              </button>
-            )}
-            <button onClick={() => onVerEnRevista(nota.desde)} className="w-full mt-3 py-3 text-[11px] tracking-[0.25em] uppercase" style={{ color: VERDE, border: `1px solid ${VERDE}` }}>
-              Ver esta nota en la revista
+            <button onClick={onClose} className="w-full mt-4 py-3 text-[11px] tracking-[0.25em] uppercase" style={{ color: VERDE, border: `1px solid ${VERDE}` }}>
+              Volver a la revista
             </button>
           </div>
         </article>
