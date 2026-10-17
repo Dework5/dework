@@ -27,7 +27,7 @@ export function Navbar() {
       }`}>
         <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            <Image src="/logo-dework.png" alt="Dework" width={110} height={36} className="object-contain" priority />
+            <Image src="/logo-dework-oscuro.png" alt="Dework" width={110} height={36} className="object-contain" priority />
           </Link>
           <div className="hidden md:flex items-center gap-10">
             {LINKS.map(l => (

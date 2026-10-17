@@ -127,7 +127,7 @@ export default async function RevistasSlugPage({ params }: Props) {
         {issues.length > 0 && (
           <span
             aria-hidden
-            className="pointer-events-none select-none absolute right-8 top-1/2 -translate-y-1/2 font-display font-bold leading-none text-dw-surface hidden lg:block"
+            className="pointer-events-none select-none absolute right-8 top-1/2 -translate-y-1/2 font-display italic leading-none text-dw-surface hidden lg:block"
             style={{ fontSize: 'clamp(140px, 18vw, 260px)' }}
           >
             {issues.length}
@@ -146,14 +146,14 @@ export default async function RevistasSlugPage({ params }: Props) {
 
           {/* Badge */}
           <div className="mb-5">
-            <span className="inline-block text-dw-sub text-[10px] tracking-[0.35em] uppercase border border-dw-border px-3 py-1.5">
+            <span className="inline-block text-dw-gold text-[10px] tracking-[0.35em] uppercase border border-dw-gold/60 px-3 py-1.5">
               {shortName}
             </span>
           </div>
 
           {/* Título */}
           <h1
-            className="font-display font-bold text-dw-white leading-none mb-5"
+            className="font-display font-normal text-dw-white leading-none mb-5"
             style={{ fontSize: 'clamp(42px, 6.5vw, 86px)' }}
           >
             {publication.name}
@@ -174,7 +174,7 @@ export default async function RevistasSlugPage({ params }: Props) {
 
         {/* Línea separadora */}
         <div className="max-w-6xl mx-auto mt-12">
-          <div className="h-px bg-gradient-to-r from-dw-border via-dw-hover to-transparent" />
+          <div className="h-px bg-gradient-to-r from-dw-gold/70 via-dw-border to-transparent" />
         </div>
       </div>
 
@@ -197,7 +197,7 @@ export default async function RevistasSlugPage({ params }: Props) {
                   className="group"
                 >
                   {/* Portada */}
-                  <div className="aspect-[3/4] relative overflow-hidden bg-dw-card shadow-[0_2px_20px_rgba(0,0,0,0.5)]">
+                  <div className="aspect-[3/4] relative overflow-hidden bg-dw-card shadow-[0_8px_30px_rgba(31,42,36,0.16)] transition-shadow duration-300 group-hover:shadow-[0_12px_40px_rgba(31,42,36,0.26)]">
                     <CoverImage
                       src={issue.cover_url}
                       alt={issue.title || `Edición #${issue.issue_number}`}
@@ -207,7 +207,7 @@ export default async function RevistasSlugPage({ params }: Props) {
                     />
 
                     {/* Overlay al hover */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[#16362B]/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <span className="text-white text-[10px] tracking-[0.28em] uppercase border border-white/25 px-4 py-2.5 translate-y-1.5 group-hover:translate-y-0 transition-transform duration-300 ease-out">
                         Leer →
                       </span>
@@ -221,7 +221,7 @@ export default async function RevistasSlugPage({ params }: Props) {
 
                   {/* Metadata debajo de la portada */}
                   <div className="mt-3 space-y-0.5">
-                    <p className="text-dw-muted text-[9px] tracking-[0.25em] uppercase">
+                    <p className="text-dw-gold text-[9px] tracking-[0.25em] uppercase">
                       #{issue.issue_number}
                     </p>
                     <p className="text-dw-sub text-[11px] font-display leading-snug line-clamp-2 group-hover:text-dw-text transition-colors duration-200">

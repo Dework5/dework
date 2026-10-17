@@ -13,8 +13,8 @@ export function ContactSection() {
           viewport={{ once: true }} transition={{ duration: 0.6 }}
           className="mb-8 md:mb-16">
           <div className="flex items-baseline gap-4 mb-3">
-            <span className="text-dw-muted text-[10px] tracking-[0.3em] uppercase">03 /</span>
-            <h2 className="font-display text-4xl md:text-5xl text-dw-white font-bold">Contacto</h2>
+            <span className="text-dw-gold text-[10px] tracking-[0.3em] uppercase">03 /</span>
+            <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal">Contacto</h2>
           </div>
           <p className="text-dw-muted text-sm max-w-md leading-relaxed">
             ¿Querés anunciarte, colaborar o saber más sobre nuestras publicaciones? Escribinos.
@@ -31,13 +31,13 @@ export function ContactSection() {
             viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}
             className="flex flex-col gap-3">
             <input name="nombre" type="text" placeholder="Nombre" required
-              className="bg-dw-surface border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-sub transition-colors" />
+              className="bg-dw-card border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-sub transition-colors" />
             <input name="email" type="email" placeholder="Email" required
-              className="bg-dw-surface border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-sub transition-colors" />
+              className="bg-dw-card border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-sub transition-colors" />
             <textarea name="mensaje" placeholder="Mensaje" rows={5} required
-              className="bg-dw-surface border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-sub transition-colors resize-none" />
+              className="bg-dw-card border border-dw-border text-dw-text placeholder-dw-muted text-sm px-5 py-4 focus:outline-none focus:border-dw-sub transition-colors resize-none" />
             <button type="submit"
-              className="bg-dw-white text-dw-black text-[11px] font-semibold tracking-[0.12em] uppercase py-4 hover:bg-dw-text transition-colors duration-200 mt-2">
+              className="bg-dw-green text-dw-black text-[11px] tracking-[0.2em] uppercase py-4 hover:bg-dw-white transition-colors duration-200 mt-2">
               Enviar mensaje →
             </button>
           </motion.form>

@@ -10,14 +10,15 @@ const itemVariant = {
   show:  { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as any } },
 }
 
-const ACCENTS = ['#C5A56B', '#6B9B8A', '#9B6B7A', '#6B7B9B', '#9B896B']
+// Acento dorado para todas (estilo Club)
+const ACCENTS = ['#A88650', '#A88650', '#A88650', '#A88650', '#A88650']
 
 const PATTERNS = [
-  'repeating-linear-gradient(-45deg, #1a1a1a 0,#1a1a1a 1px,transparent 0,transparent 16px)',
-  'repeating-linear-gradient(-60deg, #191919 0,#191919 1px,transparent 0,transparent 12px)',
-  'repeating-linear-gradient(-30deg, #1a1a1a 0,#1a1a1a 1px,transparent 0,transparent 18px)',
-  'repeating-linear-gradient(-45deg, #181818 0,#181818 1px,transparent 0,transparent 10px)',
-  'repeating-linear-gradient(-60deg, #1b1b1b 0,#1b1b1b 1px,transparent 0,transparent 14px)',
+  'repeating-linear-gradient(-45deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 16px)',
+  'repeating-linear-gradient(-60deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 12px)',
+  'repeating-linear-gradient(-30deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 18px)',
+  'repeating-linear-gradient(-45deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 10px)',
+  'repeating-linear-gradient(-60deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 14px)',
 ]
 
 export function PublicationsSection({ publications }: { publications: any[] }) {
@@ -33,8 +34,8 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
           viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6 }}
           className="mb-8 md:mb-16">
           <div className="flex items-baseline gap-4 mb-3">
-            <span className="text-dw-muted text-[10px] tracking-[0.3em] uppercase">01 /</span>
-            <h2 className="font-display text-4xl md:text-5xl text-dw-white font-bold">Publicaciones</h2>
+            <span className="text-dw-gold text-[10px] tracking-[0.3em] uppercase">01 /</span>
+            <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal">Publicaciones</h2>
           </div>
           <p className="text-dw-sub text-sm max-w-lg leading-relaxed">
             Cinco revistas que cubren el estilo de vida, la comunidad y la cultura de San Diego, Pilar y zona norte.
@@ -76,11 +77,11 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     {main.shortName || main.short_name || 'SDLR'}
                   </span>
                   <span className={`text-lg transition-colors duration-200 ${main.latest_issue?.cover_url ? 'text-white/40 group-hover:text-white/80' : 'text-dw-border group-hover:text-dw-sub'}`}>
-                    &nearr;
+                    ↗
                   </span>
                 </div>
                 <div>
-                  <h3 className={`font-display font-bold text-2xl md:text-3xl leading-tight mb-3 ${main.latest_issue?.cover_url ? 'text-white' : 'text-dw-white'}`}>
+                  <h3 className={`font-display font-normal text-2xl md:text-3xl leading-tight mb-3 ${main.latest_issue?.cover_url ? 'text-white' : 'text-dw-white'}`}>
                     {main.name}
                   </h3>
                   {main.description && (
@@ -128,11 +129,11 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     {pub.shortName || pub.short_name || pub.name?.slice(0, 4)}
                   </span>
                   <span className={`text-sm transition-colors duration-200 ${pub.latest_issue?.cover_url ? 'text-white/40 group-hover:text-white/80' : 'text-dw-muted group-hover:text-dw-sub'}`}>
-                    &nearr;
+                    ↗
                   </span>
                 </div>
                 <div>
-                  <h3 className={`font-display font-semibold text-xl leading-tight mb-1.5 ${pub.latest_issue?.cover_url ? 'text-white' : 'text-dw-white'}`}>
+                  <h3 className={`font-display font-normal text-xl leading-tight mb-1.5 ${pub.latest_issue?.cover_url ? 'text-white' : 'text-dw-white'}`}>
                     {pub.name}
                   </h3>
                   <p className={`text-xs tracking-widest ${pub.latest_issue?.cover_url ? 'text-white/55' : 'text-dw-sub'}`}>

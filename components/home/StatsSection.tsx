@@ -46,8 +46,8 @@ export function StatsSection() {
           viewport={{ once: true }} transition={{ duration: 0.6 }}
           className="mb-8 md:mb-16">
           <div className="flex items-baseline gap-4 mb-3">
-            <span className="text-dw-muted text-[10px] tracking-[0.3em] uppercase">02 /</span>
-            <h2 className="font-display text-4xl md:text-5xl text-dw-white font-bold">En números</h2>
+            <span className="text-dw-gold text-[10px] tracking-[0.3em] uppercase">02 /</span>
+            <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal">En números</h2>
           </div>
           <p className="text-dw-muted text-sm max-w-md leading-relaxed">
             Más de una década construyendo las revistas de referencia de zona norte.
