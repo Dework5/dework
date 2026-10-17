@@ -214,7 +214,7 @@ export default async function RevistasSlugPage({ params }: Props) {
                     </div>
 
                     {/* Badge número — esquina superior izquierda */}
-                    <div className="absolute top-2.5 left-2.5 bg-black/60 backdrop-blur-sm px-2 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="absolute top-2.5 left-2.5 bg-[#16362B]/80 backdrop-blur-sm px-2 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <span className="text-white/70 text-[9px] tracking-widest">#{issue.issue_number}</span>
                     </div>
                   </div>

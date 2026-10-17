@@ -64,7 +64,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 33vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F2A20]/95 via-[#16362B]/45 to-transparent" />
                 </div>
               ) : (
                 <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -116,7 +116,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 768px) 50vw, 33vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F2A20]/90 via-[#16362B]/35 to-transparent" />
                 </div>
               ) : (
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none"

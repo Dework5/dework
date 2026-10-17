@@ -39,37 +39,37 @@ const STATS = [
 
 export function StatsSection() {
   return (
-    <section className="bg-dw-surface border-y border-dw-border py-12 md:py-24 px-5 md:px-10">
+    <section className="bg-[#16362B] py-12 md:py-24 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.6 }}
           className="mb-8 md:mb-16">
           <div className="flex items-baseline gap-4 mb-3">
-            <span className="text-dw-gold text-[10px] tracking-[0.3em] uppercase">02 /</span>
-            <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal">En números</h2>
+            <span className="text-[#D9C29A] text-[10px] tracking-[0.3em] uppercase">02 /</span>
+            <h2 className="font-display text-4xl md:text-5xl text-[#F4EFE4] font-normal">En números</h2>
           </div>
-          <p className="text-dw-muted text-sm max-w-md leading-relaxed">
+          <p className="text-[#EAE2CF]/75 text-sm max-w-md leading-relaxed">
             Más de una década construyendo las revistas de referencia de zona norte.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-dw-border border border-dw-border">
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#B08D57]/40 border border-[#B08D57]/50">
           {STATS.map((s, i) => (
             <motion.div key={s.label}
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.7, delay: i * 0.1 }}
-              className="bg-dw-black px-6 py-10 md:px-10 md:py-16">
+              className="px-6 py-10 md:px-10 md:py-16">
               <div
-                className={`font-display text-dw-white leading-none mb-3 ${s.italic ? 'italic' : ''}`}
+                className={`font-display text-[#F4EFE4] leading-none mb-3 ${s.italic ? 'italic' : ''}`}
                 style={{ fontSize: 'clamp(52px, 6vw, 80px)' }}>
                 <Counter end={s.end} />{s.suffix}
                 {s.italic && (
-                  <span className="ml-2 text-[0.45em] not-italic text-dw-sub tracking-wider align-middle">años</span>
+                  <span className="ml-2 text-[0.45em] not-italic text-[#D9C29A] tracking-wider align-middle">años</span>
                 )}
               </div>
-              <p className="text-dw-muted text-[11px] tracking-[0.18em] uppercase mb-2">{s.label}</p>
-              <p className="text-dw-muted text-xs">{s.sub}</p>
+              <p className="text-[#D9C29A] text-[11px] tracking-[0.18em] uppercase mb-2">{s.label}</p>
+              <p className="text-[#EAE2CF]/70 text-xs">{s.sub}</p>
             </motion.div>
           ))}
         </div>

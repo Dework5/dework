@@ -23,7 +23,7 @@ export function Navbar() {
   return (
     <>
       <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-        scrolled ? 'bg-dw-black/90 backdrop-blur-md border-b border-dw-border' : ''
+        scrolled ? 'bg-[#F6F2EA]/92 backdrop-blur-md border-b border-[#E2D8C5]' : ''
       }`}>
         <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">

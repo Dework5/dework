@@ -98,7 +98,7 @@ export function HeroSection({ issue }: { issue: any }) {
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="220px"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F2A20]/70 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-5">
                       <p className="font-display italic text-white/50 text-5xl leading-none mb-1.5 group-hover:text-white/75 transition-colors">
                         #{issueNumber}
