@@ -13,7 +13,7 @@ export function ContactSection() {
           viewport={{ once: true }} transition={{ duration: 0.6 }}
           className="mb-8 md:mb-16">
           <div className="flex items-baseline gap-4 mb-3">
-            <span className="text-dw-gold text-[10px] tracking-[0.3em] uppercase">03 /</span>
+            <span className="text-dw-gold text-[10px] tracking-[0.3em] uppercase">04 /</span>
             <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal">Contacto</h2>
           </div>
           <p className="text-dw-muted text-sm max-w-md leading-relaxed">

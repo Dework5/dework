@@ -46,7 +46,7 @@ export function StatsSection() {
           viewport={{ once: true }} transition={{ duration: 0.6 }}
           className="mb-8 md:mb-16">
           <div className="flex items-baseline gap-4 mb-3">
-            <span className="text-[#D9C29A] text-[10px] tracking-[0.3em] uppercase">02 /</span>
+            <span className="text-[#D9C29A] text-[10px] tracking-[0.3em] uppercase">03 /</span>
             <h2 className="font-display text-4xl md:text-5xl text-[#F4EFE4] font-normal">En números</h2>
           </div>
           <p className="text-[#EAE2CF]/75 text-sm max-w-md leading-relaxed">

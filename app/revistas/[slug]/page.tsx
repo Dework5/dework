@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { createServerClient } from '@/lib/supabase-server'
 import Link from 'next/link'
 import { CoverImage } from '@/components/issues/CoverImage'
+import { AnunciantesSection } from '@/components/home/AnunciantesSection'
 
 // ISR: revalidate every 60 s so new issues/covers appear quickly without re-fetching on every hit
 export const revalidate = 60
@@ -234,6 +235,15 @@ export default async function RevistasSlugPage({ params }: Props) {
           )}
         </div>
       </div>
+
+      {issues[0]?.page_images_json?.avisos?.length > 0 && (
+        <AnunciantesSection
+          avisos={issues[0].page_images_json.avisos}
+          slug={publication.slug}
+          numero={issues[0].issue_number}
+          mes={issues[0].page_images_json.compartir?.mes}
+        />
+      )}
 
     </main>
   )

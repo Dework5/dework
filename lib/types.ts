@@ -23,6 +23,17 @@ export interface PreRenderedImages {
   notas?: Nota[]
   /** Imágenes y textos para compartir (WhatsApp): og = 1200x630, whatsapp = 1080x1080 */
   compartir?: { og: string; whatsapp: string; mes: string; titulo: string; notas: string[] }
+  /** Avisos de la edición para los banners de la web */
+  avisos?: Aviso[]
+}
+
+export interface Aviso {
+  pagina: number
+  marca: string
+  /** Imagen de la página del aviso (800 px) */
+  imagen: string
+  /** Web, WhatsApp o Instagram del anunciante (opcional) */
+  url?: string
 }
 
 export type BloqueNota = string | { h: string } | { li: string } | { foto: string; pie?: string } | { cita: string } | { firma: string } | { servicio: string[] }

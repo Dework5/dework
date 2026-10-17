@@ -7,6 +7,7 @@ import { MarqueeStrip } from '@/components/home/MarqueeStrip'
 import { PublicationsSection } from '@/components/home/PublicationsSection'
 import { StatsSection } from '@/components/home/StatsSection'
 import { ContactSection } from '@/components/home/ContactSection'
+import { AnunciantesSection } from '@/components/home/AnunciantesSection'
 
 const FALLBACK_PUBS = [
   { id: '1', slug: 'san-diego-la-revista', name: 'San Diego La Revista', short_name: 'SDLR', shortName: 'SDLR', description: 'La revista exclusiva del country San Diego. Edición mensual desde 2014.', issueCount: 139, issue_count: 139, is_active: true, accent_color: '#C5A56B', latest_issue: null },
@@ -35,7 +36,7 @@ async function getData() {
       pubs.map(async (pub: any) => {
         const { data: issue } = await db
           .from('issues')
-          .select('id,issue_number,cover_url,title,pdf_url,is_published,published_at,created_at,page_count')
+          .select('id,issue_number,cover_url,title,pdf_url,is_published,published_at,created_at,page_count,page_images_json')
           .eq('publication_id', pub.id)
           .eq('is_published', true)
           .order('published_at', { ascending: false })
@@ -64,6 +65,15 @@ export default async function HomePage() {
       <HeroSection issue={latestIssue} />
       <MarqueeStrip publications={publications} />
       <PublicationsSection publications={publications} />
+      {(latestIssue as any)?.page_images_json?.avisos?.length > 0 && (
+        <AnunciantesSection
+          avisos={(latestIssue as any).page_images_json.avisos}
+          slug="san-diego-la-revista"
+          numero={latestIssue.issue_number}
+          mes={(latestIssue as any).page_images_json.compartir?.mes}
+          orden="02"
+        />
+      )}
       <StatsSection />
       <ContactSection />
     </main>
