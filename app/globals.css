@@ -16,8 +16,9 @@
   --color-dw-green:   #2F4A3E;
 
   /* ── Typography ── */
-  --font-family-display: var(--font-display), Georgia, serif;
-  --font-family-body:    var(--font-body), system-ui, sans-serif;
+  /* Tailwind v4 usa --font-*: así funcionan las clases font-display y font-body */
+  --font-display: var(--font-bodoni), Georgia, serif;
+  --font-body:    var(--font-caslon), Georgia, serif;
 }
 
 /* ── Marquee animations ── */

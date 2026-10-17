@@ -6,7 +6,7 @@ import { SiteShell } from '@/components/layout/SiteShell'
 // Misma tipografía que la revista (diseño "Club")
 const caslon = Libre_Caslon_Text({
   subsets: ['latin'],
-  variable: '--font-body',
+  variable: '--font-caslon',
   weight: ['400', '700'],
   style: ['normal', 'italic'],
   display: 'swap',
@@ -14,7 +14,7 @@ const caslon = Libre_Caslon_Text({
 
 const bodoni = Bodoni_Moda({
   subsets: ['latin'],
-  variable: '--font-display',
+  variable: '--font-bodoni',
   weight: ['400', '500', '700'],
   style: ['normal', 'italic'],
   display: 'swap',
