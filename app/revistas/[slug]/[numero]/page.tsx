@@ -11,7 +11,7 @@ interface Props {
   searchParams: Promise<{ borrador?: string }>
 }
 
-// Borradores: solo en vistas previas de Vercel (nunca en producción). Se ven con ?borrador=1
+// Borradores: solo en vistas previas de Vercel (nunca en producción). Ahí se ven siempre; en local, con ?borrador=1
 // Lee page-images/<publicación>/borradores/<número>.json, que deja el comando `publicar` del estudio.
 async function aplicarBorrador(issue: Record<string, unknown>, publicationId: string, numero: string) {
   if (process.env.VERCEL_ENV === 'production') return issue
@@ -74,7 +74,9 @@ export default async function ReaderPage({ params, searchParams }: Props) {
   if (!result) notFound()
 
   const { publication } = result
-  const issue = borrador ? await aplicarBorrador(result.issue, publication.id, numero) as typeof result.issue : result.issue
+  // En las vistas previas de Vercel el borrador se muestra siempre (al iniciar sesión en Vercel se pierde el ?borrador=1)
+  const verBorrador = !!borrador || process.env.VERCEL_ENV === 'preview'
+  const issue = verBorrador ? await aplicarBorrador(result.issue, publication.id, numero) as typeof result.issue : result.issue
 
   const seoText = issue.page_texts_json
     ? Object.values(issue.page_texts_json as Record<string, string>).join(' ')
