@@ -23,7 +23,7 @@ export interface PreRenderedImages {
   notas?: Nota[]
 }
 
-export type BloqueNota = string | { h: string } | { li: string } | { foto: string; pie?: string } | { cita: string } | { firma: string }
+export type BloqueNota = string | { h: string } | { li: string } | { foto: string; pie?: string } | { cita: string } | { firma: string } | { servicio: string[] }
 
 export interface Nota {
   id: string
@@ -36,6 +36,8 @@ export interface Nota {
   bajada?: string
   /** Foto de apertura */
   foto?: string
+  /** Texto del botón en el visor (por defecto "Leer la nota"), p. ej. "Ver servicios" */
+  etiqueta?: string
   cuerpo: BloqueNota[]
 }
 

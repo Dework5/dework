@@ -680,7 +680,7 @@ export function PDFReader({
                 style={{ background: '#16362B', color: '#F4EFE4', padding: '9px 20px', animation: 'dwIn .3s ease-out' }}
               >
                 <BookOpen size={15} style={{ color: '#D9C29A' }} />
-                <span className="text-[10.5px] tracking-[0.2em] uppercase whitespace-nowrap">Leer la nota</span>
+                <span className="text-[10.5px] tracking-[0.2em] uppercase whitespace-nowrap">{notaActual.etiqueta ?? 'Leer la nota'}</span>
               </button>
             )}
           </div>

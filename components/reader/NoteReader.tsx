@@ -39,6 +39,7 @@ export default function NoteReader({ nota, siguiente, onClose, onAbrir }: Props)
     setAvance(max > 0 ? el.scrollTop / max : 0)
   }
 
+  const esLista = nota.cuerpo.every(b => typeof b !== 'string')
   const minutos = Math.max(1, Math.round(nota.cuerpo.reduce((a, b) => a + (typeof b === 'string' ? b.split(/\s+/).length : 0), 0) / 200))
   let primerParrafo = true
 
@@ -63,7 +64,7 @@ export default function NoteReader({ nota, siguiente, onClose, onAbrir }: Props)
           <div className="flex items-center gap-3 mb-4">
             <span className="text-[10px] tracking-[0.32em] uppercase" style={{ color: ORO }}>{nota.seccion ?? ''}</span>
             <span className="h-px w-10" style={{ background: ORO }} />
-            <span className="text-[10px] tracking-[0.2em] uppercase text-black/40">{minutos} min de lectura</span>
+            {!esLista && <span className="text-[10px] tracking-[0.2em] uppercase text-black/40">{minutos} min de lectura</span>}
           </div>
           <h1 className={bodoni.className} style={{ color: VERDE, fontSize: 'clamp(32px, 8.5vw, 46px)', lineHeight: 1.04, fontWeight: 400 }}>
             {nota.titulo}{nota.tituloCursiva && <> <i style={{ color: ORO }}>{nota.tituloCursiva}</i></>}
@@ -94,6 +95,21 @@ export default function NoteReader({ nota, siguiente, onClose, onAbrir }: Props)
                 <blockquote key={i} className={`${bodoni.className} italic text-center`} style={{ color: VERDE, fontSize: 24, lineHeight: 1.3, borderTop: `1px solid ${ORO}`, borderBottom: `1px solid ${ORO}`, padding: '0.9em 0.4em', margin: '1.6em 0' }}>“{b.cita}”</blockquote>
               )
               if ('firma' in b) return <p key={i} className="italic text-right" style={{ marginTop: '1.4em' }}>{b.firma}</p>
+              if ('servicio' in b) {
+                // Ficha de la guía de servicios: texto tal cual; el teléfono se puede tocar para llamar
+                const tel = b.servicio.map(l => l.replace(/<[^>]+>/g, '')).find(l => /\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}/.test(l))
+                const numero = tel?.match(/[\d\s-]{8,}/)?.[0].replace(/\D/g, '')
+                return (
+                  <div key={i} className="flex items-center gap-4" style={{ margin: '0.9em 0', padding: '14px 16px', background: '#FBF8F2', border: `1px solid ${ORO}55`, fontSize: 16, lineHeight: 1.45 }}>
+                    <div className="flex-1">
+                      {b.servicio.map((l, k) => <div key={k} className={k === 0 ? `${bodoni.className}` : ''} style={k === 0 ? { color: VERDE, fontSize: 19 } : undefined} dangerouslySetInnerHTML={{ __html: l }} />)}
+                    </div>
+                    {numero && (
+                      <a href={`tel:${numero}`} className="flex-shrink-0 rounded-full text-[10px] tracking-[0.18em] uppercase" style={{ background: VERDE, color: CREMA, padding: '8px 14px' }}>Llamar</a>
+                    )}
+                  </div>
+                )
+              }
               return null
             })}
           </div>
