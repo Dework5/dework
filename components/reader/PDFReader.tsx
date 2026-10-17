@@ -187,9 +187,11 @@ export function PDFReader({
     let pr = decodedRef.current.get(url)
     if (!pr) {
       const img = new Image()
-      img.decoding = 'async'
+      pr = new Promise<void>(resolve => {
+        img.onload = () => resolve()
+        img.onerror = () => resolve()
+      })
       img.src = url
-      pr = img.decode().catch(() => {})
       decodedRef.current.set(url, pr)
     }
     return pr
