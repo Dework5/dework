@@ -596,9 +596,11 @@ export function PDFReader({
           {Array.from({ length: numPages }, (_, i) => i + 1).map(n => {
             const isActivePage = n === currentPage || (double && !isCover && n === currentPage + 1)
             // Support both Cloudinary (plain key) and legacy (_L/_R) spread formats
-            const thumbUrl = preRendered.isSpreadPDF
+            const fullUrl = preRendered.isSpreadPDF
               ? (preRendered.slots[String(n)] || preRendered.slots[`${n}_L`] || '')
               : (preRendered.slots[String(n)] || '')
+            // Ediciones armadas por el estudio: cada página tiene versión chica (-800) junto a la grande (-1600)
+            const thumbUrl = fullUrl.replace(/-1600\.webp$/, '-800.webp')
             if (!thumbUrl) return null
             return (
               <button
@@ -612,9 +614,15 @@ export function PDFReader({
                 <img
                   src={thumbUrl}
                   alt={`Pág. ${n}`}
+                  fetchPriority="low"
+                  decoding="async"
                   style={{
                     height: 52,
                     width: 'auto',
+                    // Reserva el lugar antes de cargar: sin esto la carga diferida no arranca (miniatura de ancho 0)
+                    aspectRatio: preRendered.isSpreadPDF ? '420 / 297' : '210 / 297',
+                    objectFit: 'cover',
+                    background: 'rgba(0,0,0,0.06)',
                     borderRadius: 2,
                     display: 'block',
                     border: isActivePage ? '2px solid rgba(0,0,0,0.75)' : '2px solid transparent',
