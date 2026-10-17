@@ -51,6 +51,8 @@ export function PDFReader({
   const [isMobile,    setIsMobile]    = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
   const [showDouble,  setShowDouble]  = useState(true)
+  const showDoubleRef = useRef(true)
+  useEffect(() => { showDoubleRef.current = showDouble }, [showDouble])
   const [isLoading,   setIsLoading]   = useState(true)
   const [isChanging,  setIsChanging]  = useState(false)
   const [error,       setError]       = useState<string | null>(null)
@@ -87,6 +89,20 @@ export function PDFReader({
   }, [])
 
   const resetZoom = useCallback(() => applyZoom(1, 0, 0), [applyZoom])
+
+  // Ir a una página concreta. En doble página los pliegos son (par, impar): se muestra el pliego que la contiene.
+  const goToPage = useCallback((n: number) => {
+    resetZoom()
+    const target = Math.max(1, Math.min(n, preRendered?.totalPdfPages ?? n))
+    const enDoble = !(preRendered?.isSpreadPDF) && window.innerWidth >= 768 && showDoubleRef.current
+    setCurrentPage(enDoble && target > 1 && target % 2 === 1 ? target - 1 : target)
+  }, [resetZoom, preRendered])
+
+  // Link directo a una página: /revistas/.../144?p=10
+  useEffect(() => {
+    const p = parseInt(new URLSearchParams(window.location.search).get('p') ?? '', 10)
+    if (p > 1) goToPage(p)
+  }, [goToPage])
 
   // ── Mobile detection ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -458,9 +474,30 @@ export function PDFReader({
     const rightUrl = (!isCover && double && currentPage + 1 <= numPages) ? slot(currentPage + 1) : null
     return (
       <>
-        <img src={slot(currentPage)} alt={`Pág. ${currentPage}`} style={imgStyle(rightUrl ? 'left' : 'single')} />
-        {rightUrl && <img src={rightUrl} alt={`Pág. ${currentPage + 1}`} style={imgStyle('right')} />}
+        {pageWithLinks(currentPage, <img src={slot(currentPage)} alt={`Pág. ${currentPage}`} style={imgStyle(rightUrl ? 'left' : 'single')} />)}
+        {rightUrl && pageWithLinks(currentPage + 1, <img src={rightUrl} alt={`Pág. ${currentPage + 1}`} style={imgStyle('right')} />)}
       </>
+    )
+  }
+
+  // Zonas clickeables sobre una página (índice -> nota, avisos -> web/WhatsApp). Coordenadas en fracción de la página.
+  const pageWithLinks = (n: number, img: React.ReactNode) => {
+    const links = preRendered?.links?.[String(n)]
+    if (!links?.length) return img
+    return (
+      <div style={{ position: 'relative' }}>
+        {img}
+        {links.map((l, i) => {
+          const style: React.CSSProperties = {
+            position: 'absolute', left: `${l.x * 100}%`, top: `${l.y * 100}%`, width: `${l.w * 100}%`, height: `${l.h * 100}%`,
+            cursor: 'pointer', borderRadius: 3,
+          }
+          const titulo = l.title ?? (l.page ? `Ir a la pág. ${l.page}` : l.url)
+          return l.url
+            ? <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" title={titulo} aria-label={titulo} style={style} className="hover:bg-black/5 transition-colors" onPointerDown={e => e.stopPropagation()} />
+            : <button key={i} type="button" title={titulo} aria-label={titulo} style={style} className="hover:bg-black/5 transition-colors" onPointerDown={e => e.stopPropagation()} onTouchStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); if (l.page) goToPage(l.page) }} />
+        })}
+      </div>
     )
   }
 
@@ -606,7 +643,7 @@ export function PDFReader({
               <button
                 key={n}
                 ref={n === currentPage ? activeThumbRef : undefined}
-                onClick={() => { resetZoom(); setCurrentPage(n) }}
+                onClick={() => goToPage(n)}
                 title={`Pág. ${n}`}
                 className="flex-shrink-0 focus:outline-none"
                 style={{ opacity: isActivePage ? 1 : 0.38, transition: 'opacity 0.15s' }}

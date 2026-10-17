@@ -14,6 +14,11 @@ export interface PreRenderedImages {
   slots: Record<string, string>
   /** Pages that failed to render or produced a suspiciously small output (FIX 10) */
   errorPages?: number[]
+  /**
+   * Zonas clickeables por página (clave = número de página). x/y/w/h en fracción (0-1) de la página.
+   * `page` lleva a otra página de la revista; `url` abre un link externo (web, WhatsApp, Instagram).
+   */
+  links?: Record<string, Array<{ x: number; y: number; w: number; h: number; page?: number; url?: string; title?: string }>>
 }
 
 export interface Publication {
