@@ -19,6 +19,24 @@ export interface PreRenderedImages {
    * `page` lleva a otra página de la revista; `url` abre un link externo (web, WhatsApp, Instagram).
    */
   links?: Record<string, Array<{ x: number; y: number; w: number; h: number; page?: number; url?: string; title?: string }>>
+  /** Notas de la edición para el modo lectura (texto con letra de celular). Si no hay, el visor no muestra el botón. */
+  notas?: Nota[]
+}
+
+export type BloqueNota = string | { h: string } | { li: string } | { foto: string; pie?: string } | { cita: string } | { firma: string }
+
+export interface Nota {
+  id: string
+  /** Páginas que ocupa en la revista (inclusive) */
+  desde: number
+  hasta: number
+  seccion?: string
+  titulo: string
+  tituloCursiva?: string
+  bajada?: string
+  /** Foto de apertura */
+  foto?: string
+  cuerpo: BloqueNota[]
 }
 
 export interface Publication {

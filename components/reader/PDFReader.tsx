@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Minimize2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Minimize2, BookOpen, List, LayoutGrid, X } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
-import type { PreRenderedImages } from '@/lib/types'
+import type { PreRenderedImages, Nota } from '@/lib/types'
+import NoteReader from './NoteReader'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@' + pdfjsLib.version + '/build/pdf.worker.min.js'
 
@@ -56,6 +57,14 @@ export function PDFReader({
   const [isLoading,   setIsLoading]   = useState(true)
   const [isChanging,  setIsChanging]  = useState(false)
   const [error,       setError]       = useState<string | null>(null)
+  // Modo lectura (notas en letra de celular), índice y miniaturas en el celular
+  const [lectura,     setLectura]     = useState<Nota | null>(null)
+  const [verIndice,   setVerIndice]   = useState(false)
+  const [verPaginas,  setVerPaginas]  = useState(false)
+  const [pista,       setPista]       = useState(false)
+  // Desde dónde llegó el lector a una nota (página del índice o la lista de notas), para poder volver
+  const [volverA,     setVolverA]     = useState<number | 'lista' | null>(null)
+  const notas = preRendered?.notas ?? []
 
   // ── Zoom / pan state ─────────────────────────────────────────────────────
   const [zoom, setZoom] = useState(1)
@@ -97,6 +106,25 @@ export function PDFReader({
     const enDoble = !(preRendered?.isSpreadPDF) && window.innerWidth >= 768 && showDoubleRef.current
     setCurrentPage(enDoble && target > 1 && target % 2 === 1 ? target - 1 : target)
   }, [resetZoom, preRendered])
+
+  // Link directo a una nota: /revistas/.../144?nota=futbolgolf
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('nota')
+    const n = id ? preRendered?.notas?.find(x => x.id === id) : null
+    if (n) setLectura(n)
+  }, [preRendered])
+
+  // En el celular, la primera vez: "deslizá para pasar de página"
+  useEffect(() => {
+    if (window.innerWidth >= 768) return
+    try {
+      if (localStorage.getItem('dework-pista-swipe')) return
+      localStorage.setItem('dework-pista-swipe', '1')
+    } catch { /* sin almacenamiento: igual la mostramos */ }
+    setPista(true)
+    const t = setTimeout(() => setPista(false), 3500)
+    return () => clearTimeout(t)
+  }, [])
 
   // Link directo a una página: /revistas/.../144?p=10
   useEffect(() => {
@@ -432,6 +460,8 @@ export function PDFReader({
     ? (isCover ? numPages > 1 : currentPage + 2 <= numPages)
     : currentPage < numPages
   const title     = [publicationName, issueTitle].filter(Boolean).join(' ')
+  const notaActual = notas.find(n => (currentPage >= n.desde && currentPage <= n.hasta) || (double && !isCover && currentPage + 1 >= n.desde && currentPage + 1 <= n.hasta)) ?? null
+  const siguienteDe = (n: Nota) => notas[notas.findIndex(x => x.id === n.id) + 1] ?? null
   const pageLabel = (double && !isCover && currentPage + 1 <= numPages)
     ? `${currentPage} – ${currentPage + 1}`
     : String(currentPage)
@@ -446,8 +476,8 @@ export function PDFReader({
   const imgStyle = (pos: 'single' | 'left' | 'right'): React.CSSProperties => ({
     display:          'block',
     objectFit:        'contain',
-    maxHeight:        'calc(100vh - 140px)',
-    maxWidth:         pos === 'single' ? '92vw' : '48vw',
+    maxHeight:        isMobile ? 'calc(100dvh - 104px)' : 'calc(100vh - 140px)',
+    maxWidth:         pos === 'single' ? (isMobile ? '97vw' : '92vw') : '48vw',
     boxShadow:        pos === 'single'
       ? '0 4px 32px rgba(0,0,0,0.18)'
       : pos === 'left'
@@ -519,7 +549,7 @@ export function PDFReader({
           const titulo = l.title ?? (l.page ? `Ir a la pág. ${l.page}` : l.url)
           return l.url
             ? <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" title={titulo} aria-label={titulo} style={style} className="hover:bg-black/5 transition-colors" onPointerDown={e => e.stopPropagation()} />
-            : <button key={i} type="button" title={titulo} aria-label={titulo} style={style} className="hover:bg-black/5 transition-colors" onPointerDown={e => e.stopPropagation()} onTouchStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); if (l.page) goToPage(l.page) }} />
+            : <button key={i} type="button" title={titulo} aria-label={titulo} style={style} className="hover:bg-black/5 transition-colors" onPointerDown={e => e.stopPropagation()} onTouchStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); if (l.page) { setVolverA(pageRef.current); goToPage(l.page) } }} />
         })}
       </div>
     )
@@ -539,7 +569,7 @@ export function PDFReader({
   }
 
   return (
-    <div style={{ background: '#f5f0e8' }} className="min-h-screen flex flex-col select-none overflow-hidden">
+    <div style={{ background: '#f5f0e8' }} className={`${isMobile ? 'h-[100dvh]' : 'min-h-screen'} flex flex-col select-none overflow-hidden`}>
       {/* ── Top bar ─────────────────────────────────────────────────── */}
       <div style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }} className="h-11 flex items-center px-5 gap-4 flex-shrink-0">
         {backUrl && (
@@ -548,6 +578,11 @@ export function PDFReader({
           </Link>
         )}
         {title && <span className="text-black/70 text-[10px] tracking-[0.12em] uppercase flex-1 truncate">{title}</span>}
+        {notas.length > 0 && (
+          <button onClick={() => setVerIndice(true)} className="flex items-center gap-1.5 text-black/75 text-[10px] tracking-[0.18em] uppercase hover:text-black transition-colors">
+            <List size={13} />Índice
+          </button>
+        )}
         {!isMobile && !isLandscape && (
           <button
             onClick={() => { setShowDouble(s => !s); setCurrentPage(1) }}
@@ -561,12 +596,12 @@ export function PDFReader({
       {/* ── Main content area ────────────────────────────────────────── */}
       <div
         ref={contentRef}
-        className="flex-1 flex items-center justify-center relative py-6 overflow-hidden"
+        className={`flex-1 flex items-center justify-center relative overflow-hidden ${isMobile ? 'py-1' : 'py-6'}`}
         style={{ cursor: isZoomed ? (isDragging.current ? 'grabbing' : 'grab') : 'default' }}
         onMouseDown={onMouseDown}
       >
         {/* Nav arrows hidden when zoomed */}
-        {!isZoomed && (
+        {!isZoomed && !isMobile && (
           <button
             onClick={() => navigate(-1)}
             disabled={!canPrev || isLoading}
@@ -636,7 +671,7 @@ export function PDFReader({
           </button>
         )}
 
-        {!isZoomed && (
+        {!isZoomed && !isMobile && (
           <button
             onClick={() => navigate(1)}
             disabled={!canNext || isLoading}
@@ -647,8 +682,72 @@ export function PDFReader({
         )}
       </div>
 
+      {/* ── Botón de lectura: aparece en las páginas que tienen una nota ── */}
+      {notaActual && !lectura && !isZoomed && (
+        <button
+          onClick={() => setLectura(notaActual)}
+          className="fixed left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 rounded-full shadow-lg"
+          style={{ bottom: isMobile ? (verPaginas ? 118 : 54) : (imagesReady ? 128 : 56), background: '#16362B', color: '#F4EFE4', padding: isMobile ? '12px 22px' : '10px 20px', animation: 'dwFade .35s ease-out' }}
+        >
+          <BookOpen size={16} style={{ color: '#D9C29A' }} />
+          <span className="text-[11px] tracking-[0.2em] uppercase whitespace-nowrap">Leer la nota</span>
+        </button>
+      )}
+
+      {/* ── Volver al índice: cuando se llegó a la nota desde el índice ── */}
+      {volverA !== null && volverA !== currentPage && !lectura && !isZoomed && (
+        <button
+          onClick={() => { const v = volverA; setVolverA(null); if (v === 'lista') setVerIndice(true); else goToPage(v) }}
+          className="fixed left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-full shadow-md"
+          style={{ top: 54, background: '#F4EFE4', color: '#16362B', border: '1px solid #B08D57', padding: '8px 16px', animation: 'dwFade .35s ease-out' }}
+        >
+          <ChevronLeft size={14} />
+          <span className="text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Volver al índice</span>
+        </button>
+      )}
+
+      {pista && (
+        <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none rounded-full px-5 py-3 text-[12px] tracking-[0.12em]" style={{ background: 'rgba(22,54,43,.88)', color: '#F4EFE4', animation: 'dwFade .35s ease-out' }}>
+          ← Deslizá para pasar de página →
+        </div>
+      )}
+
+      {/* ── Índice de notas ── */}
+      {verIndice && (
+        <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center" style={{ background: 'rgba(0,0,0,.45)' }} onClick={() => setVerIndice(false)}>
+          <div className="w-full md:max-w-md max-h-[80dvh] overflow-y-auto rounded-t-2xl md:rounded-2xl" style={{ background: '#F4EFE4', animation: 'dwUp .25s ease-out' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 pt-5 pb-3" style={{ borderBottom: '1px solid #B08D57' }}>
+              <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: '#16362B' }}>En esta edición</span>
+              <button onClick={() => setVerIndice(false)} aria-label="Cerrar"><X size={18} /></button>
+            </div>
+            {notas.map(n => (
+              <div key={n.id} className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: '1px solid rgba(176,141,87,.35)' }}>
+                <button className="flex-1 text-left" onClick={() => { setVerIndice(false); setLectura(n) }}>
+                  <div className="text-[10px] tracking-[0.25em] uppercase mb-1" style={{ color: '#B08D57' }}>{n.seccion} · pág. {n.desde}</div>
+                  <div className="text-[17px] leading-snug" style={{ color: '#16362B', fontFamily: 'Georgia, serif' }}>{n.titulo}{n.tituloCursiva ? <i> {n.tituloCursiva}</i> : null}</div>
+                </button>
+                <button onClick={() => { setVerIndice(false); setVolverA('lista'); goToPage(n.desde) }} className="text-[9px] tracking-[0.2em] uppercase text-black/45 whitespace-nowrap">Ver pág.</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {lectura && (
+        <NoteReader
+          nota={lectura}
+          siguiente={siguienteDe(lectura)}
+          onClose={() => setLectura(null)}
+          onAbrir={n => setLectura(n)}
+          onVerEnRevista={p => { setLectura(null); goToPage(p) }}
+          onIndice={notas.length ? () => { setLectura(null); setVolverA(null); setVerIndice(true) } : undefined}
+        />
+      )}
+
+      <style>{`@keyframes dwFade{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1}}@keyframes dwUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}`}</style>
+
       {/* ── Thumbnail strip ─────────────────────────────────────────── */}
-      {imagesReady && !isLoading && !isZoomed && preRendered && (
+      {imagesReady && !isLoading && !isZoomed && preRendered && (!isMobile || verPaginas) && (
         <div
           ref={thumbStripRef}
           className="flex gap-1.5 px-4 py-2 overflow-x-auto flex-shrink-0"
@@ -710,8 +809,13 @@ export function PDFReader({
             <ChevronRight size={15} />
           </button>
         </div>
+        {isMobile && imagesReady && (
+          <button onClick={() => setVerPaginas(v => !v)} className="flex items-center gap-1.5 text-black/60 text-[10px] tracking-[0.18em] uppercase">
+            <LayoutGrid size={13} />{verPaginas ? 'Ocultar' : 'Páginas'}
+          </button>
+        )}
         {/* Zoom controls */}
-        <div className="flex items-center gap-1">
+        <div className={`${isMobile ? 'hidden' : 'flex'} items-center gap-1`}>
           <button
             onClick={() => applyZoom(zoomRef.current / 1.25)}
             disabled={zoom <= 0.51}
