@@ -161,19 +161,46 @@ export function PDFReader({
     return () => { task.destroy().catch(() => {}) }
   }, [pdfUrl, imagesReady, preRendered])
 
-  // ── Prefetch adjacent images ──────────────────────────────────────────────
-  useEffect(() => {
-    if (!imagesReady || !preRendered?.slots) return
-    const neighbors = [currentPage - 1, currentPage + 1].filter(n => n >= 1 && n <= numPages)
-    for (const n of neighbors) {
-      if (preRendered.isSpreadPDF) {
-        const l = preRendered.slots[`${n}_L`]; if (l) { const img = new Image(); img.src = l }
-        const r = preRendered.slots[`${n}_R`]; if (r) { const img = new Image(); img.src = r }
-      } else {
-        const u = preRendered.slots[String(n)]; if (u) { const img = new Image(); img.src = u }
-      }
+  // ── Página destino al avanzar/retroceder (en doble página los pliegos son 1 | 2-3 | 4-5 …) ──
+  const targetFrom = useCallback((p: number, dir: number) => {
+    const double = !isLandscape && (!isMobile && showDouble)
+    if (!double) return Math.max(1, Math.min(p + dir, numPages))
+    if (dir > 0) return p === 1 ? Math.min(2, numPages) : Math.min(p + 2, numPages)
+    if (p <= 1) return 1
+    return p === 2 ? 1 : Math.max(2, p - 2)
+  }, [isLandscape, isMobile, showDouble, numPages])
+
+  // Imágenes que forman la vista de una página (una sola o el pliego completo)
+  const spreadUrls = useCallback((p: number): string[] => {
+    if (!preRendered?.slots) return []
+    if (preRendered.isSpreadPDF) {
+      return [preRendered.slots[String(p)], preRendered.slots[`${p}_L`], preRendered.slots[`${p}_R`]].filter(Boolean) as string[]
     }
-  }, [currentPage, imagesReady, preRendered, numPages])
+    const double = !isLandscape && !isMobile && showDouble
+    const pages = double && p > 1 ? [p, p + 1] : [p]
+    return pages.filter(n => n >= 1 && n <= numPages).map(n => preRendered.slots[String(n)]).filter(Boolean)
+  }, [preRendered, isLandscape, isMobile, showDouble, numPages])
+
+  // Descarga y decodifica una imagen una sola vez (las promesas quedan guardadas)
+  const decodedRef = useRef(new Map<string, Promise<void>>())
+  const preload = useCallback((url: string) => {
+    let pr = decodedRef.current.get(url)
+    if (!pr) {
+      const img = new Image()
+      img.decoding = 'async'
+      img.src = url
+      pr = img.decode().catch(() => {})
+      decodedRef.current.set(url, pr)
+    }
+    return pr
+  }, [])
+
+  // ── Precarga: deja listos el pliego siguiente, el anterior y el que viene después ──
+  useEffect(() => {
+    if (!imagesReady) return
+    const next1 = targetFrom(currentPage, 1)
+    for (const p of [next1, targetFrom(currentPage, -1), targetFrom(next1, 1)]) spreadUrls(p).forEach(preload)
+  }, [currentPage, imagesReady, targetFrom, spreadUrls, preload])
 
   // ── PDF.js canvas rendering ───────────────────────────────────────────────
   const renderToCanvas = useCallback(async (
@@ -238,23 +265,11 @@ export function PDFReader({
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {
-    const double = !isLandscape && (!isMobile && showDouble)
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { resetZoom(); return }
       if (zoomRef.current > 1.01) return
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        setCurrentPage(p => {
-          if (!double) return Math.min(p + 1, numPages)
-          if (p === 1)  return Math.min(2, numPages)
-          return Math.min(p + 2, numPages)
-        })
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        setCurrentPage(p => {
-          if (!double) return Math.max(1, p - 1)
-          if (p === 2)  return 1
-          return Math.max(2, p - 2)
-        })
-      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigateRef.current?.(1)
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigateRef.current?.(-1)
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -373,25 +388,32 @@ export function PDFReader({
   }, [applyZoom, resetZoom])
 
   // ── navigate ──────────────────────────────────────────────────────────────
+  // Página "pedida" (puede adelantarse a currentPage mientras se carga el pliego nuevo)
+  const pageRef = useRef(1)
+  useEffect(() => { pageRef.current = currentPage }, [currentPage])
+
   const navigate = useCallback((dir: number) => {
     if (zoomRef.current > 1.01) return
-    const double = !isLandscape && (!isMobile && showDouble)
+    const target = targetFrom(pageRef.current, dir)
+    if (target === pageRef.current) return
+    pageRef.current = target
+    if (imagesReady) {
+      // Con imágenes: el cambio es instantáneo y las dos páginas del pliego aparecen juntas.
+      // Si todavía no llegaron, se espera a que estén (como máximo 1,5 s) en vez de mostrar media página.
+      const listo = Promise.all(spreadUrls(target).map(preload))
+      Promise.race([listo, new Promise(r => setTimeout(r, 1500))]).then(() => {
+        if (pageRef.current === target) setCurrentPage(target)
+      })
+      return
+    }
+    // Con PDF (ediciones sin imágenes): mismo fundido de antes
     setIsChanging(true)
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      setCurrentPage(p => {
-        if (!double) return Math.max(1, Math.min(p + dir, numPages))
-        if (dir > 0) {
-          if (p === 1) return Math.min(2, numPages)
-          return Math.min(p + 2, numPages)
-        } else {
-          if (p === 2) return 1
-          return Math.max(2, p - 2)
-        }
-      })
+      setCurrentPage(target)
       timerRef.current = setTimeout(() => setIsChanging(false), 200)
     }, 120)
-  }, [isMobile, showDouble, numPages, isLandscape])
+  }, [imagesReady, targetFrom, spreadUrls, preload])
 
   useEffect(() => { navigateRef.current = navigate }, [navigate])
 
