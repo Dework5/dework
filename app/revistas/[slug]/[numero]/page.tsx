@@ -8,6 +8,18 @@ export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string; numero: string }>
+  searchParams: Promise<{ borrador?: string }>
+}
+
+// Borradores: solo en vistas previas de Vercel (nunca en producción). Se ven con ?borrador=1
+// Lee page-images/<publicación>/borradores/<número>.json, que deja el comando `publicar` del estudio.
+async function aplicarBorrador(issue: Record<string, unknown>, publicationId: string, numero: string) {
+  if (process.env.VERCEL_ENV === 'production') return issue
+  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/page-images/${publicationId}/borradores/${numero}.json?t=${Date.now()}`
+  const res = await fetch(url, { cache: 'no-store' })
+  if (!res.ok) return issue
+  const b = await res.json()
+  return { ...issue, cover_url: b.cover_url, pdf_url: b.pdf_url, page_count: b.page_count, page_images_json: b.page_images_json, images_status: 'ready' }
 }
 
 async function getIssue(slug: string, numero: string) {
@@ -54,13 +66,15 @@ function proxyPdf(url: string | null | undefined): string | undefined {
   return url
 }
 
-export default async function ReaderPage({ params }: Props) {
+export default async function ReaderPage({ params, searchParams }: Props) {
   const { slug, numero } = await params
+  const { borrador } = await searchParams
   const result = await getIssue(slug, numero)
 
   if (!result) notFound()
 
-  const { issue, publication } = result
+  const { publication } = result
+  const issue = borrador ? await aplicarBorrador(result.issue, publication.id, numero) as typeof result.issue : result.issue
 
   const seoText = issue.page_texts_json
     ? Object.values(issue.page_texts_json as Record<string, string>).join(' ')
