@@ -578,7 +578,16 @@ export function PDFReader({
           </Link>
         )}
         {title && <span className="text-black/70 text-[10px] tracking-[0.12em] uppercase flex-1 truncate">{title}</span>}
-        {notas.length > 0 && (
+        {volverA !== null && volverA !== currentPage && !lectura && (
+          <button
+            onClick={() => { const v = volverA; setVolverA(null); if (v === 'lista') setVerIndice(true); else goToPage(v) }}
+            className="flex items-center gap-1 rounded-full text-[9px] tracking-[0.18em] uppercase whitespace-nowrap"
+            style={{ color: '#16362B', border: '1px solid #B08D57', padding: '4px 10px' }}
+          >
+            <ChevronLeft size={11} />{isMobile ? 'Índice' : 'Volver al índice'}
+          </button>
+        )}
+        {notas.length > 0 && !(isMobile && volverA !== null && volverA !== currentPage) && (
           <button onClick={() => setVerIndice(true)} className="flex items-center gap-1.5 text-black/75 text-[10px] tracking-[0.18em] uppercase hover:text-black transition-colors">
             <List size={13} />Índice
           </button>
@@ -681,30 +690,6 @@ export function PDFReader({
           </button>
         )}
       </div>
-
-      {/* ── Botón de lectura: aparece en las páginas que tienen una nota ── */}
-      {notaActual && !lectura && !isZoomed && (
-        <button
-          onClick={() => setLectura(notaActual)}
-          className="fixed left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 rounded-full shadow-lg"
-          style={{ bottom: isMobile ? (verPaginas ? 118 : 54) : (imagesReady ? 128 : 56), background: '#16362B', color: '#F4EFE4', padding: isMobile ? '12px 22px' : '10px 20px', animation: 'dwFade .35s ease-out' }}
-        >
-          <BookOpen size={16} style={{ color: '#D9C29A' }} />
-          <span className="text-[11px] tracking-[0.2em] uppercase whitespace-nowrap">Leer la nota</span>
-        </button>
-      )}
-
-      {/* ── Volver al índice: cuando se llegó a la nota desde el índice ── */}
-      {volverA !== null && volverA !== currentPage && !lectura && !isZoomed && (
-        <button
-          onClick={() => { const v = volverA; setVolverA(null); if (v === 'lista') setVerIndice(true); else goToPage(v) }}
-          className="fixed left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-full shadow-md"
-          style={{ top: 54, background: '#F4EFE4', color: '#16362B', border: '1px solid #B08D57', padding: '8px 16px', animation: 'dwFade .35s ease-out' }}
-        >
-          <ChevronLeft size={14} />
-          <span className="text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Volver al índice</span>
-        </button>
-      )}
 
       {pista && (
         <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none rounded-full px-5 py-3 text-[12px] tracking-[0.12em]" style={{ background: 'rgba(22,54,43,.88)', color: '#F4EFE4', animation: 'dwFade .35s ease-out' }}>
@@ -809,6 +794,16 @@ export function PDFReader({
             <ChevronRight size={15} />
           </button>
         </div>
+        {notaActual && !isZoomed && (
+          <button
+            onClick={() => setLectura(notaActual)}
+            className="flex items-center gap-1.5 rounded-full whitespace-nowrap"
+            style={{ background: '#16362B', color: '#F4EFE4', padding: '5px 12px' }}
+          >
+            <BookOpen size={12} style={{ color: '#D9C29A' }} />
+            <span className="text-[9px] tracking-[0.18em] uppercase">Leer la nota</span>
+          </button>
+        )}
         {isMobile && imagesReady && (
           <button onClick={() => setVerPaginas(v => !v)} className="flex items-center gap-1.5 text-black/60 text-[10px] tracking-[0.18em] uppercase">
             <LayoutGrid size={13} />{verPaginas ? 'Ocultar' : 'Páginas'}
