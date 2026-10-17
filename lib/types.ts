@@ -34,6 +34,8 @@ export interface Aviso {
   imagen: string
   /** Web, WhatsApp o Instagram del anunciante (opcional) */
   url?: string
+  /** 'media' = aviso de media página (se muestra entero dentro de la tarjeta) */
+  formato?: 'media'
 }
 
 export type BloqueNota = string | { h: string } | { li: string } | { foto: string; pie?: string } | { cita: string } | { firma: string } | { servicio: string[] }

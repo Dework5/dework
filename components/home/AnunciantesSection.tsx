@@ -45,7 +45,7 @@ export function AnunciantesSection({ avisos, slug, numero, mes, orden }: Props) 
           {avisos.map(a => (
             <button key={`${a.pagina}-${a.marca}`} onClick={() => setAbierto(a)} className="group text-left flex-shrink-0 w-[44vw] sm:w-[30vw] md:w-auto snap-start">
               <div className="aspect-[210/297] relative bg-dw-card outline outline-1 outline-dw-gold/70 outline-offset-4 shadow-[0_8px_26px_rgba(31,42,36,0.14)] group-hover:shadow-[0_12px_34px_rgba(31,42,36,0.24)] transition-shadow duration-300 overflow-hidden">
-                <img src={a.imagen} alt={`Aviso de ${a.marca}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                <img src={a.imagen} alt={`Aviso de ${a.marca}`} loading="lazy" className={`absolute inset-0 w-full h-full transition-transform duration-500 group-hover:scale-[1.03] ${a.formato === 'media' ? 'object-contain p-2' : 'object-cover'}`} />
               </div>
               <p className="font-display text-dw-white text-[15px] leading-tight mt-4">{a.marca}</p>
               <p className="text-dw-gold text-[9px] tracking-[0.25em] uppercase mt-1">Ver aviso</p>
