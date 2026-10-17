@@ -41,9 +41,9 @@ export function AnunciantesSection({ avisos, slug, numero, mes, orden }: Props) 
         </div>
 
         {/* En el celular se desliza de costado; en la compu, grilla */}
-        <div className="flex md:grid md:grid-cols-6 gap-5 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-3 -mx-5 px-5 md:mx-0 md:px-0" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex md:grid md:grid-cols-4 lg:grid-cols-7 gap-5 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-3 -mx-5 px-5 md:mx-0 md:px-0" style={{ scrollbarWidth: 'none' }}>
           {avisos.map(a => (
-            <button key={a.pagina} onClick={() => setAbierto(a)} className="group text-left flex-shrink-0 w-[44vw] sm:w-[30vw] md:w-auto snap-start">
+            <button key={`${a.pagina}-${a.marca}`} onClick={() => setAbierto(a)} className="group text-left flex-shrink-0 w-[44vw] sm:w-[30vw] md:w-auto snap-start">
               <div className="aspect-[210/297] relative bg-dw-card outline outline-1 outline-dw-gold/70 outline-offset-4 shadow-[0_8px_26px_rgba(31,42,36,0.14)] group-hover:shadow-[0_12px_34px_rgba(31,42,36,0.24)] transition-shadow duration-300 overflow-hidden">
                 <img src={a.imagen} alt={`Aviso de ${a.marca}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
               </div>
