@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Minimize2, BookOpen, List, LayoutGrid, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Minimize2, BookOpen, List, LayoutGrid, X, ExternalLink } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 import type { PreRenderedImages, Nota } from '@/lib/types'
 import NoteReader from './NoteReader'
@@ -461,6 +461,13 @@ export function PDFReader({
     : currentPage < numPages
   const title     = [publicationName, issueTitle].filter(Boolean).join(' ')
   const notaActual = notas.find(n => (currentPage >= n.desde && currentPage <= n.hasta) || (double && !isCover && currentPage + 1 >= n.desde && currentPage + 1 <= n.hasta)) ?? null
+  // Avisos con link en las páginas visibles (uno por anunciante)
+  const avisosVisibles = (() => {
+    const pags = [currentPage, ...(double && !isCover ? [currentPage + 1] : [])]
+    const vistos = new Set<string>()
+    return pags.flatMap(p => preRendered?.links?.[String(p)] ?? [])
+      .filter(l => l.url && l.title && !vistos.has(l.title) && vistos.add(l.title))
+  })()
   const siguienteDe = (n: Nota) => notas[notas.findIndex(x => x.id === n.id) + 1] ?? null
   const pageLabel = (double && !isCover && currentPage + 1 <= numPages)
     ? `${currentPage} – ${currentPage + 1}`
@@ -671,8 +678,16 @@ export function PDFReader({
         )}
 
         {/* Botón de lectura, justo debajo de la página (reserva su lugar para que la página no salte) */}
-        {!isLoading && !isZoomed && notas.length > 0 && (
-          <div className="h-12 flex items-end justify-center">
+        {!isLoading && !isZoomed && (notas.length > 0 || Object.keys(preRendered?.links ?? {}).length > 0) && (
+          <div className="h-12 flex items-end justify-center gap-2 flex-wrap max-w-[96vw]">
+            {avisosVisibles.map(l => (
+              <a key={l.title} href={l.url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 rounded-full shadow-sm hover:shadow-md transition-shadow"
+                style={{ background: '#F4EFE4', color: '#16362B', border: '1px solid #B08D57', padding: '8px 16px', animation: 'dwIn .3s ease-out' }}>
+                <ExternalLink size={13} style={{ color: '#B08D57' }} />
+                <span className="text-[10px] tracking-[0.16em] uppercase whitespace-nowrap">Visitar {l.title}</span>
+              </a>
+            ))}
             {notaActual && (
               <button
                 onClick={() => setLectura(notaActual)}
