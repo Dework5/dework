@@ -14,11 +14,11 @@ const itemVariant = {
 const ACCENTS = ['#A88650', '#A88650', '#A88650', '#A88650', '#A88650']
 
 const PATTERNS = [
-  'repeating-linear-gradient(-45deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 16px)',
-  'repeating-linear-gradient(-60deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 12px)',
-  'repeating-linear-gradient(-30deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 18px)',
-  'repeating-linear-gradient(-45deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 10px)',
-  'repeating-linear-gradient(-60deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 14px)',
+  'repeating-linear-gradient(-45deg, #CFDCC8 0,#CFDCC8 1px,transparent 0,transparent 16px)',
+  'repeating-linear-gradient(-60deg, #CFDCC8 0,#CFDCC8 1px,transparent 0,transparent 12px)',
+  'repeating-linear-gradient(-30deg, #CFDCC8 0,#CFDCC8 1px,transparent 0,transparent 18px)',
+  'repeating-linear-gradient(-45deg, #CFDCC8 0,#CFDCC8 1px,transparent 0,transparent 10px)',
+  'repeating-linear-gradient(-60deg, #CFDCC8 0,#CFDCC8 1px,transparent 0,transparent 14px)',
 ]
 
 export function PublicationsSection({ publications }: { publications: any[] }) {

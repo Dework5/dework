@@ -65,7 +65,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     : compartir?.titulo ?? `${issue.title || publication.name + ' #' + issue.issue_number}`
   const descripcion = nota?.bajada
     ?? (compartir ? `En esta edición: ${compartir.notas.join(' · ')}. Leela gratis, sin registro.` : `Leé online la edición #${issue.issue_number} de ${publication.name}. Acceso gratuito, sin registro.`)
-  const imagen = nota?.foto
+  const imagen = nota?.foto && !nota.foto.endsWith('.webp')
     ? { url: nota.foto, width: 1200, height: 800 }
     : compartir ? { url: compartir.og, width: 1200, height: 630 } : issue.cover_url ? { url: issue.cover_url, width: 800, height: 1100 } : undefined
 

@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Paleta "Club" tenue (misma familia que la revista: marfil, verde inglés, dorado) ──
+  /* ── Paleta "Club" tenue: fondo verde salvia claro, verde inglés y dorado (misma familia que la revista) ──
      Los nombres se mantienen por compatibilidad: dw-black = fondo, dw-white = títulos. */
-  --color-dw-black:   #F6F2EA;
-  --color-dw-surface: #EFE9DC;
-  --color-dw-card:    #FBF8F2;
-  --color-dw-border:  #E2D8C5;
-  --color-dw-hover:   #D9CDB6;
+  --color-dw-black:   #EAF0E6;
+  --color-dw-surface: #DFE8DA;
+  --color-dw-card:    #F3F7F0;
+  --color-dw-border:  #CFDCC8;
+  --color-dw-hover:   #C3D2BB;
   --color-dw-muted:   #8A8273;
   --color-dw-sub:     #5C584E;
   --color-dw-text:    #2B2D28;
@@ -37,5 +37,5 @@ html {
   scroll-behavior: smooth;
 }
 
-body { background: #F6F2EA; }
+body { background: #EAF0E6; }
 ::selection { background: #E8DCC4; color: #1F2A24; }

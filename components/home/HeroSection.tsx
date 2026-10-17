@@ -17,7 +17,7 @@ export function HeroSection({ issue }: { issue: any }) {
 
       {/* Ambient radial background */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 90% 70% at 65% 35%, #FBF8F2 0%, #F3EDE1 60%, #EDE5D5 100%)' }} />
+        style={{ background: 'radial-gradient(ellipse 90% 70% at 65% 35%, #F3F7F0 0%, #E6EEE1 60%, #DCE6D6 100%)' }} />
 
       {/* Giant issue-number watermark */}
       <div aria-hidden className="absolute right-[-4vw] top-1/2 -translate-y-1/2 select-none pointer-events-none leading-none hidden lg:block">
@@ -109,7 +109,7 @@ export function HeroSection({ issue }: { issue: any }) {
                 ) : (
                   <>
                     <div className="absolute inset-0"
-                      style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #E2D8C5 0,#E2D8C5 1px,transparent 0,transparent 14px)' }} />
+                      style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #CFDCC8 0,#CFDCC8 1px,transparent 0,transparent 14px)' }} />
                     <div className="absolute inset-0 flex flex-col justify-between p-5">
                       <span className="text-dw-muted text-[9px] tracking-[0.25em] uppercase">San Diego</span>
                       <div>
