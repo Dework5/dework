@@ -21,6 +21,8 @@ export interface PreRenderedImages {
   links?: Record<string, Array<{ x: number; y: number; w: number; h: number; page?: number; url?: string; title?: string }>>
   /** Notas de la edición para el modo lectura (texto con letra de celular). Si no hay, el visor no muestra el botón. */
   notas?: Nota[]
+  /** Imágenes y textos para compartir (WhatsApp): og = 1200x630, whatsapp = 1080x1080 */
+  compartir?: { og: string; whatsapp: string; mes: string; titulo: string; notas: string[] }
 }
 
 export type BloqueNota = string | { h: string } | { li: string } | { foto: string; pie?: string } | { cita: string } | { firma: string } | { servicio: string[] }
