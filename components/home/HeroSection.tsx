@@ -39,7 +39,7 @@ export function HeroSection({ issue }: { issue: any }) {
           <div>
             {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+              initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
               className="flex items-center gap-3 mb-6 md:mb-10">
               <span className="w-8 h-px bg-dw-gold" />
               <span className="text-dw-gold text-[10px] tracking-[0.28em] uppercase">
@@ -49,7 +49,7 @@ export function HeroSection({ issue }: { issue: any }) {
 
             {/* Heading */}
             <motion.h1
-              initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
+              initial={false} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.06 }}
               className="font-display font-normal text-dw-white leading-[0.95] tracking-tight mb-6"
               style={{ fontSize: 'clamp(52px, 7.5vw, 96px)' }}>
@@ -60,7 +60,7 @@ export function HeroSection({ issue }: { issue: any }) {
 
             {/* Description */}
             <motion.p
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28, duration: 0.7 }}
+              initial={false} animate={{ opacity: 1 }} transition={{ delay: 0.28, duration: 0.7 }}
               className="text-dw-sub text-sm leading-[1.75] max-w-[400px] mb-7 md:mb-10">
               Diseñamos y publicamos las revistas de San Diego, Pilar y zona norte de Buenos Aires.
               Más de 11 años y 201 ediciones en circulación.
@@ -68,7 +68,7 @@ export function HeroSection({ issue }: { issue: any }) {
 
             {/* CTAs */}
             <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.6 }}
+              initial={false} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.6 }}
               className="flex flex-wrap items-center gap-5">
               <Link href="/#publicaciones"
                 className="bg-dw-green text-dw-black text-[11px] tracking-[0.2em] uppercase px-8 py-4 hover:bg-dw-white transition-colors duration-200">
@@ -83,7 +83,7 @@ export function HeroSection({ issue }: { issue: any }) {
 
           {/* RIGHT — current issue mini-card */}
           <motion.div
-            initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
+            initial={false} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.22, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="hidden md:block self-end">
             <Link href={`/revistas/${slug}/${issueNumber}`} className="block group">
@@ -132,7 +132,7 @@ export function HeroSection({ issue }: { issue: any }) {
 
         {/* Bottom rule */}
         <motion.div
-          initial={{ scaleX: 0, opacity: 0 }} animate={{ scaleX: 1, opacity: 1 }}
+          initial={false} animate={{ scaleX: 1, opacity: 1 }}
           transition={{ delay: 0.65, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           className="mt-8 md:mt-14 h-px bg-dw-gold/50 origin-left" />
       </div>
