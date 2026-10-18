@@ -26,14 +26,15 @@ export function Navbar() {
         scrolled ? 'bg-[#EAF0E6]/92 backdrop-blur-md border-b border-[#CFDCC8]' : ''
       }`}>
         {/* Logo centrado; en la compu "Revistas" a la izquierda y "Contacto" a la derecha */}
-        <div className="relative max-w-7xl mx-auto px-6 md:px-10 h-24 md:h-32 grid grid-cols-[1fr_auto_1fr] items-center">
+        <div className="relative max-w-7xl mx-auto px-6 md:px-10 h-24 md:h-28 grid grid-cols-[1fr_auto_1fr] items-center">
           <div className="hidden md:flex justify-start">
             <Link href={LINKS[0].href} className="text-dw-muted text-[12px] tracking-[0.22em] uppercase hover:text-dw-text transition-colors duration-200">
               {LINKS[0].label}
             </Link>
           </div>
-          <Link href="/" className="col-start-2 flex items-center justify-center">
-            <Image src="/logo-dework-oscuro-recorte.png" alt="Dework" width={600} height={153} className="h-12 md:h-[72px] w-auto object-contain" priority />
+          <Link href="/" className="col-start-2 flex flex-col items-center justify-center">
+            <Image src="/logo-dework-oscuro-recorte.png" alt="Dework" width={600} height={153} className="h-9 md:h-12 w-auto object-contain" priority />
+            <span className="mt-1.5 md:mt-2 text-dw-gold text-[8.5px] md:text-[10px] tracking-[0.42em] uppercase pl-[0.42em]">Agencia Digital</span>
           </Link>
           <div className="hidden md:flex justify-end">
             <Link href={LINKS[1].href} className="text-dw-muted text-[12px] tracking-[0.22em] uppercase hover:text-dw-text transition-colors duration-200">
