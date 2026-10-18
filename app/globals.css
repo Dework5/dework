@@ -38,4 +38,7 @@ html {
 }
 
 body { background: #EAF0E6; }
+/* Las anclas (#publicaciones, #contacto, #anunciantes) quedan debajo de la barra fija */
+section[id] { scroll-margin-top: 104px; }
+@media (min-width: 768px) { section[id] { scroll-margin-top: 120px; } }
 ::selection { background: #E8DCC4; color: #1F2A24; }

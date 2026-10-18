@@ -31,7 +31,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6 }}
+          viewport={{ once: true, amount: 0 }} transition={{ duration: 0.6 }}
           className="mb-8 md:mb-16">
           <div className="flex items-baseline gap-4 mb-3">
             <span className="text-dw-gold text-[10px] tracking-[0.3em] uppercase">01 /</span>
@@ -45,7 +45,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
         {/* Grid */}
         <motion.div
           variants={stagger} initial="hidden" whileInView="show"
-          viewport={{ once: true, margin: '-60px' }}
+          viewport={{ once: true, amount: 0 }}
           className="grid grid-cols-2 md:grid-cols-3 gap-px bg-dw-border">
 
           {/* Main card */}

@@ -70,10 +70,10 @@ export function HeroSection({ issue }: { issue: any }) {
             <motion.div
               initial={false} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.6 }}
               className="flex flex-wrap items-center gap-5">
-              <Link href="/#publicaciones"
+              <a href="#publicaciones"
                 className="bg-dw-green text-dw-black text-[11px] tracking-[0.2em] uppercase px-8 py-4 hover:bg-dw-white transition-colors duration-200">
                 VER PUBLICACIONES →
-              </Link>
+              </a>
               <Link href={`/revistas/${slug}/${issueNumber}`}
                 className="text-dw-sub text-[11px] tracking-[0.18em] uppercase hover:text-dw-white transition-colors border-b border-dw-gold pb-px">
                 ÚLTIMA EDICIÓN #{issueNumber}
