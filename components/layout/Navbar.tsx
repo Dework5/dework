@@ -22,26 +22,24 @@ export function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-        scrolled ? 'bg-[#EAF0E6]/92 backdrop-blur-md border-b border-[#CFDCC8]' : ''
-      }`}>
+      <nav className="fixed top-0 w-full z-50 bg-[#16362B] shadow-[0_2px_18px_rgba(15,42,32,0.25)]">
         {/* Logo centrado; en la compu "Revistas" a la izquierda y "Contacto" a la derecha */}
         <div className="relative max-w-7xl mx-auto px-6 md:px-10 h-24 md:h-28 grid grid-cols-[1fr_auto_1fr] items-center">
           <div className="hidden md:flex justify-start">
-            <Link href={LINKS[0].href} className="text-dw-muted text-[12px] tracking-[0.22em] uppercase hover:text-dw-text transition-colors duration-200">
+            <Link href={LINKS[0].href} className="text-[#EAE2CF] text-[12px] tracking-[0.22em] uppercase hover:text-[#D9C29A] transition-colors duration-200">
               {LINKS[0].label}
             </Link>
           </div>
           <Link href="/" className="col-start-2 flex flex-col items-center justify-center">
-            <Image src="/logo-dework-oscuro-recorte.png" alt="Dework" width={600} height={153} className="h-9 md:h-12 w-auto object-contain" priority unoptimized />
-            <span className="mt-1.5 md:mt-2 text-dw-gold text-[8.5px] md:text-[10px] tracking-[0.42em] uppercase pl-[0.42em]">Agencia Digital</span>
+            <Image src="/logo-dework-recorte.png" alt="Dework" width={600} height={153} className="h-9 md:h-12 w-auto object-contain" priority unoptimized />
+            <span className="mt-1.5 md:mt-2 text-[#D9C29A] text-[8.5px] md:text-[10px] tracking-[0.42em] uppercase pl-[0.42em]">Agencia Digital</span>
           </Link>
           <div className="hidden md:flex justify-end">
-            <Link href={LINKS[1].href} className="text-dw-muted text-[12px] tracking-[0.22em] uppercase hover:text-dw-text transition-colors duration-200">
+            <Link href={LINKS[1].href} className="text-[#EAE2CF] text-[12px] tracking-[0.22em] uppercase hover:text-[#D9C29A] transition-colors duration-200">
               {LINKS[1].label}
             </Link>
           </div>
-          <button className="md:hidden absolute right-4 top-1/2 -translate-y-1/2 text-dw-muted hover:text-dw-text p-2" onClick={() => setMenuOpen(v => !v)} aria-label="Menú">
+          <button className="md:hidden absolute right-4 top-1/2 -translate-y-1/2 text-[#EAE2CF] hover:text-[#D9C29A] p-2" onClick={() => setMenuOpen(v => !v)} aria-label="Menú">
             <span className="block w-5 h-px bg-current mb-1.5 transition-all duration-300"
               style={menuOpen ? { transform: 'rotate(45deg) translate(1px, 8px)' } : {}} />
             <span className="block w-5 h-px bg-current mb-1.5 transition-all duration-300"
