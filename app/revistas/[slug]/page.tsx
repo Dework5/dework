@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { createServerClient } from '@/lib/supabase-server'
 import Link from 'next/link'
 import { CoverImage } from '@/components/issues/CoverImage'
+import { UltimaEdicion } from '@/components/issues/UltimaEdicion'
 import { AnunciantesSection } from '@/components/home/AnunciantesSection'
 
 // ISR: revalidate every 60 s so new issues/covers appear quickly without re-fetching on every hit
@@ -179,7 +180,12 @@ export default async function RevistasSlugPage({ params }: Props) {
         </div>
       </div>
 
-      {/* ── GRID ── */}
+      {/* ── ÚLTIMA EDICIÓN DESTACADA ── */}
+      {issues.length > 0 && (
+        <UltimaEdicion issue={issues[0]} slug={publication.slug} publicationName={publication.name} />
+      )}
+
+      {/* ── GRID: ediciones anteriores ── */}
       <div className="px-5 md:px-12 pb-14 md:pb-24">
         <div className="max-w-6xl mx-auto">
           {!issues || issues.length === 0 ? (
@@ -190,8 +196,15 @@ export default async function RevistasSlugPage({ params }: Props) {
               </p>
             </div>
           ) : (
+            <>
+            {issues.length > 1 && (
+              <div className="flex items-baseline gap-4 pt-12 md:pt-16 mb-8 md:mb-10">
+                <h2 className="font-display text-3xl md:text-4xl text-dw-white font-normal">Ediciones anteriores</h2>
+                <span className="h-px flex-1 bg-gradient-to-r from-dw-gold/60 to-transparent" />
+              </div>
+            )}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 md:gap-7">
-              {issues.map((issue: any, idx: number) => (
+              {issues.slice(1).map((issue: any, idx: number) => (
                 <Link
                   key={issue.id}
                   href={`/revistas/${publication.slug}/${issue.issue_number}`}
@@ -232,6 +245,7 @@ export default async function RevistasSlugPage({ params }: Props) {
                 </Link>
               ))}
             </div>
+            </>
           )}
         </div>
       </div>
