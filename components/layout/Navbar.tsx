@@ -25,19 +25,22 @@ export function Navbar() {
       <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
         scrolled ? 'bg-[#EAF0E6]/92 backdrop-blur-md border-b border-[#CFDCC8]' : ''
       }`}>
-        <div className="max-w-7xl mx-auto px-6 md:px-10 h-20 md:h-24 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <Image src="/logo-dework-oscuro-recorte.png" alt="Dework" width={600} height={153} className="h-9 md:h-12 w-auto object-contain" priority />
-          </Link>
-          <div className="hidden md:flex items-center gap-10">
-            {LINKS.map(l => (
-              <Link key={l.href} href={l.href}
-                className="text-dw-muted text-[11px] tracking-[0.15em] uppercase hover:text-dw-text transition-colors duration-200">
-                {l.label}
-              </Link>
-            ))}
+        {/* Logo centrado; en la compu "Revistas" a la izquierda y "Contacto" a la derecha */}
+        <div className="relative max-w-7xl mx-auto px-6 md:px-10 h-24 md:h-32 grid grid-cols-[1fr_auto_1fr] items-center">
+          <div className="hidden md:flex justify-start">
+            <Link href={LINKS[0].href} className="text-dw-muted text-[12px] tracking-[0.22em] uppercase hover:text-dw-text transition-colors duration-200">
+              {LINKS[0].label}
+            </Link>
           </div>
-          <button className="md:hidden text-dw-muted hover:text-dw-text p-2" onClick={() => setMenuOpen(v => !v)} aria-label="Menú">
+          <Link href="/" className="col-start-2 flex items-center justify-center">
+            <Image src="/logo-dework-oscuro-recorte.png" alt="Dework" width={600} height={153} className="h-12 md:h-[72px] w-auto object-contain" priority />
+          </Link>
+          <div className="hidden md:flex justify-end">
+            <Link href={LINKS[1].href} className="text-dw-muted text-[12px] tracking-[0.22em] uppercase hover:text-dw-text transition-colors duration-200">
+              {LINKS[1].label}
+            </Link>
+          </div>
+          <button className="md:hidden absolute right-4 top-1/2 -translate-y-1/2 text-dw-muted hover:text-dw-text p-2" onClick={() => setMenuOpen(v => !v)} aria-label="Menú">
             <span className="block w-5 h-px bg-current mb-1.5 transition-all duration-300"
               style={menuOpen ? { transform: 'rotate(45deg) translate(1px, 8px)' } : {}} />
             <span className="block w-5 h-px bg-current mb-1.5 transition-all duration-300"

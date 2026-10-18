@@ -123,7 +123,7 @@ export default async function RevistasSlugPage({ params }: Props) {
     <main className="min-h-screen bg-dw-black">
 
       {/* ── HEADER ── */}
-      <div className="relative pt-28 pb-10 md:pt-36 md:pb-14 px-5 md:px-12 overflow-hidden">
+      <div className="relative pt-32 pb-10 md:pt-44 md:pb-14 px-5 md:px-12 overflow-hidden">
 
         {/* Número decorativo de fondo */}
         {issues.length > 0 && (

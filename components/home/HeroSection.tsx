@@ -31,7 +31,7 @@ export function HeroSection({ issue }: { issue: any }) {
       <div className="hidden md:block md:flex-1 md:min-h-[11rem]" aria-hidden />
 
       {/* Main content */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pt-28 pb-12 md:pt-0 md:pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pt-32 pb-12 md:pt-0 md:pb-20">
 
         <div className="grid md:grid-cols-[1fr_220px] gap-12 items-end">
 
