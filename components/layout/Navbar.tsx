@@ -25,9 +25,9 @@ export function Navbar() {
       <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
         scrolled ? 'bg-[#EAF0E6]/92 backdrop-blur-md border-b border-[#CFDCC8]' : ''
       }`}>
-        <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 h-20 md:h-24 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            <Image src="/logo-dework-oscuro.png" alt="Dework" width={110} height={36} className="object-contain" priority />
+            <Image src="/logo-dework-oscuro-recorte.png" alt="Dework" width={600} height={153} className="h-9 md:h-12 w-auto object-contain" priority />
           </Link>
           <div className="hidden md:flex items-center gap-10">
             {LINKS.map(l => (

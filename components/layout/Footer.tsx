@@ -14,7 +14,7 @@ export function Footer() {
     <footer className="bg-[#16362B] pt-10 pb-5 md:pt-16 md:pb-8 px-5 md:px-10">
       <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 mb-10 md:gap-12 md:mb-14">
         <div>
-          <Image src="/logo-dework.png" alt="Dework" width={120} height={40} className="object-contain mb-4" />
+          <Image src="/logo-dework-recorte.png" alt="Dework" width={600} height={153} className="h-12 md:h-14 w-auto object-contain mb-5" />
           <p className="text-[#EAE2CF]/80 text-xs leading-relaxed max-w-[200px]">
             Agencia de Diseño Editorial.<br />Pilar, Buenos Aires, Argentina.
           </p>
