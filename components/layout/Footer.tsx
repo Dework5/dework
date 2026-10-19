@@ -7,6 +7,7 @@ const PUBS = [
   { slug: 'pilara-magazine',       name: 'Pilará Magazine'        },
   { slug: 'los-lagartos',          name: 'Los Lagartos'           },
   { slug: 'campo-chico',           name: 'Campo Chico'            },
+  { slug: 'olivos-golf-club',      name: 'Olivos Golf Club'       },
 ]
 
 export function Footer() {

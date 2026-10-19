@@ -21,6 +21,9 @@ const PATTERNS = [
   'repeating-linear-gradient(-60deg, #CFDCC8 0,#CFDCC8 1px,transparent 0,transparent 14px)',
 ]
 
+// Cantidad de ediciones = número de la última edición publicada (las revistas se numeran desde la 1)
+const ediciones = (p: any) => { const n = p.latest_issue?.issue_number ?? p.issueCount ?? p.issue_count; return n ? `${n} ${n === 1 ? 'edición' : 'ediciones'}` : 'Próximamente' }
+
 export function PublicationsSection({ publications }: { publications: any[] }) {
   const [main, ...rest] = publications
 
@@ -38,7 +41,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
             <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal">Publicaciones</h2>
           </div>
           <p className="text-dw-sub text-sm max-w-lg leading-relaxed">
-            Cinco revistas que cubren el estilo de vida, la comunidad y la cultura de cada club y country.
+            Seis revistas que cubren el estilo de vida, la comunidad y la cultura de cada club y country.
           </p>
         </motion.div>
 
@@ -51,7 +54,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
           {/* Main card */}
           {main && (
             <motion.div variants={itemVariant}
-              className="col-span-2 md:col-span-1 row-span-2 bg-dw-card relative group overflow-hidden"
+              className={`col-span-2 md:col-span-1 ${rest.length > 4 ? 'md:row-span-3' : 'row-span-2'} bg-dw-card relative group overflow-hidden`}
               style={{ minHeight: '420px', borderTop: `2px solid ${ACCENTS[0]}` }}>
 
               {main.latest_issue?.cover_url ? (
@@ -90,7 +93,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     </p>
                   )}
                   <p className={`text-xs tracking-widest ${main.latest_issue?.cover_url ? 'text-white/60' : 'text-dw-muted'}`}>
-                    {main.issueCount || main.issue_count || 139} ediciones
+                    {ediciones(main)}
                   </p>
                 </div>
               </Link>
@@ -137,7 +140,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     {pub.name}
                   </h3>
                   <p className={`text-xs tracking-widest ${pub.latest_issue?.cover_url ? 'text-white/55' : 'text-dw-sub'}`}>
-                    {pub.issueCount || pub.issue_count || '--'} ediciones
+                    {ediciones(pub)}
                   </p>
                 </div>
               </Link>
@@ -146,6 +149,19 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                 style={{ background: ACCENTS[i + 1] || '#888' }} />
             </motion.div>
           ))}
+
+          {/* Si queda un lugar libre en la grilla: invitación para nuevas revistas */}
+          {rest.length % 2 === 1 && (
+            <motion.div variants={itemVariant} className="bg-[#16362B] relative group overflow-hidden" style={{ minHeight: '210px', borderTop: '2px solid #A88650' }}>
+              <a href="#contacto" className="absolute inset-0 p-6 flex flex-col justify-between text-[#F4EFE4]">
+                <span className="text-[10px] tracking-[0.2em] uppercase text-[#D9C29A]">Tu revista</span>
+                <div>
+                  <h3 className="font-display font-normal text-xl leading-tight mb-1.5">¿Tu club o country? <i className="text-[#D9C29A]">Creamos su revista</i></h3>
+                  <p className="text-xs tracking-widest text-[#EAE2CF]/80">Pedir propuesta →</p>
+                </div>
+              </a>
+            </motion.div>
+          )}
 
         </motion.div>
 

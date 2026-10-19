@@ -62,13 +62,13 @@ export function HeroSection({ issue }: { issue: any }) {
             <motion.p
               initial={false} animate={{ opacity: 1 }} transition={{ delay: 0.28, duration: 0.7 }}
               className="text-dw-sub text-[15px] md:text-base leading-[1.75] max-w-[460px] mb-7 md:mb-8">
-              Diseñamos, editamos y publicamos las revistas de San Diego Country Club, Haras del Pilar,
-              Pilará, Los Lagartos y Campo Chico.
+              Diseñamos, editamos y publicamos las revistas de San Diego Country Club, Olivos Golf Club,
+              Haras del Pilar, Pilará, Los Lagartos y Campo Chico.
             </motion.p>
 
             {/* Cifras */}
             <div className="flex items-stretch mb-8 md:mb-10 border-y border-dw-gold/40 max-w-[460px]">
-              {[['11', 'años'], ['201', 'ediciones'], ['5', 'publicaciones']].map(([n, t], i) => (
+              {[['11', 'años'], ['201', 'ediciones'], ['6', 'publicaciones']].map(([n, t], i) => (
                 <div key={t} className={`flex-1 py-4 ${i ? 'border-l border-dw-gold/40 pl-5' : ''}`}>
                   <div className="font-display text-dw-white text-3xl md:text-4xl leading-none">{n}</div>
                   <div className="text-dw-gold text-[10px] tracking-[0.25em] uppercase mt-2">{t}</div>
