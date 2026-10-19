@@ -148,6 +148,22 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
           ))}
 
         </motion.div>
+
+        {/* Para nuevos clientes: pedir la revista de su club o country */}
+        <div className="mt-8 md:mt-10 bg-[#16362B] text-[#F4EFE4] px-7 py-9 md:px-12 md:py-11 grid md:grid-cols-[1fr_auto] gap-7 md:gap-12 items-center outline outline-1 outline-[#B08D57]/60 outline-offset-[6px]">
+          <div>
+            <p className="text-[#D9C29A] text-[10px] tracking-[0.3em] uppercase mb-3">Tu revista</p>
+            <h3 className="font-display font-normal text-3xl md:text-4xl leading-tight">
+              ¿Tu club o country quiere <i className="text-[#D9C29A]">su propia revista?</i>
+            </h3>
+            <p className="text-[#EAE2CF]/85 text-[15px] leading-relaxed mt-4 max-w-2xl">
+              Diseño editorial, edición mensual, versión web para leer en el celular y envío por WhatsApp. Te armamos una propuesta a medida.
+            </p>
+          </div>
+          <a href="#contacto" className="justify-self-start md:justify-self-end bg-[#B08D57] text-[#F4EFE4] text-[11px] tracking-[0.22em] uppercase px-8 py-4 hover:bg-[#9a7a49] transition-colors whitespace-nowrap">
+            Pedir propuesta →
+          </a>
+        </div>
       </div>
     </section>
   )
