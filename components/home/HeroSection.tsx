@@ -33,7 +33,7 @@ export function HeroSection({ issue }: { issue: any }) {
       {/* Main content */}
       <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pt-32 pb-12 md:pt-0 md:pb-20">
 
-        <div className="grid md:grid-cols-[1fr_220px] gap-12 items-end">
+        <div className="grid md:grid-cols-[1fr_270px] gap-12 items-end">
 
           {/* LEFT */}
           <div>
@@ -97,7 +97,7 @@ export function HeroSection({ issue }: { issue: any }) {
             transition={{ delay: 0.22, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="hidden md:block self-end">
             <Link href={`/revistas/${slug}/${issueNumber}`} className="block group">
-              <div className="aspect-[3/4] bg-dw-surface relative overflow-hidden mb-4 shadow-[0_10px_40px_rgba(31,42,36,0.18)] outline outline-1 outline-dw-gold outline-offset-[6px] transition-shadow duration-300 group-hover:shadow-[0_14px_50px_rgba(31,42,36,0.25)]">
+              <div className="aspect-[210/297] bg-dw-surface relative overflow-hidden mb-5 shadow-[0_10px_40px_rgba(31,42,36,0.18)] outline outline-1 outline-dw-gold outline-offset-[6px] transition-shadow duration-300 group-hover:shadow-[0_14px_50px_rgba(31,42,36,0.25)]">
                 {coverUrl ? (
                   <>
                     <Image
@@ -106,15 +106,8 @@ export function HeroSection({ issue }: { issue: any }) {
                       fill
                       unoptimized
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="220px"
+                      sizes="270px"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F2A20]/70 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <p className="font-display italic text-white/50 text-5xl leading-none mb-1.5 group-hover:text-white/75 transition-colors">
-                        #{issueNumber}
-                      </p>
-                      <p className="text-white/50 text-[9px] tracking-widest uppercase">Edición actual</p>
-                    </div>
                   </>
                 ) : (
                   <>
@@ -132,9 +125,9 @@ export function HeroSection({ issue }: { issue: any }) {
                   </>
                 )}
               </div>
-              <p className="text-dw-muted text-[10px] tracking-[0.2em] uppercase group-hover:text-dw-sub transition-colors">
-                Leer ahora →
-              </p>
+              <p className="text-dw-gold text-[10px] tracking-[0.25em] uppercase">Última edición</p>
+              <p className="font-display text-dw-white text-xl leading-tight mt-1">San Diego La Revista <i className="text-dw-gold">n° {issueNumber}</i></p>
+              <p className="text-dw-sub text-[10px] tracking-[0.2em] uppercase mt-2 group-hover:text-dw-white transition-colors">Leer ahora →</p>
             </Link>
           </motion.div>
 
