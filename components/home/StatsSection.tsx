@@ -26,7 +26,7 @@ const STATS = [
   {
     end: 10000, suffix: '+',
     label: 'LECTORES MENSUALES',
-    sub: 'En San Diego, Pilar y zona norte',
+    sub: 'Socios y vecinos de cada comunidad',
     italic: false,
   },
   {
@@ -50,7 +50,7 @@ export function StatsSection() {
             <h2 className="font-display text-4xl md:text-5xl text-[#F4EFE4] font-normal">En números</h2>
           </div>
           <p className="text-[#EAE2CF]/75 text-sm max-w-md leading-relaxed">
-            Más de una década construyendo las revistas de referencia de zona norte.
+            Más de una década construyendo las revistas de referencia de cada comunidad.
           </p>
         </motion.div>
 

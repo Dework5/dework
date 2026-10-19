@@ -43,7 +43,7 @@ export function HeroSection({ issue }: { issue: any }) {
               className="flex items-center gap-3 mb-6 md:mb-10">
               <span className="w-8 h-px bg-dw-gold" />
               <span className="text-dw-gold text-[10px] tracking-[0.28em] uppercase">
-                Dework · Agencia Editorial · Pilar, Buenos Aires
+                Dework · Agencia Digital · Pilar, Buenos Aires
               </span>
             </motion.div>
 
@@ -55,16 +55,26 @@ export function HeroSection({ issue }: { issue: any }) {
               style={{ fontSize: 'clamp(52px, 7.5vw, 96px)' }}>
               Revistas<br />
               <em className="font-display italic font-normal text-dw-gold"
-                style={{ fontSize: '0.6em' }}>zona norte / oeste</em>
+                style={{ fontSize: '0.62em' }}>de clubes y countries</em>
             </motion.h1>
 
             {/* Description */}
             <motion.p
               initial={false} animate={{ opacity: 1 }} transition={{ delay: 0.28, duration: 0.7 }}
-              className="text-dw-sub text-sm leading-[1.75] max-w-[400px] mb-7 md:mb-10">
-              Diseñamos y publicamos las revistas de San Diego, Pilar y zona norte de Buenos Aires.
-              Más de 11 años y 201 ediciones en circulación.
+              className="text-dw-sub text-[15px] md:text-base leading-[1.75] max-w-[460px] mb-7 md:mb-8">
+              Diseñamos, editamos y publicamos las revistas de San Diego Country Club, Haras del Pilar,
+              Pilará, Los Lagartos y Campo Chico.
             </motion.p>
+
+            {/* Cifras */}
+            <div className="flex items-stretch mb-8 md:mb-10 border-y border-dw-gold/40 max-w-[460px]">
+              {[['11', 'años'], ['201', 'ediciones'], ['5', 'publicaciones']].map(([n, t], i) => (
+                <div key={t} className={`flex-1 py-4 ${i ? 'border-l border-dw-gold/40 pl-5' : ''}`}>
+                  <div className="font-display text-dw-white text-3xl md:text-4xl leading-none">{n}</div>
+                  <div className="text-dw-gold text-[10px] tracking-[0.25em] uppercase mt-2">{t}</div>
+                </div>
+              ))}
+            </div>
 
             {/* CTAs */}
             <motion.div
@@ -76,7 +86,7 @@ export function HeroSection({ issue }: { issue: any }) {
               </a>
               <Link href={`/revistas/${slug}/${issueNumber}`}
                 className="text-dw-sub text-[11px] tracking-[0.18em] uppercase hover:text-dw-white transition-colors border-b border-dw-gold pb-px">
-                ÚLTIMA EDICIÓN #{issueNumber}
+                Leer la última edición →
               </Link>
             </motion.div>
           </div>

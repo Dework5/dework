@@ -21,12 +21,12 @@ const bodoni = Bodoni_Moda({
 })
 
 export const metadata: Metadata = {
-  title: 'Dework Editorial — Revistas digitales de zona norte',
-  description: 'Revistas editoriales de San Diego y zona norte de Buenos Aires. Más de 139 ediciones publicadas.',
-  keywords: 'revistas, san diego, pilar, zona norte, editorial, dework',
+  title: 'Dework · Agencia Digital — Revistas de clubes y countries',
+  description: 'Diseñamos, editamos y publicamos las revistas de San Diego Country Club, Haras del Pilar, Pilará, Los Lagartos y Campo Chico. Más de 201 ediciones publicadas.',
+  keywords: 'revistas, san diego, pilar, countries, clubes, editorial, dework, agencia digital',
   openGraph: {
     title: 'Dework Editorial',
-    description: 'Revistas digitales de zona norte de Buenos Aires',
+    description: 'Revistas de clubes y countries',
     type: 'website',
   },
 }

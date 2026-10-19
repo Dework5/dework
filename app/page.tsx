@@ -61,7 +61,7 @@ export default async function HomePage() {
   const { publications, latestIssue } = await getData()
   return (
     <main>
-      <h1 className="sr-only">Revistas editoriales de San Diego y zona norte</h1>
+      <h1 className="sr-only">Dework, agencia digital: revistas de clubes y countries</h1>
       <HeroSection issue={latestIssue} />
       <MarqueeStrip publications={publications} />
       <PublicationsSection publications={publications} />

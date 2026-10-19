@@ -38,7 +38,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
             <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal">Publicaciones</h2>
           </div>
           <p className="text-dw-sub text-sm max-w-lg leading-relaxed">
-            Cinco revistas que cubren el estilo de vida, la comunidad y la cultura de San Diego, Pilar y zona norte.
+            Cinco revistas que cubren el estilo de vida, la comunidad y la cultura de cada club y country.
           </p>
         </motion.div>
 
