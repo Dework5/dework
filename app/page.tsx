@@ -62,7 +62,7 @@ export default async function HomePage() {
   return (
     <main>
       <h1 className="sr-only">Dework, agencia digital: revistas de clubes y countries</h1>
-      <HeroSection issue={latestIssue} />
+      <HeroSection publications={publications} />
       <MarqueeStrip publications={publications} />
       <PublicationsSection publications={publications} />
       {(latestIssue as any)?.page_images_json?.avisos?.length > 0 && (

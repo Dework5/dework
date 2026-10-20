@@ -1,143 +1,81 @@
 'use client'
 
 import Image from 'next/image'
-import { motion } from 'framer-motion'
-import Link from 'next/link'
 
-export function HeroSection({ issue }: { issue: any }) {
-  const issueNumber = issue?.issue_number || issue?.issueNumber || 139
-  const slug = issue?.publication_slug || issue?.slug || 'san-diego-la-revista'
-  const coverUrl = issue?.cover_url || null
+// Portada de la web: presentación de Dework (qué hacemos) y, a la derecha, las tapas de todas las revistas
+export function HeroSection({ publications }: { publications: any[] }) {
+  const tapas = publications.filter((p: any) => p.latest_issue?.cover_url).slice(0, 6).reverse() // San Diego queda adelante
 
   return (
     <section
-      className="relative flex flex-col justify-center md:justify-start bg-dw-black overflow-hidden"
+      className="relative flex flex-col justify-center bg-dw-black overflow-hidden"
       style={{ minHeight: '100svh' }}
     >
-
-      {/* Ambient radial background */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 90% 70% at 65% 35%, #F3F7F0 0%, #E6EEE1 60%, #DCE6D6 100%)' }} />
 
-      {/* Giant issue-number watermark */}
-      <div aria-hidden className="absolute right-[-4vw] top-1/2 -translate-y-1/2 select-none pointer-events-none leading-none hidden lg:block">
-        <span className="font-display font-bold italic"
-          style={{ fontSize: 'clamp(260px, 34vw, 480px)', color: 'transparent', WebkitTextStroke: '1px #DCCDAE' }}>
-          {issueNumber}
-        </span>
-      </div>
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pt-32 pb-12 md:pt-36 md:pb-20">
+        <div className="grid md:grid-cols-[1fr_420px] gap-12 md:gap-16 items-center">
 
-      {/* Desktop spacer — pushes content to bottom on large screens */}
-      <div className="hidden md:block md:flex-1 md:min-h-[11rem]" aria-hidden />
-
-      {/* Main content */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pt-32 pb-12 md:pt-0 md:pb-20">
-
-        <div className="grid md:grid-cols-[1fr_270px] gap-12 items-end">
-
-          {/* LEFT */}
           <div>
-            {/* Badge */}
-            <motion.div
-              initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-              className="flex items-center gap-3 mb-6 md:mb-10">
+            <div className="flex items-center gap-3 mb-6 md:mb-9">
               <span className="w-8 h-px bg-dw-gold" />
-              <span className="text-dw-gold text-[10px] tracking-[0.28em] uppercase">
-                Dework · Agencia Digital · Pilar, Buenos Aires
-              </span>
-            </motion.div>
-
-            {/* Heading */}
-            <motion.h1
-              initial={false} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.06 }}
-              className="font-display font-normal text-dw-white leading-[0.95] tracking-tight mb-6"
-              style={{ fontSize: 'clamp(52px, 7.5vw, 96px)' }}>
-              Revistas<br />
-              <em className="font-display italic font-normal text-dw-gold"
-                style={{ fontSize: '0.62em' }}>de clubes y countries</em>
-            </motion.h1>
-
-            {/* Description */}
-            <motion.p
-              initial={false} animate={{ opacity: 1 }} transition={{ delay: 0.28, duration: 0.7 }}
-              className="text-dw-sub text-[15px] md:text-base leading-[1.75] max-w-[460px] mb-7 md:mb-8">
-              Diseñamos, editamos y publicamos las revistas de San Diego Country Club, Olivos Golf Club,
-              Haras del Pilar, Pilará, Los Lagartos y Campo Chico.
-            </motion.p>
-
-            {/* Cifras */}
-            <div className="flex items-stretch mb-8 md:mb-10 border-y border-dw-gold/40 max-w-[460px]">
-              {[['11', 'años'], ['201', 'ediciones'], ['6', 'publicaciones']].map(([n, t], i) => (
-                <div key={t} className={`flex-1 py-4 ${i ? 'border-l border-dw-gold/40 pl-5' : ''}`}>
-                  <div className="font-display text-dw-white text-3xl md:text-4xl leading-none">{n}</div>
-                  <div className="text-dw-gold text-[10px] tracking-[0.25em] uppercase mt-2">{t}</div>
-                </div>
-              ))}
+              <span className="text-dw-gold text-[10px] tracking-[0.28em] uppercase">Dework · Agencia Digital · Pilar, Buenos Aires</span>
             </div>
 
-            {/* CTAs */}
-            <motion.div
-              initial={false} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.6 }}
-              className="flex flex-wrap items-center gap-5">
+            <h1 className="font-display font-normal text-dw-white leading-[0.98] tracking-tight mb-6"
+              style={{ fontSize: 'clamp(46px, 6.4vw, 84px)' }}>
+              Contamos la vida<br />de cada comunidad
+              <em className="block font-display italic font-normal text-dw-gold mt-3" style={{ fontSize: '0.5em' }}>
+                revistas de clubes y countries
+              </em>
+            </h1>
+
+            <p className="text-dw-sub text-[15px] md:text-base leading-[1.75] max-w-[500px] mb-7">
+              Somos la editorial de los clubes y countries de la zona. Desde 2014 hacemos sus revistas de punta a punta:
+              contenidos, fotografía y diseño editorial, una versión web que se lee rápido en el celular,
+              el envío a los socios por WhatsApp y la difusión en redes. Y conectamos a cada comunidad con los anunciantes que la eligen.
+            </p>
+
+            <ul className="grid sm:grid-cols-3 gap-px bg-dw-gold/40 border border-dw-gold/40 max-w-[560px] mb-8 md:mb-10">
+              {[['Diseño editorial', 'Una revista de primera, mes a mes'], ['Web y WhatsApp', 'Cada edición, al instante en el celular'], ['Anunciantes', 'Avisos con link directo a cada marca']].map(([t, d]) => (
+                <li key={t} className="bg-dw-black/60 px-4 py-4">
+                  <p className="font-display text-dw-white text-lg leading-tight">{t}</p>
+                  <p className="text-dw-sub text-[12px] leading-snug mt-1">{d}</p>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex flex-wrap items-center gap-5">
               <a href="#publicaciones"
                 className="bg-dw-green text-dw-black text-[11px] tracking-[0.2em] uppercase px-8 py-4 hover:bg-dw-white transition-colors duration-200">
-                VER PUBLICACIONES →
+                VER LAS REVISTAS →
               </a>
-              <Link href={`/revistas/${slug}/${issueNumber}`}
+              <a href="#contacto"
                 className="text-dw-sub text-[11px] tracking-[0.18em] uppercase hover:text-dw-white transition-colors border-b border-dw-gold pb-px">
-                Leer la última edición →
-              </Link>
-            </motion.div>
+                Pedir la revista de tu club →
+              </a>
+            </div>
           </div>
 
-          {/* RIGHT — current issue mini-card */}
-          <motion.div
-            initial={false} animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.22, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="hidden md:block self-end">
-            <Link href={`/revistas/${slug}/${issueNumber}`} className="block group">
-              <div className="aspect-[210/297] bg-dw-surface relative overflow-hidden mb-5 shadow-[0_10px_40px_rgba(31,42,36,0.18)] outline outline-1 outline-dw-gold outline-offset-[6px] transition-shadow duration-300 group-hover:shadow-[0_14px_50px_rgba(31,42,36,0.25)]">
-                {coverUrl ? (
-                  <>
-                    <Image
-                      src={coverUrl}
-                      alt={`San Diego La Revista #${issueNumber}`}
-                      fill
-                      unoptimized
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="270px"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <div className="absolute inset-0"
-                      style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #CFDCC8 0,#CFDCC8 1px,transparent 0,transparent 14px)' }} />
-                    <div className="absolute inset-0 flex flex-col justify-between p-5">
-                      <span className="text-dw-muted text-[9px] tracking-[0.25em] uppercase">San Diego</span>
-                      <div>
-                        <p className="font-display italic text-dw-border text-5xl leading-none mb-1.5 group-hover:text-dw-muted transition-colors">
-                          #{issueNumber}
-                        </p>
-                        <p className="text-dw-muted text-[9px] tracking-widest uppercase">Edición actual</p>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-              <p className="text-dw-gold text-[10px] tracking-[0.25em] uppercase">Última edición</p>
-              <p className="font-display text-dw-white text-xl leading-tight mt-1">San Diego La Revista <i className="text-dw-gold">n° {issueNumber}</i></p>
-              <p className="text-dw-sub text-[10px] tracking-[0.2em] uppercase mt-2 group-hover:text-dw-white transition-colors">Leer ahora →</p>
-            </Link>
-          </motion.div>
-
+          {/* Tapas de las revistas, en abanico */}
+          {tapas.length > 0 && (
+            <a href="#publicaciones" aria-label="Ver las revistas" className="relative block [--abanico:24px] md:[--abanico:34px] h-[250px] md:h-[460px] group">
+              {tapas.map((p: any, i: number) => {
+                const n = tapas.length, k = i - (n - 1) / 2
+                return (
+                  <div key={p.slug}
+                    className="absolute top-1/2 left-1/2 w-[140px] md:w-[230px] aspect-[210/297] bg-dw-surface overflow-hidden shadow-[0_10px_34px_rgba(31,42,36,0.22)] outline outline-1 outline-dw-gold/70 transition-transform duration-500"
+                    style={{ transform: `translate(-50%, -50%) translateX(calc(${k} * var(--abanico, 34px))) rotate(${k * 5}deg)`, zIndex: i === n - 1 ? 10 : i }}>
+                    <Image src={p.latest_issue.cover_url} alt={`Portada ${p.name}`} fill unoptimized className="object-cover" sizes="230px" />
+                  </div>
+                )
+              })}
+            </a>
+          )}
         </div>
 
-        {/* Bottom rule */}
-        <motion.div
-          initial={false} animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ delay: 0.65, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-8 md:mt-14 h-px bg-dw-gold/50 origin-left" />
+        <div className="mt-10 md:mt-14 h-px bg-dw-gold/50" />
       </div>
     </section>
   )
