@@ -29,7 +29,7 @@ export function HeroSection({ publications }: { publications: any[] }) {
             </h1>
 
             <p className="text-dw-sub text-[15px] md:text-base leading-[1.7] max-w-[440px] mb-8 md:mb-10">
-              Desde 2014: diseño editorial, web y envío por WhatsApp.
+              Desde 2014: diseño editorial.
             </p>
 
             <div className="flex flex-wrap items-center gap-5">
