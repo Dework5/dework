@@ -9,12 +9,12 @@ export function HeroSection({ publications }: { publications: any[] }) {
   return (
     <section
       className="relative flex flex-col justify-center bg-dw-black overflow-hidden"
-      style={{ minHeight: '100svh' }}
+      
     >
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 90% 70% at 65% 35%, #F3F7F0 0%, #E6EEE1 60%, #DCE6D6 100%)' }} />
 
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pt-32 pb-12 md:pt-36 md:pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 md:px-16 pt-32 pb-10 md:pt-40 md:pb-14">
         <div className="grid md:grid-cols-[1fr_420px] gap-12 md:gap-16 items-center">
 
           <div>
@@ -23,28 +23,14 @@ export function HeroSection({ publications }: { publications: any[] }) {
               <span className="text-dw-gold text-[10px] tracking-[0.28em] uppercase">Dework · Agencia Digital · Pilar, Buenos Aires</span>
             </div>
 
-            <h1 className="font-display font-normal text-dw-white leading-[0.98] tracking-tight mb-6"
-              style={{ fontSize: 'clamp(46px, 6.4vw, 84px)' }}>
-              Contamos la vida<br />de cada comunidad
-              <em className="block font-display italic font-normal text-dw-gold mt-3" style={{ fontSize: '0.5em' }}>
-                revistas de clubes y countries
-              </em>
+            <h1 className="font-display font-normal text-dw-white leading-[1] tracking-tight mb-6"
+              style={{ fontSize: 'clamp(44px, 6vw, 80px)' }}>
+              Revistas de <em className="italic text-dw-gold">clubes y countries</em>
             </h1>
 
-            <p className="text-dw-sub text-[15px] md:text-base leading-[1.75] max-w-[500px] mb-7">
-              Somos la editorial de los clubes y countries de la zona. Desde 2014 hacemos sus revistas de punta a punta:
-              contenidos, fotografía y diseño editorial, una versión web que se lee rápido en el celular,
-              el envío a los socios por WhatsApp y la difusión en redes. Y conectamos a cada comunidad con los anunciantes que la eligen.
+            <p className="text-dw-sub text-[15px] md:text-base leading-[1.7] max-w-[440px] mb-8 md:mb-10">
+              Desde 2014: diseño editorial, web y envío por WhatsApp.
             </p>
-
-            <ul className="grid sm:grid-cols-3 gap-px bg-dw-gold/40 border border-dw-gold/40 max-w-[560px] mb-8 md:mb-10">
-              {[['Diseño editorial', 'Una revista de primera, mes a mes'], ['Web y WhatsApp', 'Cada edición, al instante en el celular'], ['Anunciantes', 'Avisos con link directo a cada marca']].map(([t, d]) => (
-                <li key={t} className="bg-dw-black/60 px-4 py-4">
-                  <p className="font-display text-dw-white text-lg leading-tight">{t}</p>
-                  <p className="text-dw-sub text-[12px] leading-snug mt-1">{d}</p>
-                </li>
-              ))}
-            </ul>
 
             <div className="flex flex-wrap items-center gap-5">
               <a href="#publicaciones"
