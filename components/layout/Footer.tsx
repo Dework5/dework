@@ -35,7 +35,7 @@ export function Footer() {
             <span>Info@dework.com.ar</span>
             <span>011 3361-6566</span>
             <div className="flex gap-6 mt-3">
-              <a href="https://www.instagram.com/countrysandiegolarevista/?hl=es" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/dework.lat/?hl=es" target="_blank" rel="noopener noreferrer"
                 className="hover:text-[#F4EFE4] transition-colors">Instagram</a>
               <a href="https://www.facebook.com/dework.arg" target="_blank" rel="noopener noreferrer"
                 className="hover:text-[#F4EFE4] transition-colors">Facebook</a>
