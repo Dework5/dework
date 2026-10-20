@@ -49,7 +49,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
         <motion.div
           variants={stagger} initial="hidden" whileInView="show"
           viewport={{ once: true, amount: 0 }}
-          className="grid grid-cols-2 md:grid-cols-3 gap-px bg-dw-border">
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-dw-border">
 
           {/* Main card */}
           {main && (
@@ -58,16 +58,17 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
               style={{ minHeight: '420px', borderTop: `2px solid ${ACCENTS[0]}` }}>
 
               {main.latest_issue?.cover_url ? (
-                <div className="absolute inset-0">
-                  <Image
-                    src={main.latest_issue.cover_url}
-                    alt={`Portada ${main.name}`}
-                    fill
-                    unoptimized
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F2A20]/95 via-[#16362B]/45 to-transparent" />
+                <div className="absolute inset-0 bg-[#16362B] px-8 pt-8 pb-40">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={main.latest_issue.cover_url}
+                      alt={`Portada ${main.name}`}
+                      fill
+                      unoptimized
+                      className="object-contain object-top drop-shadow-[0_10px_24px_rgba(0,0,0,0.35)] transition-transform duration-700 group-hover:scale-[1.02]"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -76,12 +77,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
 
               <Link href={`/revistas/${main.slug}`} className="absolute inset-0 p-8 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
-                  <span className={`text-[10px] tracking-[0.22em] uppercase ${main.latest_issue?.cover_url ? 'text-white/70' : 'text-dw-muted'}`}>
-                    {main.shortName || main.short_name || 'SDLR'}
-                  </span>
-                  <span className={`text-lg transition-colors duration-200 ${main.latest_issue?.cover_url ? 'text-white/40 group-hover:text-white/80' : 'text-dw-border group-hover:text-dw-sub'}`}>
-                    ↗
-                  </span>
+                  <span />
                 </div>
                 <div>
                   <h3 className={`font-display font-normal text-2xl md:text-3xl leading-tight mb-3 ${main.latest_issue?.cover_url ? 'text-white' : 'text-dw-white'}`}>
@@ -107,26 +103,27 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
           {rest.map((pub: any, i: number) => (
             <motion.div key={pub.slug} variants={itemVariant}
               className="bg-dw-card relative group overflow-hidden"
-              style={{ minHeight: '210px', borderTop: `2px solid ${ACCENTS[i + 1] || '#1E1E1E'}` }}>
+              style={{ minHeight: '250px', borderTop: `2px solid ${ACCENTS[i + 1] || '#1E1E1E'}` }}>
 
               {pub.latest_issue?.cover_url ? (
-                <div className="absolute inset-0">
-                  <Image
-                    src={pub.latest_issue.cover_url}
-                    alt={`Portada ${pub.name}`}
-                    fill
-                    unoptimized
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F2A20]/90 via-[#16362B]/35 to-transparent" />
+                <div className="absolute inset-0 bg-[#16362B]">
+                  <div className="absolute top-4 bottom-4 right-4 w-[46%]">
+                    <Image
+                      src={pub.latest_issue.cover_url}
+                      alt={`Portada ${pub.name}`}
+                      fill
+                      unoptimized
+                      className="object-contain object-right drop-shadow-[0_8px_18px_rgba(0,0,0,0.35)] transition-transform duration-700 group-hover:scale-[1.03]"
+                      sizes="200px"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
                   style={{ backgroundImage: PATTERNS[i + 1] }} />
               )}
 
-              <Link href={`/revistas/${pub.slug}`} className="absolute inset-0 p-6 flex flex-col justify-between">
+              <Link href={`/revistas/${pub.slug}`} className={`absolute inset-0 p-6 flex flex-col justify-between ${pub.latest_issue?.cover_url ? 'pr-[52%]' : ''}`}>
                 <div className="flex justify-between items-start">
                   <span className={`text-[10px] tracking-[0.2em] uppercase ${pub.latest_issue?.cover_url ? 'text-white/60' : 'text-dw-sub'}`}>
                     {pub.shortName || pub.short_name || pub.name?.slice(0, 4)}
@@ -152,7 +149,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
 
           {/* Si queda un lugar libre en la grilla: invitación para nuevas revistas */}
           {rest.length % 2 === 1 && (
-            <motion.div variants={itemVariant} className="bg-[#16362B] relative group overflow-hidden" style={{ minHeight: '210px', borderTop: '2px solid #A88650' }}>
+            <motion.div variants={itemVariant} className="bg-[#16362B] relative group overflow-hidden" style={{ minHeight: '250px', borderTop: '2px solid #A88650' }}>
               <a href="#contacto" className="absolute inset-0 p-6 flex flex-col justify-between text-[#F4EFE4]">
                 <span className="text-[10px] tracking-[0.2em] uppercase text-[#D9C29A]">Tu revista</span>
                 <div>

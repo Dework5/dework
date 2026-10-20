@@ -117,6 +117,8 @@ export default async function RevistasSlugPage({ params }: Props) {
   if (!result) notFound()
 
   const { publication, issues } = result
+  // Las revistas se numeran desde la 1: la cantidad de ediciones es el número de la última (no todas están cargadas en la web)
+  const totalEdiciones: number = issues[0]?.issue_number ?? issues.length
   const shortName = publication.short_name || publication.shortName || publication.name?.slice(0, 4).toUpperCase()
 
   return (
@@ -132,7 +134,7 @@ export default async function RevistasSlugPage({ params }: Props) {
             className="pointer-events-none select-none absolute right-8 top-1/2 -translate-y-1/2 font-display italic leading-none text-dw-surface hidden lg:block"
             style={{ fontSize: 'clamp(140px, 18vw, 260px)' }}
           >
-            {issues.length}
+            {totalEdiciones}
           </span>
         )}
 
@@ -168,7 +170,7 @@ export default async function RevistasSlugPage({ params }: Props) {
             </p>
             {issues.length > 0 && (
               <p className="text-dw-muted text-xs tracking-[0.2em] uppercase shrink-0">
-                {issues.length} {issues.length === 1 ? 'edición' : 'ediciones'}
+                {totalEdiciones} {totalEdiciones === 1 ? 'edición' : 'ediciones'}
               </p>
             )}
           </div>
