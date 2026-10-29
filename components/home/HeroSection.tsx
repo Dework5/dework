@@ -49,7 +49,7 @@ export function HeroSection({ publications }: { publications: any[] }) {
           {/* Tapa de la última San Diego La Revista */}
           <a href={`/revistas/san-diego-la-revista/${numero}`} aria-label="Leer San Diego La Revista" className="block justify-self-center md:justify-self-end w-[220px] md:w-[300px] group">
             <div className="relative aspect-[210/297] overflow-hidden shadow-[0_14px_40px_rgba(31,42,36,0.25)] outline outline-1 outline-dw-gold outline-offset-[6px]">
-              <Image src="/tapas/san-diego-144.jpg" alt={`San Diego La Revista n° ${numero}`} fill unoptimized className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" sizes="300px" priority />
+              <Image src={sd?.latest_issue?.cover_url ?? "/tapas/san-diego-144.jpg"} alt={`San Diego La Revista n° ${numero}`} fill unoptimized className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" sizes="300px" priority />
             </div>
             <p className="text-dw-gold text-[10px] tracking-[0.25em] uppercase mt-5">Última edición</p>
             <p className="font-display text-dw-white text-xl leading-tight mt-1">San Diego La Revista <i className="text-dw-gold">n° {numero}</i></p>

@@ -22,7 +22,7 @@ const PATTERNS = [
 ]
 
 // Cantidad de ediciones = número de la última edición publicada (las revistas se numeran desde la 1)
-const ediciones = (p: any) => { const n = p.latest_issue?.issue_number ?? p.issueCount ?? p.issue_count; return n ? `${n} ${n === 1 ? 'edición' : 'ediciones'}` : 'Próximamente' }
+const ediciones = (p: any) => { const n = p.latest_issue?.issue_number ?? p.issueCount ?? p.issue_count; return n ? `Edición n° ${n}` : 'Próximamente' }
 
 export function PublicationsSection({ publications }: { publications: any[] }) {
   const [main, ...rest] = publications
@@ -61,7 +61,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                 <div className="absolute inset-0 bg-[#16362B] px-8 pt-8 pb-40">
                   <div className="relative w-full h-full">
                     <Image
-                      src={main.slug === 'san-diego-la-revista' ? '/tapas/san-diego-144.jpg' : main.latest_issue?.cover_url}
+                      src={main.latest_issue?.cover_url}
                       alt={`Portada ${main.name}`}
                       fill
                       unoptimized
