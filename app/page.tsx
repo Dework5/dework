@@ -9,17 +9,21 @@ import { StatsSection } from '@/components/home/StatsSection'
 import { ContactSection } from '@/components/home/ContactSection'
 import { AnunciantesSection } from '@/components/home/AnunciantesSection'
 
+// Si la base de datos no responde, la portada se arma igual con estos datos (cantidad de ediciones = número de la última)
+const pub = (id: string, slug: string, name: string, short: string, description: string, ultima: number) =>
+  ({ id, slug, name, short_name: short, shortName: short, description, is_active: true, accent_color: '#A88650', latest_issue: { issue_number: ultima, cover_url: null } })
 const FALLBACK_PUBS = [
-  { id: '1', slug: 'san-diego-la-revista', name: 'San Diego La Revista', short_name: 'SDLR', shortName: 'SDLR', description: 'La revista exclusiva del country San Diego. Edición mensual desde 2014.', issueCount: 139, issue_count: 139, is_active: true, accent_color: '#C5A56B', latest_issue: null },
-  { id: '2', slug: 'haras-del-pilar',      name: 'Haras del Pilar',       short_name: 'HDP',  shortName: 'HDP',  description: 'El mundo ecuestre y polo.',                       issueCount: 24,  issue_count: 24,  is_active: true, accent_color: '#6B9B8A', latest_issue: null },
-  { id: '3', slug: 'pilara-magazine',       name: 'Pilará Magazine',        short_name: 'PM',   shortName: 'PM',   description: 'La publicación de Pilará.',                       issueCount: 18,  issue_count: 18,  is_active: true, accent_color: '#9B6B7A', latest_issue: null },
-  { id: '4', slug: 'los-lagartos',          name: 'Los Lagartos',           short_name: 'LL',   shortName: 'LL',   description: 'Polo club Los Lagartos.',                         issueCount: 12,  issue_count: 12,  is_active: true, accent_color: '#6B7B9B', latest_issue: null },
-  { id: '5', slug: 'campo-chico',           name: 'Campo Chico',            shortName: 'CC',   short_name: 'CC',  description: 'La vida en el campo.',                            issueCount: 8,   issue_count: 8,   is_active: true, accent_color: '#9B896B', latest_issue: null },
+  pub('1', 'san-diego-la-revista', 'San Diego La Revista', 'SDLR', 'La revista exclusiva del country San Diego. Edición mensual desde 2014.', 144),
+  pub('2', 'haras-del-pilar', 'Haras del Pilar', 'HDP', 'La revista del mundo ecuestre y country de Pilar.', 7),
+  pub('3', 'pilara-magazine', 'Pilará Magazine', 'PM', 'La publicación de Pilará.', 6),
+  pub('4', 'los-lagartos', 'Los Lagartos', 'LL', 'La revista de Los Lagartos Country Club.', 7),
+  pub('5', 'campo-chico', 'Campo Chico', 'CC', 'La revista de Campo Chico Country Club.', 2),
+  pub('6', 'olivos-golf-club', 'Olivos Golf Club Magazine', 'OGC', 'La revista del Olivos Golf Club.', 1),
 ]
 
 const FALLBACK_ISSUE = {
-  id: '1', issue_number: 139, slug: 'san-diego-la-revista', publication_slug: 'san-diego-la-revista',
-  title: 'Edición #139', cover_url: null, pdf_url: null,
+  id: '1', issue_number: 144, slug: 'san-diego-la-revista', publication_slug: 'san-diego-la-revista',
+  title: 'Edición #144', cover_url: null, pdf_url: null,
   is_published: true, published_at: new Date().toISOString(),
 }
 
@@ -29,7 +33,8 @@ async function getData() {
     const { data: publications } = await db
       .from('publications').select('*').eq('is_active', true).order('created_at', { ascending: true })
 
-    const pubs = publications?.length ? publications : FALLBACK_PUBS
+    // si la base no responde, se usan los datos de respaldo (con la cantidad de ediciones de cada revista)
+    const pubs = publications?.length ? publications.map((p: any) => ({ ...FALLBACK_PUBS.find(f => f.slug === p.slug), ...p })) : FALLBACK_PUBS
 
     // Fetch latest published issue (with cover) for every publication in parallel
     const pubsWithIssues = await Promise.all(
@@ -42,7 +47,7 @@ async function getData() {
           .order('published_at', { ascending: false })
           .limit(1)
           .single()
-        return { ...pub, latest_issue: issue || null }
+        return { ...pub, latest_issue: issue || pub.latest_issue || null }
       })
     )
 

@@ -57,11 +57,11 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
               className={`col-span-2 md:col-span-1 ${rest.length > 4 ? 'md:row-span-3' : 'row-span-2'} bg-dw-card relative group overflow-hidden`}
               style={{ minHeight: '420px', borderTop: `2px solid ${ACCENTS[0]}` }}>
 
-              {main.latest_issue?.cover_url ? (
+              {main ? (
                 <div className="absolute inset-0 bg-[#16362B] px-8 pt-8 pb-40">
                   <div className="relative w-full h-full">
                     <Image
-                      src={main.latest_issue.cover_url}
+                      src={main.slug === 'san-diego-la-revista' ? '/tapas/san-diego-144.jpg' : main.latest_issue?.cover_url}
                       alt={`Portada ${main.name}`}
                       fill
                       unoptimized
@@ -80,15 +80,15 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                   <span />
                 </div>
                 <div>
-                  <h3 className={`font-display font-normal text-2xl md:text-3xl leading-tight mb-3 ${main.latest_issue?.cover_url ? 'text-white' : 'text-dw-white'}`}>
+                  <h3 className={`font-display font-normal text-2xl md:text-3xl leading-tight mb-3 text-white`}>
                     {main.name}
                   </h3>
                   {main.description && (
-                    <p className={`text-xs leading-relaxed mb-4 max-w-[240px] ${main.latest_issue?.cover_url ? 'text-white/75' : 'text-dw-sub'}`}>
+                    <p className={`text-xs leading-relaxed mb-4 max-w-[240px] text-white/75`}>
                       {main.description}
                     </p>
                   )}
-                  <p className={`text-xs tracking-widest ${main.latest_issue?.cover_url ? 'text-white/60' : 'text-dw-muted'}`}>
+                  <p className={`text-xs tracking-widest text-white/60`}>
                     {ediciones(main)}
                   </p>
                 </div>
@@ -103,41 +103,24 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
           {rest.map((pub: any, i: number) => (
             <motion.div key={pub.slug} variants={itemVariant}
               className="bg-dw-card relative group overflow-hidden"
-              style={{ minHeight: '250px', borderTop: `2px solid ${ACCENTS[i + 1] || '#1E1E1E'}` }}>
+              style={{ minHeight: '200px', borderTop: `2px solid ${ACCENTS[i + 1] || '#1E1E1E'}` }}>
 
-              {pub.latest_issue?.cover_url ? (
-                <div className="absolute inset-0 bg-[#16362B]">
-                  <div className="absolute top-4 bottom-4 right-4 w-[46%]">
-                    <Image
-                      src={pub.latest_issue.cover_url}
-                      alt={`Portada ${pub.name}`}
-                      fill
-                      unoptimized
-                      className="object-contain object-right drop-shadow-[0_8px_18px_rgba(0,0,0,0.35)] transition-transform duration-700 group-hover:scale-[1.03]"
-                      sizes="200px"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                  style={{ backgroundImage: PATTERNS[i + 1] }} />
-              )}
-
-              <Link href={`/revistas/${pub.slug}`} className={`absolute inset-0 p-6 flex flex-col justify-between ${pub.latest_issue?.cover_url ? 'pr-[52%]' : ''}`}>
+              <div className="absolute inset-0 bg-[#16362B]" />
+              <Link href={`/revistas/${pub.slug}`} className="absolute inset-0 p-6 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
-                  <span className={`text-[10px] tracking-[0.2em] uppercase ${pub.latest_issue?.cover_url ? 'text-white/60' : 'text-dw-sub'}`}>
+                  <span className={`text-[10px] tracking-[0.2em] uppercase text-white/60`}>
                     {pub.shortName || pub.short_name || pub.name?.slice(0, 4)}
                   </span>
-                  <span className={`text-sm transition-colors duration-200 ${pub.latest_issue?.cover_url ? 'text-white/40 group-hover:text-white/80' : 'text-dw-muted group-hover:text-dw-sub'}`}>
+                  <span className={`text-sm transition-colors duration-200 text-white/40 group-hover:text-white/80`}>
                     ↗
                   </span>
                 </div>
                 <div>
-                  <h3 className={`font-display font-normal text-xl leading-tight mb-1.5 ${pub.latest_issue?.cover_url ? 'text-white' : 'text-dw-white'}`}>
+                  <h3 className={`font-display font-normal text-2xl md:text-[28px] leading-tight mb-2 text-white`}>
                     {pub.name}
                   </h3>
-                  <p className={`text-xs tracking-widest ${pub.latest_issue?.cover_url ? 'text-white/55' : 'text-dw-sub'}`}>
-                    {ediciones(pub)}
+                  <p className={`text-xs tracking-widest text-white/55`}>
+                    {ediciones(pub)} <span className="text-[#D9C29A] ml-2">Ver revista →</span>
                   </p>
                 </div>
               </Link>
@@ -149,7 +132,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
 
           {/* Si queda un lugar libre en la grilla: invitación para nuevas revistas */}
           {rest.length % 2 === 1 && (
-            <motion.div variants={itemVariant} className="bg-[#16362B] relative group overflow-hidden" style={{ minHeight: '250px', borderTop: '2px solid #A88650' }}>
+            <motion.div variants={itemVariant} className="bg-[#16362B] relative group overflow-hidden" style={{ minHeight: '200px', borderTop: '2px solid #A88650' }}>
               <a href="#contacto" className="absolute inset-0 p-6 flex flex-col justify-between text-[#F4EFE4]">
                 <span className="text-[10px] tracking-[0.2em] uppercase text-[#D9C29A]">Tu revista</span>
                 <div>
