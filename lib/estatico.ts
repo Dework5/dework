@@ -1,14 +1,18 @@
 // Datos de la web guardados en el propio sitio (no dependen de Supabase).
-// San Diego La Revista: las dos últimas ediciones completas. Otras revistas: solo la tapa.
+// San Diego La Revista: las cuatro últimas ediciones completas. Otras revistas: solo la tapa.
 // Se regeneran con `node scripts/estatico.mjs` desde los archivos del estudio.
 import sd144 from '@/data/sd-144.json'
 import sd143 from '@/data/sd-143.json'
+import sd142 from '@/data/sd-142.json'
+import sd141 from '@/data/sd-141.json'
 
 const SD_ID = '13374b20-d409-4ce0-a493-6a0dc7816eef'
 
 export const EDICIONES_SD = [
   { id: '5cce10e3-c75a-417d-8079-e8902a81daba', publication_id: SD_ID, is_published: true, images_status: 'ready', ...sd144 },
   { id: '0e08e70c-f85c-46f7-9ff4-0f3076aeaab5', publication_id: SD_ID, is_published: true, images_status: 'ready', ...sd143 },
+  { id: 'd01802d5-966a-4632-b82e-017cd90c4c31', publication_id: SD_ID, is_published: true, images_status: 'ready', ...sd142 },
+  { id: 'ee10aaa8-cf94-4776-99fb-190ec631f2b5', publication_id: SD_ID, is_published: true, images_status: 'ready', ...sd141 },
 ] as any[]
 
 const pub = (id: string, slug: string, name: string, short: string, description: string, ultima: number, tapa: string) => ({

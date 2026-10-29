@@ -1,0 +1,217 @@
+{
+ "issue_number": 142,
+ "title": "SAN DIEGO LA REVISTA EDICION 40 AÑOS ·#142",
+ "published_at": "2026-08-27T12:48:31.211Z",
+ "cover_url": "/ed/sd/142/tapa.jpg",
+ "pdf_url": "https://pub-aea55e089e9746838a843cbe7fe9cc31.r2.dev/13374b20-d409-4ce0-a493-6a0dc7816eef/142-1787834904475.pdf",
+ "page_count": 37,
+ "page_images_json": {
+  "slots": {
+   "1": "/ed/sd/142/p01-1600.webp",
+   "2": "/ed/sd/142/p02-1600.webp",
+   "3": "/ed/sd/142/p03-1600.webp",
+   "4": "/ed/sd/142/p04-1600.webp",
+   "5": "/ed/sd/142/p05-1600.webp",
+   "6": "/ed/sd/142/p06-1600.webp",
+   "7": "/ed/sd/142/p07-1600.webp",
+   "8": "/ed/sd/142/p08-1600.webp",
+   "9": "/ed/sd/142/p09-1600.webp",
+   "10": "/ed/sd/142/p10-1600.webp",
+   "11": "/ed/sd/142/p11-1600.webp",
+   "12": "/ed/sd/142/p12-1600.webp",
+   "13": "/ed/sd/142/p13-1600.webp",
+   "14": "/ed/sd/142/p14-1600.webp",
+   "15": "/ed/sd/142/p15-1600.webp",
+   "16": "/ed/sd/142/p16-1600.webp",
+   "17": "/ed/sd/142/p17-1600.webp",
+   "18": "/ed/sd/142/p18-1600.webp",
+   "19": "/ed/sd/142/p19-1600.webp",
+   "20": "/ed/sd/142/p20-1600.webp",
+   "21": "/ed/sd/142/p21-1600.webp",
+   "22": "/ed/sd/142/p22-1600.webp",
+   "23": "/ed/sd/142/p23-1600.webp",
+   "24": "/ed/sd/142/p24-1600.webp",
+   "25": "/ed/sd/142/p25-1600.webp",
+   "26": "/ed/sd/142/p26-1600.webp",
+   "27": "/ed/sd/142/p27-1600.webp",
+   "28": "/ed/sd/142/p28-1600.webp",
+   "29": "/ed/sd/142/p29-1600.webp",
+   "30": "/ed/sd/142/p30-1600.webp",
+   "31": "/ed/sd/142/p31-1600.webp",
+   "32": "/ed/sd/142/p32-1600.webp",
+   "33": "/ed/sd/142/p33-1600.webp",
+   "34": "/ed/sd/142/p34-1600.webp",
+   "35": "/ed/sd/142/p35-1600.webp",
+   "36": "/ed/sd/142/p36-1600.webp",
+   "37": "/ed/sd/142/p37-1600.webp"
+  },
+  "renderer": "dework-conversion",
+  "errorPages": [],
+  "isAllSpread": false,
+  "isSpreadPDF": false,
+  "totalPdfPages": 37,
+  "pageDimensions": {
+   "w": 595.276,
+   "h": 841.89
+  },
+  "avisos": [],
+  "links": {
+   "2": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://www.audi.com.ar/ar/web/es.html",
+     "title": "Audi Buenos Aires"
+    }
+   ],
+   "3": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://www.instagram.com/ancarolaracca/",
+     "title": "Ancarola & Racca"
+    }
+   ],
+   "12": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://www.instagram.com/monicaparodipropiedades/",
+     "title": "Mónica Parodi Propiedades"
+    }
+   ],
+   "13": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://wa.me/5491130476513",
+     "title": "SAC Producciones"
+    }
+   ],
+   "18": [
+    {
+     "x": 0,
+     "y": 0.5,
+     "w": 1,
+     "h": 0.5,
+     "url": "https://www.instagram.com/citeza.proyecta/",
+     "title": "Citeza"
+    }
+   ],
+   "19": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://wa.me/5491131511819",
+     "title": "Samurai Cocina Japonesa"
+    }
+   ],
+   "29": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "http://grupodema.com.ar/productos/marcas/acqua-system",
+     "title": "Grupo Dema"
+    }
+   ],
+   "30": [
+    {
+     "x": 0.64,
+     "y": 0.715,
+     "w": 0.36,
+     "h": 0.21,
+     "url": "https://www.audi.com.ar/ar/web/es.html",
+     "title": "Audi Buenos Aires"
+    }
+   ],
+   "31": [
+    {
+     "x": 0,
+     "y": 0.715,
+     "w": 0.6,
+     "h": 0.21,
+     "url": "https://www.audi.com.ar/ar/web/es.html",
+     "title": "Audi Buenos Aires"
+    },
+    {
+     "x": 0.565,
+     "y": 0.055,
+     "w": 0.395,
+     "h": 0.43,
+     "url": "https://www.dework.com.ar",
+     "title": "Dework"
+    }
+   ],
+   "32": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 0.5,
+     "url": "https://wa.link/kv08mh",
+     "title": "Grupo R"
+    },
+    {
+     "x": 0,
+     "y": 0.5,
+     "w": 1,
+     "h": 0.5,
+     "url": "https://www.instagram.com/tiernissimacarnicerias/",
+     "title": "Tiernísima"
+    }
+   ],
+   "33": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://www.instagram.com/casasmartt/",
+     "title": "Casa Smart"
+    }
+   ],
+   "35": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://www.instagram.com/victoriagazzorealestate/",
+     "title": "Coldwell Banker Wings"
+    }
+   ],
+   "36": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://www.audi.com.ar/ar/web/es.html",
+     "title": "Audi Buenos Aires"
+    }
+   ],
+   "37": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "url": "https://www.audi.com.ar/ar/web/es.html",
+     "title": "Audi Buenos Aires"
+    }
+   ]
+  }
+ }
+}
