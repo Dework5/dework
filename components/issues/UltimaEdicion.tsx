@@ -57,7 +57,8 @@ export function UltimaEdicion({ issue, slug, publicationName }: Props) {
               Leer ahora →
             </Link>
             {issue.pdf_url && (
-              <a href={`${issue.pdf_url}?download=${encodeURIComponent(`San Diego La Revista ${issue.issue_number}${mes ? ' - ' + mes : ''}.pdf`)}`}
+              <a href={issue.pdf_url.startsWith('/') ? issue.pdf_url : `${issue.pdf_url}?download=${encodeURIComponent(`San Diego La Revista ${issue.issue_number}${mes ? ' - ' + mes : ''}.pdf`)}`}
+                download={`San Diego La Revista ${issue.issue_number}${mes ? ' - ' + mes : ''}.pdf`}
                 className="text-[#EAE2CF] text-[11px] tracking-[0.2em] uppercase border-b border-[#B08D57] pb-px hover:text-[#F4EFE4]">
                 Descargar revista
               </a>

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { Suspense } from 'react'
-import { createServerClient } from '@/lib/supabase-server'
+import { publicacion, edicion } from '@/lib/estatico'
 import { PDFReaderWrapper, LoadingFallback } from '@/components/reader/PDFReaderWrapper'
 import type { PreRenderedImages } from '@/lib/types'
 
@@ -24,26 +24,9 @@ async function aplicarBorrador(issue: Record<string, unknown>, publicationId: st
 }
 
 async function getIssue(slug: string, numero: string) {
-  const db = createServerClient()
-
-  const { data: publication } = await db
-    .from('publications')
-    .select('*')
-    .eq('slug', slug)
-    .single()
-
-  if (!publication) return null
-
-  const { data: issue } = await db
-    .from('issues')
-    .select('*')
-    .eq('publication_id', publication.id)
-    .eq('issue_number', parseInt(numero))
-    .eq('is_published', true)
-    .single()
-
-  if (!issue) return null
-
+  const publication = publicacion(slug)
+  const issue = edicion(slug, parseInt(numero))
+  if (!publication || !issue) return null
   return { issue, publication }
 }
 

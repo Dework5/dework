@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { Metadata } from 'next'
-import { createServerClient } from '@/lib/supabase-server'
+import { PUBLICACIONES, EDICIONES_SD, SLUG_SD, publicacion } from '@/lib/estatico'
 import Link from 'next/link'
 import { CoverImage } from '@/components/issues/CoverImage'
 import { UltimaEdicion } from '@/components/issues/UltimaEdicion'
@@ -13,86 +13,15 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-const PUBLICATIONS_FALLBACK = [
-  {
-    id: 'fallback-1',
-    slug: 'san-diego-la-revista',
-    name: 'San Diego La Revista',
-    short_name: 'SDLR',
-    shortName: 'SDLR',
-    description: 'La revista exclusiva del country San Diego. Edición mensual desde 2014.',
-    is_active: true,
-  },
-  {
-    id: 'fallback-2',
-    slug: 'haras-del-pilar',
-    name: 'Haras del Pilar',
-    short_name: 'HDP',
-    shortName: 'HDP',
-    description: 'La revista del mundo ecuestre y country de Pilar.',
-    is_active: true,
-  },
-  {
-    id: 'fallback-3',
-    slug: 'pilara-magazine',
-    name: 'Pilará Magazine',
-    short_name: 'PM',
-    shortName: 'PM',
-    description: 'Moda, cultura y tendencias de Pilará y alrededores.',
-    is_active: true,
-  },
-  {
-    id: 'fallback-4',
-    slug: 'los-lagartos',
-    name: 'Los Lagartos',
-    short_name: 'LL',
-    shortName: 'LL',
-    description: 'Revista del country Los Lagartos.',
-    is_active: true,
-  },
-  {
-    id: 'fallback-5',
-    slug: 'campo-chico',
-    name: 'Campo Chico',
-    short_name: 'CC',
-    shortName: 'CC',
-    description: 'La vida en el campo chico de zona norte.',
-    is_active: true,
-  },
-]
-
+// Datos guardados en la web: San Diego con sus dos últimas ediciones; las otras revistas solo muestran la tapa en el inicio
 async function getPublication(slug: string) {
-  const db = createServerClient()
-  let publication = null
-  let issues: any[] = []
-
-  const { data: pubData } = await db
-    .from('publications')
-    .select('*')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
-  publication = pubData
-
-  if (!publication) {
-    publication = PUBLICATIONS_FALLBACK.find(p => p.slug === slug) ?? null
-  }
-
+  const publication = publicacion(slug)
   if (!publication) return null
-
-  const { data: issuesData } = await db
-    .from('issues')
-    .select('*')
-    .eq('publication_id', publication.id)
-    .eq('is_published', true)
-    .order('issue_number', { ascending: false })
-  issues = issuesData || []
-
-  return { publication, issues }
+  return { publication, issues: slug === SLUG_SD ? EDICIONES_SD : [] }
 }
 
 export async function generateStaticParams() {
-  return PUBLICATIONS_FALLBACK.map(p => ({ slug: p.slug }))
+  return PUBLICACIONES.map(p => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -115,10 +44,12 @@ export default async function RevistasSlugPage({ params }: Props) {
   const result = await getPublication(slug)
 
   if (!result) notFound()
+  // las otras revistas por ahora solo están con su tapa en el inicio
+  if (slug !== SLUG_SD) redirect('/#publicaciones')
 
   const { publication, issues } = result
   // Las revistas se numeran desde la 1: la cantidad de ediciones es el número de la última (no todas están cargadas en la web)
-  const totalEdiciones: number = issues[0]?.issue_number ?? issues.length
+  const totalEdiciones: number = publication.latest_issue?.issue_number ?? issues[0]?.issue_number ?? issues.length
   const shortName = publication.short_name || publication.shortName || publication.name?.slice(0, 4).toUpperCase()
 
   return (

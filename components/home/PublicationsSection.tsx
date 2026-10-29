@@ -103,16 +103,21 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
           {rest.map((pub: any, i: number) => (
             <motion.div key={pub.slug} variants={itemVariant}
               className="bg-dw-card relative group overflow-hidden"
-              style={{ minHeight: '200px', borderTop: `2px solid ${ACCENTS[i + 1] || '#1E1E1E'}` }}>
+              style={{ minHeight: '250px', borderTop: `2px solid ${ACCENTS[i + 1] || '#1E1E1E'}` }}>
 
-              <div className="absolute inset-0 bg-[#16362B]" />
-              <Link href={`/revistas/${pub.slug}`} className="absolute inset-0 p-6 flex flex-col justify-between">
+              {/* Otras revistas: solo la tapa (sin ediciones para leer) */}
+              <div className="absolute inset-0 bg-[#16362B]">
+                {pub.latest_issue?.cover_url && (
+                  <div className="absolute top-4 bottom-4 right-4 w-[46%]">
+                    <Image src={pub.latest_issue.cover_url} alt={`Tapa ${pub.name}`} fill unoptimized
+                      className="object-contain object-right drop-shadow-[0_8px_18px_rgba(0,0,0,0.35)]" sizes="200px" />
+                  </div>
+                )}
+              </div>
+              <div className="absolute inset-0 p-6 pr-[52%] flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                   <span className={`text-[10px] tracking-[0.2em] uppercase text-white/60`}>
                     {pub.shortName || pub.short_name || pub.name?.slice(0, 4)}
-                  </span>
-                  <span className={`text-sm transition-colors duration-200 text-white/40 group-hover:text-white/80`}>
-                    ↗
                   </span>
                 </div>
                 <div>
@@ -120,10 +125,10 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                     {pub.name}
                   </h3>
                   <p className={`text-xs tracking-widest text-white/55`}>
-                    {ediciones(pub)} <span className="text-[#D9C29A] ml-2">Ver revista →</span>
+                    {ediciones(pub)}
                   </p>
                 </div>
-              </Link>
+              </div>
 
               <div className="absolute top-0 left-0 right-0 h-[2px] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500"
                 style={{ background: ACCENTS[i + 1] || '#888' }} />
@@ -132,7 +137,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
 
           {/* Si queda un lugar libre en la grilla: invitación para nuevas revistas */}
           {rest.length % 2 === 1 && (
-            <motion.div variants={itemVariant} className="bg-[#16362B] relative group overflow-hidden" style={{ minHeight: '200px', borderTop: '2px solid #A88650' }}>
+            <motion.div variants={itemVariant} className="bg-[#16362B] relative group overflow-hidden" style={{ minHeight: '250px', borderTop: '2px solid #A88650' }}>
               <a href="#contacto" className="absolute inset-0 p-6 flex flex-col justify-between text-[#F4EFE4]">
                 <span className="text-[10px] tracking-[0.2em] uppercase text-[#D9C29A]">Tu revista</span>
                 <div>
