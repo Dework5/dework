@@ -680,6 +680,12 @@
      "marca": "Coldwell Banker Wings",
      "imagen": "/ed/sd/144/p30-800.webp",
      "pagina": 30
+    },
+    {
+     "url": "https://www.audi.com.ar/ar/web/es.html",
+     "marca": "Audi Buenos Aires",
+     "imagen": "/ed/sd/144/p32-800.webp",
+     "pagina": 32
     }
    ],
    "renderer": "dework-estudio",
