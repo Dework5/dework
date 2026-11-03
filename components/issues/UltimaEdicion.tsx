@@ -16,7 +16,7 @@ export function UltimaEdicion({ issue, slug, publicationName }: Props) {
   const tapa = pij?.slots?.['1']?.replace(/-1600\.webp$/, '-800.webp') ?? issue.cover_url
 
   return (
-    <section id="ultima" className="scroll-mt-44 md:scroll-mt-48 bg-[#16362B] text-[#F4EFE4] px-5 md:px-12 py-12 md:py-20">
+    <section id="ultima" className="scroll-mt-28 md:scroll-mt-32 bg-[#16362B] text-[#F4EFE4] px-5 md:px-12 py-12 md:py-20">
       <div className="max-w-6xl mx-auto grid md:grid-cols-[minmax(0,420px)_1fr] gap-10 md:gap-16 items-center">
         <Link href={href} className="group block mx-auto w-[72%] sm:w-[55%] md:w-full">
           <div className="aspect-[210/297] relative outline outline-1 outline-[#B08D57] outline-offset-[10px] shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">

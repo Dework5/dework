@@ -6,6 +6,7 @@ import { CoverImage } from '@/components/issues/CoverImage'
 import { UltimaEdicion } from '@/components/issues/UltimaEdicion'
 import { AnunciantesSection } from '@/components/home/AnunciantesSection'
 import { ServiciosSection } from '@/components/issues/ServiciosSection'
+import { SeccionesMenu } from '@/components/issues/SeccionesMenu'
 
 // ISR: revalidate every 60 s so new issues/covers appear quickly without re-fetching on every hit
 export const revalidate = 60
@@ -114,23 +115,15 @@ export default async function RevistasSlugPage({ params }: Props) {
         </div>
       </div>
 
-      {/* ── ACCESOS RÁPIDOS A CADA SECCIÓN (queda fija debajo del menú al bajar) ── */}
+      {/* ── ACCESOS RÁPIDOS: botón "Secciones" debajo del menú de arriba, se despliega al tocarlo ── */}
       {issues.length > 0 && (
-        <nav aria-label="Secciones" className="sticky top-24 md:top-28 z-40 bg-dw-black/95 backdrop-blur-sm border-y border-dw-gold/30">
-          <div className="max-w-6xl mx-auto px-5 md:px-12 py-3 flex gap-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {[
-              ['#ultima', 'Última edición'],
-              ...(issues.length > 1 ? [['#anteriores', 'Ediciones anteriores']] : []),
-              ...(issues[0]?.page_images_json?.avisos?.length > 0 ? [['#anunciantes', 'Anunciantes']] : []),
-              ['#servicios', 'Servicios recomendados'],
-              ['/#contacto', '¿Querés publicar?'],
-            ].map(([href, label]) => (
-              <a key={href} href={href} className="shrink-0 text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-dw-text border border-dw-gold/60 rounded-full px-4 py-2 hover:bg-[#16362B] hover:text-[#F4EFE4] hover:border-[#16362B] transition-colors">
-                {label}
-              </a>
-            ))}
-          </div>
-        </nav>
+        <SeccionesMenu secciones={[
+          ['#ultima', 'Última edición'],
+          ...(issues.length > 1 ? [['#anteriores', 'Ediciones anteriores'] as [string, string]] : []),
+          ...(issues[0]?.page_images_json?.avisos?.length > 0 ? [['#anunciantes', 'Anunciantes'] as [string, string]] : []),
+          ['#servicios', 'Servicios recomendados'],
+          ['/#contacto', '¿Querés publicar?'],
+        ]} />
       )}
 
       {/* ── ÚLTIMA EDICIÓN DESTACADA ── */}
@@ -151,7 +144,7 @@ export default async function RevistasSlugPage({ params }: Props) {
           ) : (
             <>
             {issues.length > 1 && (
-              <div id="anteriores" className="scroll-mt-44 md:scroll-mt-48 flex items-baseline gap-4 pt-12 md:pt-16 mb-8 md:mb-10">
+              <div id="anteriores" className="scroll-mt-28 md:scroll-mt-32 flex items-baseline gap-4 pt-12 md:pt-16 mb-8 md:mb-10">
                 <h2 className="font-display text-3xl md:text-4xl text-dw-white font-normal">Ediciones anteriores</h2>
                 <span className="h-px flex-1 bg-gradient-to-r from-dw-gold/60 to-transparent" />
               </div>

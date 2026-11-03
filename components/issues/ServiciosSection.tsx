@@ -5,7 +5,7 @@ import servicios from '@/data/sd-servicios.json'
 export function ServiciosSection() {
   if (!servicios.length) return null
   return (
-    <section id="servicios" className="scroll-mt-44 md:scroll-mt-48 bg-dw-black py-14 md:py-24 px-5 md:px-10">
+    <section id="servicios" className="scroll-mt-28 md:scroll-mt-32 bg-dw-black py-14 md:py-24 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 md:mb-12">
           <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal mb-3">
