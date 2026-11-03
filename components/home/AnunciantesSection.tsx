@@ -28,7 +28,7 @@ export function AnunciantesSection({ avisos, slug, numero, mes, orden }: Props) 
   if (!avisos.length) return null
 
   return (
-    <section id="anunciantes" className="bg-dw-surface py-14 md:py-24 px-5 md:px-10">
+    <section id="anunciantes" className="scroll-mt-44 md:scroll-mt-48 bg-dw-surface py-14 md:py-24 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 md:mb-12">
           <div className="flex items-baseline gap-4 mb-3">
