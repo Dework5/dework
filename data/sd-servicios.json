@@ -1,0 +1,86 @@
+[
+ {
+  "marca": "Ecosuper",
+  "rubro": "Supermercado",
+  "tel": "11 2448-1116",
+  "whatsapp": "https://wa.me/5491124481116",
+  "imagen": "/servicios/ecosuper.webp"
+ },
+ {
+  "marca": "Pintor Felipe",
+  "rubro": "Pintura profesional · Interiores y exteriores",
+  "tel": "11 4162-6490",
+  "whatsapp": "https://wa.me/5491141626490",
+  "imagen": "/servicios/pintor-felipe.webp"
+ },
+ {
+  "marca": "Antonio",
+  "rubro": "Mantenimiento general",
+  "tel": "11 5714-1268",
+  "whatsapp": "https://wa.me/5491157141268",
+  "imagen": "/servicios/antonio.webp"
+ },
+ {
+  "marca": "Mas Soluciones",
+  "rubro": "Computación",
+  "tel": "11 5958-7422",
+  "whatsapp": "https://wa.me/5491159587422",
+  "imagen": "/servicios/mas-soluciones.webp"
+ },
+ {
+  "marca": "Como Perros y Gatos",
+  "rubro": "Pet shop · Peluquería",
+  "tel": "11 6761-3754",
+  "whatsapp": "https://wa.me/5491167613754",
+  "imagen": "/servicios/como-perros-y-gatos.webp"
+ },
+ {
+  "marca": "Clases de Música",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://wa.me/5491169311288",
+  "imagen": "/servicios/clases-de-musica.webp"
+ },
+ {
+  "marca": "Andrea Diaz Beccar",
+  "rubro": "Fisioterapia y psicomotricidad",
+  "tel": "2392- 544173",
+  "whatsapp": "https://wa.me/5492392544173",
+  "imagen": "/servicios/andrea-diaz-beccar.webp"
+ },
+ {
+  "marca": "Athenea Spa San Diego",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://wa.me/5491151387011",
+  "imagen": "/servicios/athenea-spa-san-diego.webp"
+ },
+ {
+  "marca": "Tiernísima",
+  "rubro": "Carnicerías",
+  "tel": "11 4673-6525",
+  "whatsapp": "https://wa.me/5491146736525",
+  "imagen": "/servicios/tiernisima.webp"
+ },
+ {
+  "marca": "Grupo R",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://wa.me/5491165205228",
+  "imagen": "/servicios/grupo-r.webp"
+ },
+ {
+  "marca": "Diego",
+  "rubro": "Electricista",
+  "tel": "11 5740-5874",
+  "whatsapp": "https://wa.me/5491157405874",
+  "imagen": "/servicios/diego.webp"
+ },
+ {
+  "marca": "Tienda de Helados",
+  "rubro": "Heladería",
+  "tel": "11 3426-9878",
+  "whatsapp": "https://wa.me/5491134269878",
+  "imagen": "/servicios/tienda-de-helados.webp"
+ }
+]

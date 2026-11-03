@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { CoverImage } from '@/components/issues/CoverImage'
 import { UltimaEdicion } from '@/components/issues/UltimaEdicion'
 import { AnunciantesSection } from '@/components/home/AnunciantesSection'
+import { ServiciosSection } from '@/components/issues/ServiciosSection'
 
 // ISR: revalidate every 60 s so new issues/covers appear quickly without re-fetching on every hit
 export const revalidate = 60
@@ -191,6 +192,8 @@ export default async function RevistasSlugPage({ params }: Props) {
           mes={issues[0].page_images_json.compartir?.mes}
         />
       )}
+
+      <ServiciosSection />
 
     </main>
   )
