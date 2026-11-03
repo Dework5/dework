@@ -12,6 +12,14 @@ export function SeccionesMenu({ secciones }: Props) {
   const [abierto, setAbierto] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
+  // Al llegar desde otra página con #seccion en el link, ir a esa sección una vez cargada la página
+  useEffect(() => {
+    const id = window.location.hash.slice(1)
+    if (!id) return
+    const t = setTimeout(() => document.getElementById(id)?.scrollIntoView(), 300)
+    return () => clearTimeout(t)
+  }, [])
+
   useEffect(() => {
     if (!abierto) return
     const fuera = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setAbierto(false) }

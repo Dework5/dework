@@ -8,6 +8,7 @@ import { PublicationsSection } from '@/components/home/PublicationsSection'
 import { StatsSection } from '@/components/home/StatsSection'
 import { ContactSection } from '@/components/home/ContactSection'
 import { AnunciantesSection } from '@/components/home/AnunciantesSection'
+import { SeccionesMenu } from '@/components/issues/SeccionesMenu'
 
 async function getData() {
   const publications = PUBLICACIONES
@@ -20,6 +21,13 @@ export default async function HomePage() {
   return (
     <main>
       <h1 className="sr-only">Dework, agencia digital: revistas de clubes y countries</h1>
+      <SeccionesMenu secciones={[
+        ['#publicaciones', 'Revistas'],
+        ['/revistas/san-diego-la-revista#ultima', 'San Diego La Revista'],
+        ...((latestIssue as any)?.page_images_json?.avisos?.length > 0 ? [['#anunciantes', 'Anunciantes'] as [string, string]] : []),
+        ['/revistas/san-diego-la-revista#servicios', 'Servicios recomendados'],
+        ['#contacto', 'Contacto'],
+      ]} />
       <HeroSection publications={publications} />
       <MarqueeStrip publications={publications} />
       <PublicationsSection publications={publications} />

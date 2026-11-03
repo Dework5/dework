@@ -28,7 +28,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
   const [main, ...rest] = publications
 
   return (
-    <section id="publicaciones" className="bg-dw-black py-14 md:py-28 px-5 md:px-10">
+    <section id="publicaciones" className="scroll-mt-28 md:scroll-mt-32 bg-dw-black py-14 md:py-28 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
 
         {/* Section header */}
