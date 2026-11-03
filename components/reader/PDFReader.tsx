@@ -50,6 +50,8 @@ export function PDFReader({
   const [currentPage, setCurrentPage] = useState(1)
   const [numPages,    setNumPages]    = useState(totalPages || 0)
   const [isMobile,    setIsMobile]    = useState(false)
+  // Hasta medir la pantalla no se pide ninguna imagen (así el celular no baja primero las grandes y las miniaturas)
+  const [medido,      setMedido]      = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
   const [showDouble,  setShowDouble]  = useState(true)
   const showDoubleRef = useRef(true)
@@ -136,6 +138,7 @@ export function PDFReader({
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
     check()
+    setMedido(true)
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
@@ -198,6 +201,10 @@ export function PDFReader({
     return p === 2 ? 1 : Math.max(2, p - 2)
   }, [isLandscape, isMobile, showDouble, numPages])
 
+  // En el celular se usa la versión de 800 px de cada página (la de 1600 solo con zoom)
+  const liviana = useCallback((url: string) =>
+    isMobile && zoom <= 1.01 ? url.replace(/-1600\.webp$/, '-800.webp') : url, [isMobile, zoom])
+
   // Imágenes que forman la vista de una página (una sola o el pliego completo)
   const spreadUrls = useCallback((p: number): string[] => {
     if (!preRendered?.slots) return []
@@ -206,8 +213,8 @@ export function PDFReader({
     }
     const double = !isLandscape && !isMobile && showDouble
     const pages = double && p > 1 ? [p, p + 1] : [p]
-    return pages.filter(n => n >= 1 && n <= numPages).map(n => preRendered.slots[String(n)]).filter(Boolean)
-  }, [preRendered, isLandscape, isMobile, showDouble, numPages])
+    return pages.filter(n => n >= 1 && n <= numPages).map(n => liviana(preRendered.slots[String(n)])).filter(Boolean)
+  }, [preRendered, isLandscape, isMobile, showDouble, numPages, liviana])
 
   // Descarga y decodifica una imagen una sola vez (las promesas quedan guardadas)
   const decodedRef = useRef(new Map<string, Promise<void>>())
@@ -227,10 +234,10 @@ export function PDFReader({
 
   // ── Precarga: deja listos el pliego siguiente, el anterior y el que viene después ──
   useEffect(() => {
-    if (!imagesReady) return
+    if (!imagesReady || !medido) return
     const next1 = targetFrom(currentPage, 1)
     for (const p of [next1, targetFrom(currentPage, -1), targetFrom(next1, 1)]) spreadUrls(p).forEach(preload)
-  }, [currentPage, imagesReady, targetFrom, spreadUrls, preload])
+  }, [currentPage, imagesReady, medido, targetFrom, spreadUrls, preload])
 
   // ── PDF.js canvas rendering ───────────────────────────────────────────────
   const renderToCanvas = useCallback(async (
@@ -477,7 +484,7 @@ export function PDFReader({
   // ── Image helpers ─────────────────────────────────────────────────────────
   const slot = (n: number, side?: 'L' | 'R') => {
     if (!preRendered?.slots) return ''
-    return (side ? preRendered.slots[`${n}_${side}`] : preRendered.slots[String(n)]) || ''
+    return liviana((side ? preRendered.slots[`${n}_${side}`] : preRendered.slots[String(n)]) || '')
   }
 
   const imgStyle = (pos: 'single' | 'left' | 'right'): React.CSSProperties => ({
@@ -644,7 +651,7 @@ export function PDFReader({
               willChange:      'transform',
             }}
           >
-            {(imagesReady &&
+            {(imagesReady && medido &&
               (preRendered?.isSpreadPDF
                 ? !!(preRendered?.slots?.[`${currentPage}_L`] || preRendered?.slots?.[`${currentPage}_R`] || preRendered?.slots?.[String(currentPage)])
                 : !!slot(currentPage)) &&
@@ -763,7 +770,7 @@ export function PDFReader({
       <style>{`@keyframes dwFade{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1}}@keyframes dwIn{from{opacity:0;transform:translateY(4px)}to{opacity:1}}@keyframes dwUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}`}</style>
 
       {/* ── Thumbnail strip ─────────────────────────────────────────── */}
-      {imagesReady && !isLoading && !isZoomed && preRendered && (!isMobile || verPaginas) && (
+      {imagesReady && medido && !isLoading && !isZoomed && preRendered && (!isMobile || verPaginas) && (
         <div
           ref={thumbStripRef}
           className="flex gap-1.5 px-4 py-2 overflow-x-auto flex-shrink-0"
