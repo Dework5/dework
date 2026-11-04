@@ -22,7 +22,7 @@ export function HeroSection({ publications }: { publications: any[] }) {
           <div>
             <div className="flex items-center gap-3 mb-6 md:mb-9">
               <span className="w-8 h-px bg-dw-gold" />
-              <span className="text-dw-gold text-[10px] tracking-[0.28em] uppercase">Dework · Agencia Digital · Pilar, Buenos Aires</span>
+              <span className="text-dw-gold text-[10px] tracking-[0.28em] uppercase">Dework · Agencia Gráfica · Pilar, Buenos Aires</span>
             </div>
 
             <h1 className="font-display font-normal text-dw-white leading-[1] tracking-tight mb-6"

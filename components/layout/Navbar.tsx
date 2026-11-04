@@ -32,7 +32,7 @@ export function Navbar() {
           </div>
           <Link href="/" className="col-start-2 flex flex-col items-center justify-center">
             <Image src="/logo-dework-recorte.png" alt="Dework" width={600} height={153} className="h-9 md:h-12 w-auto object-contain" priority unoptimized />
-            <span className="mt-1.5 md:mt-2 text-[#D9C29A] text-[8.5px] md:text-[10px] tracking-[0.42em] uppercase pl-[0.42em]">Agencia Digital</span>
+            <span className="mt-1.5 md:mt-2 text-[#D9C29A] text-[8.5px] md:text-[10px] tracking-[0.42em] uppercase pl-[0.42em]">Agencia Gráfica</span>
           </Link>
           <div className="hidden md:flex justify-end">
             <Link href={LINKS[1].href} className="text-[#EAE2CF] text-[12px] tracking-[0.22em] uppercase hover:text-[#D9C29A] transition-colors duration-200">

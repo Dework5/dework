@@ -20,7 +20,7 @@ export default async function HomePage() {
   const { publications, latestIssue } = await getData()
   return (
     <main>
-      <h1 className="sr-only">Dework, agencia digital: revistas de clubes y countries</h1>
+      <h1 className="sr-only">Dework, agencia gráfica: revistas de clubes y countries</h1>
       <SeccionesMenu secciones={[
         ['#publicaciones', 'Revistas'],
         ['/revistas/san-diego-la-revista#ultima', 'San Diego La Revista'],

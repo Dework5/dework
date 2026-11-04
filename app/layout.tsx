@@ -23,9 +23,9 @@ const bodoni = Bodoni_Moda({
 export const metadata: Metadata = {
   // las imágenes para compartir (WhatsApp) ahora están en el propio sitio: links completos
   metadataBase: new URL('https://www.dework.com.ar'),
-  title: 'Dework · Agencia Digital — Revistas de clubes y countries',
+  title: 'Dework · Agencia Gráfica — Revistas de clubes y countries',
   description: 'Diseñamos, editamos y publicamos las revistas de San Diego Country Club, Olivos Golf Club, Haras del Pilar, Pilará, Los Lagartos y Campo Chico. Más de 201 ediciones publicadas.',
-  keywords: 'revistas, san diego, pilar, countries, clubes, editorial, dework, agencia digital',
+  keywords: 'revistas, san diego, pilar, countries, clubes, editorial, dework, agencia gráfica',
   openGraph: {
     title: 'Dework Editorial',
     description: 'Revistas de clubes y countries',
