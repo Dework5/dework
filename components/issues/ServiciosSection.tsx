@@ -27,7 +27,7 @@ export function ServiciosSection() {
               className="group block"
             >
               <div className="shadow-[0_8px_26px_rgba(31,42,36,0.14)] group-hover:shadow-[0_12px_34px_rgba(31,42,36,0.26)] transition-shadow duration-300 overflow-hidden">
-                <img src={s.imagen} alt={s.marca} width={600} height={1048} loading="lazy" className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]" />
+                <img src={s.imagen} alt={s.marca} width={600} height={771} loading="lazy" className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]" />
               </div>
               <p className="text-dw-gold text-[9px] tracking-[0.25em] uppercase mt-3">WhatsApp →</p>
             </a>
