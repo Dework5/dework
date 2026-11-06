@@ -70,11 +70,18 @@
   "imagen": "/servicios/diego.webp"
  },
  {
-  "marca": "Tienda de Helados",
-  "rubro": "Heladería",
-  "tel": "11 3426-9878",
-  "whatsapp": "https://wa.me/5491134269878",
-  "imagen": "/servicios/tienda-de-helados.webp"
+  "marca": "Armando",
+  "rubro": "Carpintero",
+  "tel": "11 2619-2838",
+  "whatsapp": "https://wa.me/5491126192838",
+  "imagen": "/servicios/armando.webp"
+ },
+ {
+  "marca": "Tienta Helados",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://wa.me/5491169549875",
+  "imagen": "/servicios/tienta-helados.webp"
  },
  {
   "marca": "Centro de Estética Graciela Merlín",
@@ -96,6 +103,55 @@
   "tel": "11 3195-8530",
   "whatsapp": "https://wa.me/5491131958530",
   "imagen": "/servicios/unic-golf-sd.webp"
+ },
+ {
+  "marca": "Pañalera San Diego",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://wa.me/5491124647219",
+  "imagen": "/servicios/panalera-san-diego.webp"
+ },
+ {
+  "marca": "Technical Roll",
+  "rubro": "Cortinas a medida",
+  "tel": "11 5936-8076",
+  "whatsapp": "https://wa.me/5491159368076",
+  "imagen": "/servicios/technical-roll.webp"
+ },
+ {
+  "marca": "Audi Buenos Aires",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://www.audi.com.ar/ar/web/es.html",
+  "imagen": "/servicios/audi-buenos-aires.webp"
+ },
+ {
+  "marca": "Ancarola & Racca",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://www.instagram.com/ancarolaracca/",
+  "imagen": "/servicios/ancarola-racca.webp"
+ },
+ {
+  "marca": "Luis Pasteur",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://osluispasteur.com/",
+  "imagen": "/servicios/luis-pasteur.webp"
+ },
+ {
+  "marca": "Tubotherm · Grupo Dema",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "http://grupodema.com.ar/productos/marcas/acqua-system",
+  "imagen": "/servicios/tubotherm-grupo-dema.webp"
+ },
+ {
+  "marca": "Coldwell Banker Wings",
+  "rubro": "",
+  "tel": "",
+  "whatsapp": "https://www.instagram.com/victoriagazzorealestate/",
+  "imagen": "/servicios/coldwell-banker-wings.webp"
  },
  {
   "marca": "Sumá tu servicio",

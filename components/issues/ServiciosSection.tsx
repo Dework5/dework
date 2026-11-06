@@ -12,26 +12,30 @@ export function ServiciosSection() {
             Servicios <i className="text-dw-gold">recomendados</i>
           </h2>
           <p className="text-dw-sub text-sm max-w-lg leading-relaxed">
-            Los servicios y emprendimientos que recomienda San Diego La Revista. Tocá cada uno para escribirle por WhatsApp.
+            Los servicios, emprendimientos y anunciantes que recomienda San Diego La Revista. Tocá cada uno para escribirle por WhatsApp o ver más.
           </p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-          {servicios.map(s => (
-            <a
-              key={s.marca}
-              href={s.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Escribir por WhatsApp a ${s.marca}`}
-              className="group block"
-            >
-              <div className="shadow-[0_8px_26px_rgba(31,42,36,0.14)] group-hover:shadow-[0_12px_34px_rgba(31,42,36,0.26)] transition-shadow duration-300 overflow-hidden">
-                <img src={s.imagen} alt={s.marca} width={600} height={771} loading="lazy" className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]" />
-              </div>
-              <p className="text-dw-gold text-[9px] tracking-[0.25em] uppercase mt-3">WhatsApp →</p>
-            </a>
-          ))}
+          {servicios.map(s => {
+            // Los servicios abren WhatsApp; algunos anunciantes llevan a su web o a su Instagram
+            const esWa = s.whatsapp.includes('wa.me/')
+            return (
+              <a
+                key={s.marca}
+                href={s.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={esWa ? `Escribir por WhatsApp a ${s.marca}` : `Ver más de ${s.marca}`}
+                className="group block"
+              >
+                <div className="shadow-[0_8px_26px_rgba(31,42,36,0.14)] group-hover:shadow-[0_12px_34px_rgba(31,42,36,0.26)] transition-shadow duration-300 overflow-hidden">
+                  <img src={s.imagen} alt={s.marca} width={600} height={1044} loading="lazy" className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]" />
+                </div>
+                <p className="text-dw-gold text-[9px] tracking-[0.25em] uppercase mt-3">{esWa ? 'WhatsApp →' : 'Ver más →'}</p>
+              </a>
+            )
+          })}
         </div>
 
         <p className="mt-10 md:mt-14 border-t border-dw-gold/50 pt-5 text-center font-display italic text-dw-text text-base md:text-lg">
