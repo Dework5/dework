@@ -1,7 +1,8 @@
 [
  {
   "marca": "Pintor Felipe",
-  "rubro": "Pintura profesional · Interiores y exteriores",
+  "nombre": "Pintor Felipe",
+  "rubro": "Pintura de interiores y exteriores",
   "tel": "11 4162-6490",
   "seccion": "Para la casa",
   "whatsapp": "https://wa.me/5491141626490",
@@ -9,6 +10,7 @@
  },
  {
   "marca": "Antonio",
+  "nombre": "Antonio",
   "rubro": "Mantenimiento general",
   "tel": "11 5714-1268",
   "seccion": "Para la casa",
@@ -17,6 +19,7 @@
  },
  {
   "marca": "Diego",
+  "nombre": "Diego",
   "rubro": "Electricista",
   "tel": "11 5740-5874",
   "seccion": "Para la casa",
@@ -25,6 +28,7 @@
  },
  {
   "marca": "Armando",
+  "nombre": "Armando",
   "rubro": "Carpintero",
   "tel": "11 2619-2838",
   "seccion": "Para la casa",
@@ -33,14 +37,16 @@
  },
  {
   "marca": "Grupo R",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Grupo R",
+  "rubro": "Fumigación y control de plagas",
+  "tel": "11 6520-5228",
   "seccion": "Para la casa",
   "whatsapp": "https://wa.me/5491165205228",
   "imagen": "/servicios/grupo-r.webp"
  },
  {
   "marca": "Mas Soluciones",
+  "nombre": "Mas Soluciones",
   "rubro": "Computación",
   "tel": "11 5958-7422",
   "seccion": "Para la casa",
@@ -49,23 +55,26 @@
  },
  {
   "marca": "Technical Roll",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Technical Roll",
+  "rubro": "Cortinas a medida",
+  "tel": "11 5936-8076",
   "seccion": "Para la casa",
   "whatsapp": "https://wa.me/5491159368076",
   "imagen": "/servicios/technical-roll.webp"
  },
  {
   "marca": "Ferretería & Cerrajería San Diego",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Ferretería San Diego",
+  "rubro": "Ferretería y cerrajería",
+  "tel": "2227 405867",
   "seccion": "Para la casa",
   "whatsapp": "https://www.instagram.com/ferreteriaycerrajeriasandiego/",
   "imagen": "/servicios/ferreteria-cerrajeria-san-diego.webp"
  },
  {
   "marca": "Tubotherm · Grupo Dema",
-  "rubro": "",
+  "nombre": "Tubotherm",
+  "rubro": "Piso radiante · Grupo Dema",
   "tel": "",
   "seccion": "Para la casa",
   "whatsapp": "http://grupodema.com.ar/productos/marcas/acqua-system",
@@ -73,7 +82,8 @@
  },
  {
   "marca": "Como Perros y Gatos",
-  "rubro": "Pet shop · Peluquería",
+  "nombre": "Como Perros y Gatos",
+  "rubro": "Pet shop · Peluquería · Pensionado",
   "tel": "11 6761-3754",
   "seccion": "Mascotas",
   "whatsapp": "https://wa.me/5491167613754",
@@ -81,22 +91,25 @@
  },
  {
   "marca": "Athenea Spa San Diego",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Athenea Spa San Diego",
+  "rubro": "Spa · Tratamientos corporales y faciales",
+  "tel": "11 5138-7011",
   "seccion": "Bienestar y belleza",
   "whatsapp": "https://wa.me/5491151387011",
   "imagen": "/servicios/athenea-spa-san-diego.webp"
  },
  {
   "marca": "Centro de Estética Graciela Merlín",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Graciela Merlín",
+  "rubro": "Centro de estética · Dermatocosmiatría",
+  "tel": "11 4083-6041",
   "seccion": "Bienestar y belleza",
   "whatsapp": "https://wa.me/5491140836041",
   "imagen": "/servicios/centro-de-estetica-graciela-merlin.webp"
  },
  {
   "marca": "Ecosuper",
+  "nombre": "Ecosuper",
   "rubro": "Supermercado",
   "tel": "11 2448-1116",
   "seccion": "Gastronomía y compras",
@@ -105,6 +118,7 @@
  },
  {
   "marca": "Tiernísima",
+  "nombre": "Tiernísima",
   "rubro": "Carnicerías",
   "tel": "11 4673-6525",
   "seccion": "Gastronomía y compras",
@@ -113,38 +127,43 @@
  },
  {
   "marca": "Tienta Helados",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Tienta Helados",
+  "rubro": "Heladería",
+  "tel": "11 6954-9875",
   "seccion": "Gastronomía y compras",
   "whatsapp": "https://wa.me/5491169549875",
   "imagen": "/servicios/tienta-helados.webp"
  },
  {
   "marca": "Pañalera San Diego",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Pañalera San Diego",
+  "rubro": "Todo para tu bebé",
+  "tel": "11 2464-7219",
   "seccion": "Gastronomía y compras",
   "whatsapp": "https://wa.me/5491124647219",
   "imagen": "/servicios/panalera-san-diego.webp"
  },
  {
   "marca": "Kiosco & Dietética San Diego",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Kiosco & Dietética San Diego",
+  "rubro": "Kiosco · Dietética",
+  "tel": "11 5487-6612",
   "seccion": "Gastronomía y compras",
   "whatsapp": "https://wa.me/5491154876612",
   "imagen": "/servicios/kiosco-dietetica-san-diego.webp"
  },
  {
   "marca": "Emma Pierangeli",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Emma Pierangeli",
+  "rubro": "Cocina · Eventos y catering",
+  "tel": "11 6613-3357",
   "seccion": "Gastronomía y compras",
   "whatsapp": "https://wa.me/5491166133357",
   "imagen": "/servicios/emma-pierangeli.webp"
  },
  {
   "marca": "Únic Golf SD",
+  "nombre": "Únic",
   "rubro": "Resto · Golf SD",
   "tel": "11 3195-8530",
   "seccion": "Gastronomía y compras",
@@ -153,22 +172,25 @@
  },
  {
   "marca": "Clases de Música",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Clases de Música",
+  "rubro": "Guitarra, piano, canto y ukelele",
+  "tel": "11 6931-1288",
   "seccion": "Deporte y tiempo libre",
   "whatsapp": "https://wa.me/5491169311288",
   "imagen": "/servicios/clases-de-musica.webp"
  },
  {
   "marca": "Punto Golf Shop",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Punto Golf Shop",
+  "rubro": "Equipamiento e indumentaria de golf",
+  "tel": "11 2167-2165",
   "seccion": "Deporte y tiempo libre",
   "whatsapp": "https://wa.me/5491121672165",
   "imagen": "/servicios/punto-golf-shop.webp"
  },
  {
   "marca": "Sumá tu servicio",
+  "nombre": "Sumá tu servicio",
   "rubro": "",
   "tel": "",
   "seccion": "",
@@ -177,15 +199,17 @@
  },
  {
   "marca": "Luis Pasteur",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Luis Pasteur",
+  "rubro": "Cobertura de salud",
+  "tel": "0810 333 7278",
   "seccion": "Salud, autos e inmobiliarias",
   "whatsapp": "https://osluispasteur.com/",
   "imagen": "/servicios/luis-pasteur.webp"
  },
  {
   "marca": "Audi Buenos Aires",
-  "rubro": "",
+  "nombre": "Audi Buenos Aires",
+  "rubro": "Concesionario · 0 km y usados",
   "tel": "",
   "seccion": "Salud, autos e inmobiliarias",
   "whatsapp": "https://www.audi.com.ar/ar/web/es.html",
@@ -193,7 +217,8 @@
  },
  {
   "marca": "Ancarola & Racca",
-  "rubro": "",
+  "nombre": "Ancarola & Racca",
+  "rubro": "Negocios inmobiliarios",
   "tel": "",
   "seccion": "Salud, autos e inmobiliarias",
   "whatsapp": "https://www.instagram.com/ancarolaracca/",
@@ -201,8 +226,9 @@
  },
  {
   "marca": "Coldwell Banker Wings",
-  "rubro": "",
-  "tel": "",
+  "nombre": "Coldwell Banker Wings",
+  "rubro": "Inmobiliaria en San Diego",
+  "tel": "11 3361-6566",
   "seccion": "Salud, autos e inmobiliarias",
   "whatsapp": "https://www.instagram.com/victoriagazzorealestate/",
   "imagen": "/servicios/coldwell-banker-wings.webp"

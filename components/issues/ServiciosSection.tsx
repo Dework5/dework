@@ -1,6 +1,6 @@
 import servicios from '@/data/sd-servicios.json'
 
-type Servicio = { marca: string; whatsapp: string; imagen: string; seccion?: string }
+type Servicio = { marca: string; nombre?: string; rubro?: string; tel?: string; whatsapp: string; imagen: string; seccion?: string }
 
 // Servicios recomendados de San Diego (los mismos de la guía de la revista), agrupados por rubro con su título,
 // en el mismo orden que la revista. Cada tarjeta abre el WhatsApp del servicio (o la web / Instagram del anunciante).
@@ -13,14 +13,59 @@ function Tarjeta({ s }: { s: Servicio }) {
       href={`/ir/${s.imagen.replace(/^\/servicios\//, '').replace(/\.webp$/, '')}`}
       target="_blank"
       rel="noopener"
-      aria-label={esWa ? `Escribir por WhatsApp a ${s.marca}` : `Ver más de ${s.marca}`}
-      className="group block"
+      aria-label={esWa ? `Escribir por WhatsApp a ${s.nombre ?? s.marca}` : `Ver más de ${s.nombre ?? s.marca}`}
+      className="group flex flex-col"
     >
-      <div className="shadow-[0_8px_26px_rgba(31,42,36,0.14)] group-hover:shadow-[0_12px_34px_rgba(31,42,36,0.26)] transition-shadow duration-300 overflow-hidden">
-        <img src={s.imagen} alt={s.marca} width={600} height={1044} loading="lazy" className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]" />
+      {/* todas las tarjetas a la misma altura, para que los renglones queden parejos */}
+      <div className="aspect-[600/1044] bg-white shadow-[0_8px_26px_rgba(31,42,36,0.14)] group-hover:shadow-[0_12px_34px_rgba(31,42,36,0.26)] transition-shadow duration-300 overflow-hidden">
+        <img src={s.imagen} alt={s.nombre ?? s.marca} width={600} height={1044} loading="lazy" className="w-full h-full object-contain block transition-transform duration-500 group-hover:scale-[1.02]" />
       </div>
-      <p className="text-dw-gold text-[9px] tracking-[0.25em] uppercase mt-3">{esWa ? 'WhatsApp →' : 'Ver más →'}</p>
+      <p className="font-display text-dw-white text-[15px] md:text-base leading-tight mt-3">{s.nombre ?? s.marca}</p>
+      {s.rubro && <p className="text-dw-sub text-[11px] md:text-xs leading-snug mt-1">{s.rubro}</p>}
+      {esWa && s.tel && <p className="md:hidden text-dw-text text-[13px] mt-1 tabular-nums">{s.tel}</p>}
+      <p className="text-dw-gold text-[10px] tracking-[0.18em] uppercase mt-2 group-hover:underline underline-offset-4">
+        {esWa ? <>WhatsApp<span className="hidden md:inline">{s.tel ? ' · ' + s.tel : ''}</span> →</> : 'Ver más →'}
+      </p>
     </a>
+  )
+}
+
+// Clases fijas (Tailwind necesita verlas escritas)
+const SPAN = ['', 'col-span-1', 'col-span-2', 'col-span-3', 'col-span-4', 'col-span-5']
+const COLS = ['', 'grid-cols-1', 'grid-cols-2', 'grid-cols-3', 'grid-cols-4', 'grid-cols-5']
+type Tramo = { titulo: string; items: Servicio[] }
+// Reparte las tarjetas (en orden de rubro) en renglones completos de `c` columnas; cada pedazo de renglón lleva el título de su rubro
+function renglones(grupos: { titulo: string; items: Servicio[] }[], c: number): Tramo[][] {
+  const filas: Tramo[][] = []
+  let fila: Tramo[] = [], usados = 0
+  for (const g of grupos) for (const it of g.items) {
+    const ult = fila[fila.length - 1]
+    if (ult && ult.titulo === g.titulo) ult.items.push(it)
+    else fila.push({ titulo: g.titulo, items: [it] })
+    if (++usados === c) { filas.push(fila); fila = []; usados = 0 }
+  }
+  if (fila.length) filas.push(fila)
+  return filas
+}
+function Renglones({ grupos, c, className }: { grupos: { titulo: string; items: Servicio[] }[]; c: number; className: string }) {
+  return (
+    <div className={`${className} space-y-10 md:space-y-12`}>
+      {renglones(grupos, c).map((fila, k, todas) => (
+        <div key={k} className={`grid ${COLS[c]} gap-x-4 md:gap-x-6`}>
+          {fila.map((t, n) => (
+            <div key={n} className={SPAN[t.items.length]}>
+              {/* el título va cuando empieza el rubro; si el rubro sigue en el renglón de abajo, solo la línea */}
+              <h3 style={n === 0 && k > 0 && todas[k - 1].at(-1)!.titulo === t.titulo ? { color: 'transparent' } : undefined} className="text-dw-gold text-[10px] md:text-[11px] tracking-[0.28em] uppercase border-b border-dw-gold/40 pb-2 mb-4 md:mb-5 truncate" title={t.titulo}>
+                {t.titulo}
+              </h3>
+              <div className={`grid ${COLS[t.items.length]} gap-4 md:gap-6`}>
+                {t.items.map(s => <Tarjeta key={s.marca} s={s} />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -35,7 +80,11 @@ export function ServiciosSection() {
     if (g) g.items.push(s)
     else grupos.push({ titulo: t, items: [s] })
   }
-  grupos.sort((a, b) => Number(!a.titulo) - Number(!b.titulo))
+  // la tarjeta verde "Sumá tu servicio" ya está como texto arriba y abajo: no ocupa un renglón propio
+  const conTitulo = grupos.filter(g => g.titulo)
+  // los rubros chicos van antes que los grandes que siguen, así los renglones quedan completos y cada rubro junto
+  const ORDEN = ['Para la casa', 'Mascotas', 'Bienestar y belleza', 'Deporte y tiempo libre', 'Gastronomía y compras', 'Salud, autos e inmobiliarias']
+  const orden = [...conTitulo].sort((a, b) => (ORDEN.indexOf(a.titulo) + 99) % 99 - (ORDEN.indexOf(b.titulo) + 99) % 99)
   return (
     <section id="servicios" className="scroll-mt-28 md:scroll-mt-32 bg-dw-black py-14 md:py-24 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
@@ -53,20 +102,9 @@ export function ServiciosSection() {
           </p>
         </div>
 
-        <div className="space-y-10 md:space-y-14">
-          {grupos.map(g => (
-            <div key={g.titulo || 'otros'}>
-              {g.titulo && (
-                <h3 className="text-dw-gold text-[11px] md:text-xs tracking-[0.3em] uppercase border-b border-dw-gold/40 pb-2 mb-5 md:mb-6">
-                  {g.titulo}
-                </h3>
-              )}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-                {g.items.map(s => <Tarjeta key={s.marca} s={s} />)}
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Renglones completos (5 por renglón en la compu, 2 en el celular), cada pedazo con el título de su rubro */}
+        <Renglones grupos={orden} c={5} className="hidden md:block" />
+        <Renglones grupos={orden} c={2} className="md:hidden" />
 
         <p className="mt-10 md:mt-14 border-t border-dw-gold/50 pt-5 text-center font-display italic text-dw-text text-base md:text-lg">
           ¿Querés sumar tu servicio o emprendimiento en esta sección de recomendados? Contactate al{' '}
