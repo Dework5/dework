@@ -2,7 +2,7 @@
  {
   "issue_number": 145,
   "title": "San Diego La Revista · Edición n° 145",
-  "published_at": "2026-11-07T18:50:35.405Z",
+  "published_at": "2026-11-07T19:12:41.423Z",
   "cover_url": "/ed/sd/145/tapa.jpg",
   "pdf_url": "/ed/sd/145/San-Diego-La-Revista-145.pdf",
   "page_count": 44,
@@ -601,6 +601,124 @@
      ]
     },
     {
+     "id": "poli",
+     "foto": "/ed/sd/145/notas/poli.webp",
+     "desde": 22,
+     "hasta": 23,
+     "seccion": "Polideportivo San Diego · 2026",
+     "titulo": "Horarios del",
+     "tituloCursiva": "Poli",
+     "cuerpo": [
+      {
+       "h": "Lunes"
+      },
+      "<b>17:00 a 18:00</b> · Pádel (5 a 7 años)",
+      "<b>17:30 a 18:30</b> · Mini vóley (8 a 12 años)",
+      "<b>17:30 a 18:30</b> · Natación (4 a 7 años)",
+      "<b>18:00 a 19:00</b> · Pádel (8 a 12 años)",
+      "<b>18:30 a 19:30</b> · Mini vóley (12 a 16 años)",
+      "<b>18:30 a 19:30</b> · Natación (8 a 12 años)",
+      {
+       "h": "Martes"
+      },
+      "<b>17:30 a 18:30</b> · Mini gym (2 a 5 años)",
+      "<b>18:00 a 19:00</b> · Fútbol (4 a 5 y 6 a 7 años)",
+      "<b>18:30 a 19:30</b> · Gimnasia artística (6 a 12 años)",
+      "<b>19:00 a 20:00</b> · Fútbol (8 a 9 y 10 a 11 años)",
+      {
+       "h": "Miércoles"
+      },
+      "<b>16:00 a 19:30</b> · Equitación",
+      "<b>17:00 a 18:00</b> · Tenis (3 a 4, 5 a 7 y 13 a 15 años)",
+      "<b>17:00 a 18:00</b> · Danza U (6 a 9 años)",
+      "<b>17:30 a 18:30</b> · Campus Kids (6 a 12 años)",
+      "<b>18:00 a 19:00</b> · Tenis (8 a 10 y 10 a 12 años)",
+      "<b>18:00 a 19:00</b> · DS U. Teens (+10 años)",
+      "<b>18:30 a 19:30</b> · Campus Kids (2 a 5 años)",
+      "<b>19:00 a 20:00</b> · Reggaetón (+10 años)",
+      {
+       "h": "Jueves"
+      },
+      "<b>17:30 a 18:30</b> · Mini gym (2 a 5 años)",
+      "<b>17:30 a 18:30</b> · Natación (8 a 12 años)",
+      "<b>18:00 a 19:00</b> · Fútbol (4 a 5 y 6 a 7 años)",
+      "<b>18:30 a 19:30</b> · Gimnasia artística (6 a 12 años)",
+      "<b>18:30 a 19:30</b> · Natación (4 a 7 años)",
+      "<b>19:00 a 20:00</b> · Fútbol (8 a 9 y 10 a 11 años)",
+      {
+       "h": "Viernes"
+      },
+      "<b>17:30 a 18:30</b> · Telas Kids (6 a 9 años)",
+      "<b>18:00 a 19:00</b> · Pádel (8 a 12 años)",
+      "<b>18:30 a 19:30</b> · Telas Teens (10 a 14 años)",
+      "<b>19:30 a 20:30</b> · Tik Tok (10 a 14 años)",
+      {
+       "h": "Sábado"
+      },
+      "<b>09:00 a 10:00</b> · Golf (4 a 7 años)",
+      "<b>10:00 a 11:00</b> · Golf (8 a 12 años)",
+      "<b>10:00 a 11:00</b> · Tenis (8 a 10 años)",
+      "<b>10:00 a 13:00</b> · Polo",
+      "<b>10:00 a 13:30</b> · Equitación",
+      "<b>10:30 a 11:30</b> · Street Jazz (5 a 10 años)",
+      "<b>10:30 a 11:30</b> · Taekwondo",
+      "<b>11:00 a 12:00</b> · Tenis (3 a 4 y 5 a 7 años)",
+      "<b>11:30 a 12:30</b> · DS U. Teens (11 a 16 años)",
+      "<b>12:00 a 13:00</b> · Tenis (10 a 14 años)",
+      "<b>15:00 a 18:00</b> · Recre",
+      "<b>18:00 a 19:00</b> · Campus Kids (2 a 5 años)",
+      "<b>19:00 a 20:00</b> · Campus Kids (6 a 12 años)",
+      "<b>Desde las 20:00</b> · Nocturna",
+      {
+       "h": "Domingo"
+      },
+      "<b>10:00 a 11:00</b> · Fútbol (4 a 5 y 6 a 7 años)",
+      "<b>10:00 a 13:30</b> · Equitación",
+      "<b>11:00 a 12:00</b> · Fútbol (8 a 9 y 10 a 11 años)",
+      "<b>15:00 a 18:00</b> · Recre"
+     ]
+    },
+    {
+     "id": "tenis",
+     "foto": "/ed/sd/145/notas/tenis.webp",
+     "desde": 24,
+     "hasta": 24,
+     "seccion": "Tenis y pádel",
+     "titulo": "Resultados de",
+     "tituloCursiva": "nuestros equipos",
+     "bajada": "Cómo les fue a los equipos de San Diego en Citenis, Liga CETI, Liga del Oeste y Cipadel, según los resultados publicados por la Escuela de Tenis y Pádel.",
+     "cuerpo": [
+      {
+       "h": "Citenis"
+      },
+      "<b>Damas +25 1ra</b> · San Diego (Karina) vs. Puertos: 2/1",
+      "<b>Damas +25 3ra</b> · San Diego vs. Cecilia A Aranzazu: 3/0",
+      "<b>Damas +25 Intermedia</b> · San Diego Blanco vs. Mapuche: 0/3",
+      "<b>Caballeros +45 1ra</b> · San Diego (Juan) vs. La Lomada A: 0/3",
+      {
+       "h": "Liga CETI"
+      },
+      "<b>Damas Intermedia · semifinal</b> · San Diego (Agustina) vs. Sta Irene: 2/1",
+      "<b>Damas +25 2da</b> · San Diego Ladies: 0/2",
+      "<b>Damas 3ra</b> · San Diego (Fernanda) vs. Terravista: 0/2",
+      {
+       "h": "Liga del Oeste"
+      },
+      "<b>Caballeros Intermedia</b> · San Diego (Jorge) vs. Bco Pcia: 2/0",
+      "<b>Caballeros 3ra</b> · San Diego (Jorge) vs. Kadima: 1/2",
+      "<b>Intermedia · semifinal</b> · San Diego (Miriam) vs. M. Moreno: 0/2",
+      {
+       "h": "Damas Libres"
+      },
+      "<b>Damas Libres Intermedia</b> · San Diego (Mica) vs. Miraflores: 2/1",
+      {
+       "h": "Cipadel"
+      },
+      "<b>Damas 8va</b> · San Diego (Loly) vs. Bco Pcia: 2/0",
+      "Resultados y fotos: Escuela de Tenis y Pádel San Diego (@escuela.detenisypadel)."
+     ]
+    },
+    {
      "id": "directorio",
      "foto": "/ed/sd/145/p26-800.webp",
      "desde": 26,
@@ -697,6 +815,172 @@
       "Su característica principal es que son plantas que soportan climas hostiles y por lo tanto son muy resistentes. Normalmente suelen perder las flores en invierno, sobreviviendo únicamente las raíces, pero en primavera vuelven a florecer, ya que las plantas perennes dan flor y semillas varias veces en su vida.",
       "Algunas clases de plantas perennes son la prímula, el lirio, la canna, la margarita africana, la asclepia, ciertos geranios y, obviamente, los árboles y arbustos.",
       "Las plantas herbáceas son plantas de tallos blandos y verdes, sin tejido leñoso, que pueden ser anuales, bienales o perennes, como el trigo, la zanahoria, la gazania o las peonías."
+     ]
+    },
+    {
+     "id": "servicios",
+     "desde": 40,
+     "hasta": 41,
+     "seccion": "Guía",
+     "titulo": "Servicios recomendados",
+     "etiqueta": "Ver servicios",
+     "cuerpo": [
+      {
+       "h": "Para la casa"
+      },
+      {
+       "servicio": [
+        "PINTOR FELIPE",
+        "Pintura de interiores y exteriores",
+        "<b>11 4162-6490</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "ANTONIO",
+        "Mantenimiento general",
+        "<b>11 5714-1268</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "DIEGO",
+        "Electricista",
+        "<b>11 5740-5874</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "ARMANDO",
+        "Carpintero",
+        "<b>11 2619-2838</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "GRUPO R",
+        "Fumigación y control de plagas",
+        "<b>11 6520-5228</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "MAS SOLUCIONES",
+        "Computación",
+        "<b>11 5958-7422</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "TECHNICAL ROLL",
+        "Cortinas a medida",
+        "<b>11 5936-8076</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "FERRETERÍA SAN DIEGO",
+        "Ferretería y cerrajería",
+        "<b>2227 405867</b>"
+       ]
+      },
+      {
+       "h": "Mascotas"
+      },
+      {
+       "servicio": [
+        "COMO PERROS Y GATOS",
+        "Pet shop · Peluquería · Pensionado",
+        "<b>11 6761-3754</b>"
+       ]
+      },
+      {
+       "h": "Bienestar"
+      },
+      {
+       "servicio": [
+        "ATHENEA SPA SAN DIEGO",
+        "Spa · Tratamientos corporales y faciales",
+        "<b>11 5138-7011</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "GRACIELA MERLÍN",
+        "Centro de estética · Dermatocosmiatría",
+        "<b>11 4083-6041</b>"
+       ]
+      },
+      {
+       "h": "Compras"
+      },
+      {
+       "servicio": [
+        "ECOSUPER",
+        "Supermercado",
+        "<b>11 2448-1116</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "TIERNÍSIMA",
+        "Carnicerías",
+        "<b>11 4673-6525</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "TIENTA HELADOS",
+        "Heladería",
+        "<b>11 6954-9875</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "PAÑALERA SAN DIEGO",
+        "Todo para tu bebé",
+        "<b>11 2464-7219</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "ÚNIC",
+        "Resto · Golf SD",
+        "<b>11 3195-8530</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "KIOSCO & DIETÉTICA SAN DIEGO",
+        "Kiosco · Dietética",
+        "<b>11 5487-6612</b>"
+       ]
+      },
+      {
+       "h": "Tiempo libre"
+      },
+      {
+       "servicio": [
+        "CLASES DE MÚSICA",
+        "Guitarra, piano, canto y ukelele",
+        "<b>11 6931-1288</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "PUNTO GOLF SHOP",
+        "Equipamiento e indumentaria de golf",
+        "<b>11 2167-2165</b>"
+       ]
+      },
+      {
+       "servicio": [
+        "EMMA PIERANGELI",
+        "Cocina · Eventos y catering",
+        "<b>11 6613-3357</b>"
+       ]
+      },
+      "¿Querés sumar tu servicio o emprendimiento en esta sección de recomendados? Contactate al <b>11 3361-6566</b>"
      ]
     }
    ],
