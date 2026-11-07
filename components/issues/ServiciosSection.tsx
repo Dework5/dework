@@ -38,12 +38,17 @@ export function ServiciosSection() {
   return (
     <section id="servicios" className="scroll-mt-28 md:scroll-mt-32 bg-dw-black py-14 md:py-24 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 md:mb-12">
-          <h2 className="font-display text-4xl md:text-5xl text-dw-white font-normal mb-3">
+        <div className="mb-10 md:mb-14 text-center">
+          <h2 className="font-display text-4xl md:text-6xl text-dw-white font-normal mb-4">
             Servicios <i className="text-dw-gold">recomendados</i>
           </h2>
-          <p className="text-dw-sub text-sm max-w-lg leading-relaxed">
-            Los servicios, emprendimientos y anunciantes que recomienda San Diego La Revista. Tocá cada uno para escribirle por WhatsApp o ver más.
+          <p className="font-display text-2xl md:text-3xl text-dw-white">
+            Contactá a tu <i className="text-dw-gold">servicio recomendado</i>
+          </p>
+          <div className="w-16 border-t border-dw-gold/60 mx-auto my-5" />
+          <p className="text-dw-text text-base md:text-lg">
+            Si querés sumarte, contactanos al{' '}
+            <a href="https://wa.me/5491133616566" target="_blank" rel="noopener noreferrer" className="text-dw-gold font-medium underline-offset-4 hover:underline whitespace-nowrap">11 3361-6566</a>
           </p>
         </div>
 
