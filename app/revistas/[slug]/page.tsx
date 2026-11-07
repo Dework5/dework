@@ -7,6 +7,7 @@ import { UltimaEdicion } from '@/components/issues/UltimaEdicion'
 import { AnunciantesSection } from '@/components/home/AnunciantesSection'
 import { ServiciosSection } from '@/components/issues/ServiciosSection'
 import { SeccionesMenu } from '@/components/issues/SeccionesMenu'
+import { MainSponsor } from '@/components/issues/MainSponsor'
 
 // ISR: revalidate every 60 s so new issues/covers appear quickly without re-fetching on every hit
 export const revalidate = 60
@@ -125,6 +126,9 @@ export default async function RevistasSlugPage({ params }: Props) {
           ['/#contacto', '¿Querés publicar?'],
         ]} />
       )}
+
+      {/* ── MAIN SPONSOR: Audi Buenos Aires, con video ── */}
+      <MainSponsor />
 
       {/* ── ÚLTIMA EDICIÓN DESTACADA ── */}
       {issues.length > 0 && (
