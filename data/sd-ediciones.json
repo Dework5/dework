@@ -1,5 +1,849 @@
 [
  {
+  "issue_number": 145,
+  "title": "San Diego La Revista · Edición n° 145",
+  "published_at": "2026-11-07T18:50:35.405Z",
+  "cover_url": "/ed/sd/145/tapa.jpg",
+  "pdf_url": "/ed/sd/145/San-Diego-La-Revista-145.pdf",
+  "page_count": 44,
+  "page_images_json": {
+   "links": {
+    "2": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 1,
+      "url": "https://www.dework.com.ar/ir/audi-buenos-aires",
+      "title": "Audi Buenos Aires"
+     }
+    ],
+    "3": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 1,
+      "url": "https://www.dework.com.ar/ir/ancarola-racca",
+      "title": "Ancarola & Racca"
+     }
+    ],
+    "4": [
+     {
+      "x": 0.0952,
+      "y": 0.2155,
+      "w": 0.8095,
+      "h": 0.0707,
+      "page": 6,
+      "title": "Sofía Cairo, la mejor del mundo"
+     },
+     {
+      "x": 0.0952,
+      "y": 0.3047,
+      "w": 0.8095,
+      "h": 0.0707,
+      "page": 16,
+      "title": "Sofi Cairo: “Los sueños se cumplen”"
+     },
+     {
+      "x": 0.0952,
+      "y": 0.3939,
+      "w": 0.8095,
+      "h": 0.0707,
+      "page": 22,
+      "title": "Horarios del Poli"
+     },
+     {
+      "x": 0.0952,
+      "y": 0.4832,
+      "w": 0.8095,
+      "h": 0.0707,
+      "page": 24,
+      "title": "Tenis y pádel"
+     },
+     {
+      "x": 0.0952,
+      "y": 0.5724,
+      "w": 0.8095,
+      "h": 0.0707,
+      "page": 26,
+      "title": "El Directorio, cara a cara con los socios"
+     },
+     {
+      "x": 0.0952,
+      "y": 0.6616,
+      "w": 0.8095,
+      "h": 0.0707,
+      "page": 30,
+      "title": "El Master Plan del golf se va completando"
+     },
+     {
+      "x": 0.0952,
+      "y": 0.7508,
+      "w": 0.8095,
+      "h": 0.0707,
+      "page": 34,
+      "title": "Florales de estación y herbáceas perennes"
+     },
+     {
+      "x": 0.0952,
+      "y": 0.8401,
+      "w": 0.8095,
+      "h": 0.0707,
+      "page": 40,
+      "title": "Servicios recomendados"
+     }
+    ],
+    "5": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 1,
+      "url": "https://www.dework.com.ar/ir/luis-pasteur",
+      "title": "Luis Pasteur"
+     }
+    ],
+    "25": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 1,
+      "url": "https://www.dework.com.ar/ir/tubotherm-grupo-dema",
+      "title": "Tubotherm · Grupo Dema"
+     }
+    ],
+    "28": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 0.498,
+      "url": "https://www.instagram.com/tiernissimacarnicerias/",
+      "title": "Tiernísima"
+     },
+     {
+      "x": 0,
+      "y": 0.498,
+      "w": 1,
+      "h": 0.502,
+      "url": "https://www.dework.com.ar/ir/panalera-san-diego",
+      "title": "Pañalera San Diego"
+     }
+    ],
+    "29": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 1,
+      "url": "https://www.dework.com.ar/ir/grupo-r",
+      "title": "Grupo R"
+     }
+    ],
+    "31": [
+     {
+      "x": 0,
+      "y": 0.498,
+      "w": 1,
+      "h": 0.502,
+      "url": "https://www.dework.com.ar/ir/punto-golf-shop",
+      "title": "Punto Golf Shop"
+     }
+    ],
+    "32": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 0.5,
+      "url": "https://www.dework.com.ar/ir/tienta-helados",
+      "title": "Tienta Helados"
+     },
+     {
+      "x": 0.08,
+      "y": 0.6,
+      "w": 0.38,
+      "h": 0.36,
+      "url": "https://www.dework.com.ar/sandiego",
+      "title": "San Diego La Revista"
+     },
+     {
+      "x": 0.54,
+      "y": 0.6,
+      "w": 0.38,
+      "h": 0.36,
+      "url": "https://www.dework.com.ar/revistas/san-diego-la-revista#servicios",
+      "title": "Servicios recomendados"
+     }
+    ],
+    "33": [
+     {
+      "x": 0,
+      "y": 0.5,
+      "w": 1,
+      "h": 0.5,
+      "url": "https://www.dework.com.ar/ir/technical-roll",
+      "title": "Technical Roll"
+     },
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 0.5,
+      "url": "https://www.dework.com.ar/ir/centro-de-estetica-graciela-merlin",
+      "title": "Centro de Estética Graciela Merlín"
+     }
+    ],
+    "36": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 0.5,
+      "url": "https://www.dework.com.ar/ir/ferreteria-cerrajeria-san-diego",
+      "title": "Ferretería & Cerrajería San Diego"
+     },
+     {
+      "x": 0,
+      "y": 0.5,
+      "w": 1,
+      "h": 0.5,
+      "url": "https://www.dework.com.ar/ir/emma-pierangeli",
+      "title": "Emma Pierangeli"
+     }
+    ],
+    "37": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 1,
+      "url": "https://www.dework.com.ar/ir/coldwell-banker-wings",
+      "title": "Coldwell Banker Wings"
+     }
+    ],
+    "38": [
+     {
+      "x": 0.64,
+      "y": 0.715,
+      "w": 0.36,
+      "h": 0.21,
+      "url": "https://www.dework.com.ar/ir/audi-buenos-aires",
+      "title": "Audi Buenos Aires"
+     }
+    ],
+    "39": [
+     {
+      "x": 0,
+      "y": 0.715,
+      "w": 0.6,
+      "h": 0.21,
+      "url": "https://www.dework.com.ar/ir/audi-buenos-aires",
+      "title": "Audi Buenos Aires"
+     },
+     {
+      "x": 0.565,
+      "y": 0.055,
+      "w": 0.395,
+      "h": 0.43,
+      "url": "https://www.dework.com.ar",
+      "title": "Dework"
+     }
+    ],
+    "40": [
+     {
+      "x": 0.0762,
+      "y": 0.1347,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/pintor-felipe",
+      "title": "Pintor Felipe"
+     },
+     {
+      "x": 0.2928,
+      "y": 0.1347,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/antonio",
+      "title": "Antonio"
+     },
+     {
+      "x": 0.5095,
+      "y": 0.1347,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/diego",
+      "title": "Diego"
+     },
+     {
+      "x": 0.7262,
+      "y": 0.1347,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/armando",
+      "title": "Armando"
+     },
+     {
+      "x": 0.0762,
+      "y": 0.3928,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/grupo-r",
+      "title": "Grupo R"
+     },
+     {
+      "x": 0.2928,
+      "y": 0.3928,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/mas-soluciones",
+      "title": "Mas Soluciones"
+     },
+     {
+      "x": 0.5095,
+      "y": 0.3928,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/technical-roll",
+      "title": "Technical Roll"
+     },
+     {
+      "x": 0.7262,
+      "y": 0.3928,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/ferreteria-cerrajeria-san-diego",
+      "title": "Ferretería & Cerrajería San Diego"
+     },
+     {
+      "x": 0.0762,
+      "y": 0.6509,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/tubotherm-grupo-dema",
+      "title": "Tubotherm · Grupo Dema"
+     },
+     {
+      "x": 0.2928,
+      "y": 0.6509,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/como-perros-y-gatos",
+      "title": "Como Perros y Gatos"
+     },
+     {
+      "x": 0.5095,
+      "y": 0.6509,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/athenea-spa-san-diego",
+      "title": "Athenea Spa San Diego"
+     },
+     {
+      "x": 0.7262,
+      "y": 0.6509,
+      "w": 0.1976,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/centro-de-estetica-graciela-merlin",
+      "title": "Centro de Estética Graciela Merlín"
+     }
+    ],
+    "41": [
+     {
+      "x": 0.0762,
+      "y": 0.1347,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/ecosuper",
+      "title": "Ecosuper"
+     },
+     {
+      "x": 0.2486,
+      "y": 0.1347,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/tiernisima",
+      "title": "Tiernísima"
+     },
+     {
+      "x": 0.4209,
+      "y": 0.1347,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/tienta-helados",
+      "title": "Tienta Helados"
+     },
+     {
+      "x": 0.5933,
+      "y": 0.1347,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/panalera-san-diego",
+      "title": "Pañalera San Diego"
+     },
+     {
+      "x": 0.7657,
+      "y": 0.1347,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/kiosco-dietetica-san-diego",
+      "title": "Kiosco & Dietética San Diego"
+     },
+     {
+      "x": 0.0762,
+      "y": 0.3928,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/emma-pierangeli",
+      "title": "Emma Pierangeli"
+     },
+     {
+      "x": 0.2486,
+      "y": 0.3928,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/unic-golf-sd",
+      "title": "Únic Golf SD"
+     },
+     {
+      "x": 0.4209,
+      "y": 0.3928,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/clases-de-musica",
+      "title": "Clases de Música"
+     },
+     {
+      "x": 0.5933,
+      "y": 0.3928,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/punto-golf-shop",
+      "title": "Punto Golf Shop"
+     },
+     {
+      "x": 0.7657,
+      "y": 0.3928,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/suma-tu-servicio",
+      "title": "Sumá tu servicio"
+     },
+     {
+      "x": 0.0762,
+      "y": 0.6509,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/luis-pasteur",
+      "title": "Luis Pasteur"
+     },
+     {
+      "x": 0.2486,
+      "y": 0.6509,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/audi-buenos-aires",
+      "title": "Audi Buenos Aires"
+     },
+     {
+      "x": 0.4209,
+      "y": 0.6509,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/ancarola-racca",
+      "title": "Ancarola & Racca"
+     },
+     {
+      "x": 0.5933,
+      "y": 0.6509,
+      "w": 0.1581,
+      "h": 0.2245,
+      "url": "https://www.dework.com.ar/ir/coldwell-banker-wings",
+      "title": "Coldwell Banker Wings"
+     }
+    ],
+    "43": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 1,
+      "url": "https://www.dework.com.ar/ir/audi-buenos-aires",
+      "title": "Audi Buenos Aires"
+     }
+    ],
+    "44": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 1,
+      "url": "https://www.dework.com.ar/ir/audi-buenos-aires",
+      "title": "Audi Buenos Aires"
+     }
+    ]
+   },
+   "notas": [
+    {
+     "id": "sofia",
+     "foto": "/ed/sd/145/notas/sofia.webp",
+     "desde": 6,
+     "hasta": 15,
+     "seccion": "Hockey",
+     "titulo": "Sofía Cairo,",
+     "tituloCursiva": "la mejor del mundo",
+     "bajada": "Convirtió el penal que le dio el bronce a Las Leonas en París 2024 y, dos años después, el que las coronó campeonas del mundo en Amstelveen. En octubre, la Federación Internacional de Hockey la eligió la mejor jugadora del planeta. Criada en San Diego, Sofía es una de las nuestras.",
+     "cuerpo": [
+      "Hay jugadoras que aparecen en el momento justo. Sofía Cairo tiene esa costumbre: cuando el partido se define en el último tiro, la pelota termina en su palo.",
+      "Pasó en París. El 9 de agosto de 2024, Las Leonas y Bélgica empataron 2 a 2 en el partido por la medalla de bronce y todo se resolvió en los penales australianos. Con Argentina arriba en la tanda, Sofía, que jugaba sus primeros Juegos Olímpicos, tomó la pelota, encaró y la metió: 3 a 1 y medalla de bronce para el hockey argentino.",
+      "Ese día, su familia estaba en la tribuna. Sus padres y sus hermanos viajaron a París para acompañarla, y sus abuelos lo vivieron desde Argentina, minuto a minuto, festejando a la distancia.",
+      "Este logro fue especialmente significativo para Sofía, quien luego del partido compartió que vivió el momento con una mezcla de nervios y determinación. Para ella, fue un honor ser la responsable de ese penal, y lo hizo pensando en todo el esfuerzo colectivo del equipo. Las Leonas celebraron con lágrimas de alegría, sabiendo que habían alcanzado un nuevo hito en su historia.",
+      {
+       "h": "De Moreno a la Selección"
+      },
+      "Sofía tiene 24 años y juega en el Club y Biblioteca Mariano Moreno desde los seis. Es un club de ascenso: hasta 2019 competía en la división D y hoy pelea en la C. En 2016, la Asociación de Buenos Aires convocó a una prueba masiva para armar los seleccionados juveniles, con dos jugadoras por club, y ahí empezó a llamar la atención. Tres años después, en una final nacional Sub 18 con el seleccionado bonaerense, Fernando Ferrara, entonces entrenador de Las Leoncitas, la convocó al seleccionado juvenil.",
+      "Así se convirtió en la primera jugadora de Mariano Moreno en llegar a la Selección. Con Las Leoncitas fue subcampeona del Mundial Sub-21 en Santiago 2023 y ese mismo año, ya con la mayor, ganó la medalla de oro en los Juegos Panamericanos de Santiago.",
+      "De su club habla con un cariño que no se negocia. “Es mi club de toda la vida. Para mí es una familia que me apoyó desde que empecé a tener oportunidades en los seleccionados de Buenos Aires y mientras fui creciendo hasta llegar a las Leonas”, contó en una entrevista con La Nación durante el Mundial.",
+      "Cuando volvió a Moreno con la medalla, le preguntaron por qué seguía jugando en su club de barrio. Su respuesta fue simple: “¿Por qué me iría del lugar donde soy feliz?”.",
+      {
+       "h": "El camino al título"
+      },
+      "El Mundial 2026 se jugó entre el 15 y el 30 de agosto, con sedes en Wavre, Bélgica, y Amstelveen, Países Bajos. Las Leonas, dirigidas por Fernando Ferrara, arrancaron en el grupo B: empataron 1 a 1 con Estados Unidos, le ganaron 3 a 2 a Alemania y 2 a 0 a Escocia. En la segunda fase golearon 3 a 0 a España y empataron 0 a 0 con Bélgica, un resultado que les dio el primer puesto del grupo.",
+      "Sobre ese partido, Sofía lo explicó así: “Estamos contentas porque nos lo merecíamos y lo más importante resultó la manera en que defendimos”. En la semifinal, otra vez en Wavre, Argentina le ganó 1 a 0 a Australia con un gol en el último cuarto, en una jugada en la que participó ella.",
+      "Antes de ese cruce había definido el espíritu del grupo: “Nos propusimos seguir juntas hasta el final y darlo todo, luchar, ser una familia”.",
+      {
+       "h": "Campeona del mundo"
+      },
+      "La final fue el 29 de agosto en el Wagener Hockey Stadium de Amstelveen, ante Países Bajos, las dueñas de casa y verdugas de la final de 2022. Yibbi Jansen abrió el marcador para las neerlandesas sobre el cierre del primer tiempo y Las Leonas tuvieron que remar. A los 54 minutos, María José Granatto empató de córner corto, en una jugada que nació de una recuperación de Sofía. Otra vez, penales.",
+      "En la tanda convirtieron Victoria Granatto y Brisa Bruggesser, y la arquera Cristina Cosentino atajó tres tiros. El último, el que valía el título, lo pateó Sofía: 3 a 1 y campeonas del mundo. Fue la tercera Copa del Mundo en la historia de Las Leonas, después de Perth 2002 y Rosario 2010.",
+      "El lunes 31 de agosto, el plantel aterrizó en Ezeiza con la copa y las medallas. Más de doscientos hinchas las esperaban con banderas en el hall del aeropuerto.",
+      {
+       "h": "En primera persona"
+      },
+      "Entre París y Amstelveen, Sofía cambió de lugar dentro del equipo. “Ahora me siento un poco más ‘grande’, por así decir”, contó. “En este plantel hay jugadoras más jóvenes que yo y en este momento me ubico en el medio de las edades del equipo. Entonces me siento con más confianza para hablar internamente y ayudar, sabiendo cómo funciona todo”.",
+      "También encontró tiempo para estudiar. Hizo la licenciatura en Publicidad a distancia en la Universidad de Palermo y se recibió en julio, semanas antes del Mundial. “Estudiar Publicidad ayudó a despejarme del hockey y fue muy importante obtener el diploma antes del Mundial para enfocarme ciento por ciento acá”, dijo.",
+      "Y cuando le preguntan qué significa ser una Leona, vuelve a la infancia: “Es un orgullo y un privilegio enorme. Es lo que soñé siempre desde que conocí a las Leonas. Antes, cuando era chica, las veía por la tele con mi mamá y las íbamos a ver a los partidos”.",
+      {
+       "h": "La mejor del planeta"
+      },
+      "En octubre llegó el reconocimiento individual. En los FIH Hockey Stars Awards 2026, realizados en Doha, Qatar, la Federación Internacional de Hockey la eligió Jugadora del Año. No fue la única alegría argentina de la noche: Tomás Domene fue elegido el mejor jugador del mundo, Cristina Cosentino la mejor arquera y Zoe Díaz la mejor jugadora joven. Cuatro de los seis premios individuales quedaron en manos argentinas.",
+      "Al recibirlo, Sofía dijo que ser parte de Las Leonas era algo que siempre había querido y que el premio no era solo suyo, porque el equipo la empuja a mejorar todos los días.",
+      {
+       "h": "Una leona con estilo propio"
+      },
+      "Las Leonas, la selección femenina de hockey sobre césped de Argentina, han dejado una marca indeleble en la historia de los Juegos Olímpicos. Con su pasión, talento y entrega, han logrado posicionarse como una de las potencias mundiales en este deporte. A lo largo de los años, han obtenido varias medallas, destacándose por su estilo de juego dinámico y por ser un símbolo de orgullo nacional.",
+      "Entre las jugadoras que han emergido como figuras clave, Sofía Cairo se destaca por su habilidad, dedicación y liderazgo dentro del campo. Cairo, conocida por su precisión en el manejo de la pelota y su visión de juego, ha sido fundamental en los recientes éxitos del equipo. Su capacidad para tomar decisiones rápidas y su destreza técnica la han convertido en una jugadora indispensable para Las Leonas.",
+      "Las Leonas, con Sofía Cairo entre sus filas, continúan siendo una fuerza formidable en el hockey sobre césped, inspirando a nuevas generaciones de jugadoras y consolidando el legado de Argentina en el deporte olímpico. Con cada participación en los Juegos, renuevan la esperanza y el entusiasmo de sus seguidores, llevando consigo el sueño de seguir sumando logros a su rica historia.",
+      {
+       "h": "Una de las nuestras"
+      },
+      "Sofía es socia de San Diego desde hace muchos años: se crió en el club, y es muy querida por todos los socios. Aunque su camino en el hockey lo hizo con la camiseta de Mariano Moreno, San Diego es su casa.",
+      "Desde San Diego la seguimos en cada partido y festejamos cada gol como propio.",
+      "Fotos: Sofía Cairo y familia, Hockey Argentina (CAH), ESPN Argentina, Arnau MB (@arnaumb16) y Martín Waichman."
+     ]
+    },
+    {
+     "id": "pingpong",
+     "foto": "/ed/sd/145/notas/pingpong.webp",
+     "desde": 16,
+     "hasta": 21,
+     "seccion": "Ping pong exclusivo",
+     "titulo": "Sofi Cairo:",
+     "tituloCursiva": "“Los sueños se cumplen”",
+     "bajada": "Se crió en San Diego, empezó a jugar al hockey a los 6 años en Mariano Moreno y hoy es campeona y la mejor jugadora del mundo. En una charla exclusiva con nuestra revista, Sofi repasa su infancia en el club, el último penal de la final, la noche de Doha y lo que más extraña cuando está lejos de casa.",
+     "cuerpo": [
+      {
+       "h": "¿Qué recuerdos tenés de tu infancia en San Diego? ¿Hay algún rincón del club que sea especialmente tuyo?"
+      },
+      "Me mudé a San Diego con mi familia cuando tenía 2 años, así que prácticamente crecí ahí. Lo que más me acuerdo es que siempre fui muy fanática del Poli, ¡no salía de ahí! Iba a la recre, hacía vóley, básquet, telas, todo lo que tuviera que ver con el deporte… Me quedaba a la nocturna y hasta cenaba en el club. Me acuerdo del famoso McPlato, que era milanesa con papitas noisette. Era tan fanática que les pedía a mis papás que fuéramos a almorzar los domingos al Poli porque a las 15 empezaba la recre y no me quería perder ni un minuto. Siempre fui muy deportista y me encantaba todo lo que tuviera que ver con el club. Tengo recuerdos hermosos de esa etapa.",
+      {
+       "h": "¿Cómo empezaste a jugar al hockey? ¿Quién te puso el primer palo en la mano?"
+      },
+      "Empecé a jugar a los 6 años en Mariano Moreno. Mi mamá también jugaba al hockey y fue ella quien me llevó al club. Al principio era un juego, iba a divertirme y a pasar tiempo con mis amigas, y de a poquito se fue convirtiendo en algo cada vez más importante en mi vida. Nunca más me fui.",
+      {
+       "h": "¿Qué pensaste cuando agarraste la pelota para patear el último penal de la final del Mundial?"
+      },
+      "A la hora de ir a tirar el shootout, la verdad es que traté de mantener la calma y concentrarme en lo que tenía que hacer. Sabía lo que estaba en juego, pero intenté no pensar demasiado y confiar en mí. Cuando entró y me di vuelta para festejar con mis compañeras y el cuerpo técnico, fue una felicidad inexplicable. Creo que todavía hoy me cuesta dimensionar lo que vivimos ese día.",
+      {
+       "h": "¿Qué sentiste cuando dijeron tu nombre en Doha como la mejor jugadora del mundo?"
+      },
+      "¡Uf, fue una emoción enorme! Todavía me cuesta caer. Estar ahí, escuchar mi nombre y pensar en todo el proceso fue increíble. Es un reconocimiento individual muy lindo, pero siento que también es parte de todas Las Leonas y del cuerpo técnico, porque sin ellos no hubiera llegado hasta ahí. También representa a todas las personas que me acompañaron: mi familia, el Club Moreno, mi novio, mis amigas y toda la gente de Argentina que ayudó muchísimo con sus votos. Nunca me imaginé vivir algo así y estoy muy agradecida de haberlo podido disfrutar.",
+      {
+       "h": "¿Qué te dijo tu familia después de la final y del premio?"
+      },
+      "Mi familia es la que está desde el primer día, en las buenas y en las malas. Después de la final, los tenía ahí, en Países Bajos, al lado mío, y juntos festejamos y disfrutamos muchísimo de ese día. Con el premio pasó lo mismo: cuando les conté que había ganado, fue un momento de muchísima emoción. Sé todo lo que ellos viven y hacen para acompañarme, así que poder compartir estos logros con ellos es de las cosas que más disfruto. Son una parte fundamental de todo esto y sé que sin ellos el camino hubiese sido muy distinto.",
+      {
+       "h": "¿Qué tiene Mariano Moreno que nunca quisiste dejarlo?"
+      },
+      "Moreno es mi casa. Empecé a jugar ahí a los 6 años, crecí, hice amigas, aprendí un montón de cosas y viví muchísimos momentos que me marcaron. Es el lugar donde empezó todo y donde siempre me hacen sentir en casa. Por más que después haya llegado a Las Leonas y haya tenido la posibilidad de jugar en otros lugares, nunca tuve ganas de dejar de jugar en Moreno. Es parte de mi vida y de quién soy, no solo como jugadora, sino también como persona.",
+      {
+       "h": "¿Cómo es un día normal tuyo entre entrenamientos, viajes y el resto de tu vida?"
+      },
+      "Mis días suelen arrancar bastante temprano. Alrededor de las 5.30 o 6 ya me despierto, desayuno y viajo desde San Diego hasta el CENARD para entrenar con Las Leonas. Hacemos preparación física, ya sea gimnasio o trabajo físico, y después hockey, así que suelen ser jornadas largas, a las que también se suma bastante tiempo de viaje. A casa vuelvo alrededor de las 14. Después trato de organizarme para tener tiempo para mi familia, mis amigos, mi novio y hacer cosas que disfruto fuera del hockey. Cuando estamos de gira cambia bastante la rutina, pero también es parte de lo lindo de esta vida.",
+      {
+       "h": "¿Qué te enseñaron Las Leonas, adentro y afuera de la cancha?"
+      },
+      "Las Leonas me enseñaron muchísimo, no solamente desde lo deportivo, sino también como persona. Justo el otro día lo hablaba con Zoe Díaz, una compañera de Las Leonas, y coincidíamos en que formar parte de este equipo nos transmite muchos valores y enseñanzas para la vida, para saber compartir y convivir con distintas personas. Dentro de la cancha, me enseñaron a competir, a no dar nunca una pelota por perdida y a confiar en mis compañeras. Afuera, a ser responsable, a trabajar en equipo, a tener compromiso y a entender que nadie llega a ningún lado sola. Compartir el día a día con jugadoras que admiro y de las que aprendo constantemente es un privilegio. También me enseñaron a disfrutar y valorar cada oportunidad de representar a mi país.",
+      {
+       "h": "¿Qué le dirías a una nena de San Diego que hoy empieza a jugar al hockey y sueña con ser Leona?"
+      },
+      "Que disfrute muchísimo el camino, que juegue, que se divierta, que haga amigas y que nunca deje de soñar. Que no piense que por empezar en un club de barrio no puede llegar a lugares enormes. Yo empecé a los 6 años en Mariano Moreno, sin imaginarme todo lo que iba a vivir. Con trabajo, constancia y, sobre todo, disfrutando del proceso, pueden pasar cosas increíbles. ¡Yo doy fe de que los sueños se cumplen! Y que el hockey es un deporte hermoso.",
+      {
+       "h": "¿Qué es lo que más extrañás de San Diego cuando estás de gira?"
+      },
+      "Sin dudas, mi familia, mis amigos y mi casa. También las cosas más simples de la rutina: estar tranquila, compartir un rato con ellos y ver a la gente de siempre. Tengo la suerte de vivir muy cerca de mis tíos, primos y abuelos, y eso también se siente cuando estoy lejos. Cuando estás mucho tiempo afuera, empezás a valorar todavía más esas pequeñas cosas.",
+      {
+       "h": "¿Cuál es tu mayor sueño ahora que ya llegaste a lo más alto?"
+      },
+      "Ahora uno de mis grandes sueños es poder ganar una medalla de oro olímpica con Las Leonas. Y ascender con Moreno."
+     ]
+    },
+    {
+     "id": "directorio",
+     "foto": "/ed/sd/145/p26-800.webp",
+     "desde": 26,
+     "hasta": 27,
+     "seccion": "Administración",
+     "titulo": "El Directorio,",
+     "tituloCursiva": "cara a cara con los socios",
+     "bajada": "Más de 80 socios participaron de la reunión informativa semestral, en la que se repasaron la situación económica del club, las normas de convivencia, las obras y el futuro de la calle Savio.",
+     "cuerpo": [
+      "Como ya es tradición, el Directorio del Club de Campo San Diego llevó adelante su reunión informativa semestral, un espacio de encuentro en el que se brinda a los socios accionistas información oficial sobre los distintos aspectos de la gestión y aquellos temas de interés para toda la comunidad del club.",
+      "En esta oportunidad, el encuentro se realizó el viernes 23 de octubre, a las 18 horas, en la House Principal, y contó con la presencia de más de 80 socios, que se acercaron con el objetivo de conocer las novedades, interiorizarse sobre los proyectos y plantear sus inquietudes.",
+      "Durante la reunión se abordó inicialmente la situación económica y financiera del club. Posteriormente, se trataron distintos aspectos reglamentarios, con especial atención a las normas de convivencia, tránsito y ruidos molestos. En este último punto, se presentó un informe detallado sobre las multas aplicadas a los socios que infringen las disposiciones vigentes.",
+      "También se brindó información sobre el nivel de morosidad en el pago de las expensas, destacándose que actualmente se mantiene en valores sumamente bajos, reflejo del buen cumplimiento de los compromisos por parte de los socios.",
+      "Otro de los ejes centrales fue el balance de las obras realizadas y finalizadas, los trabajos que se encuentran actualmente en ejecución y la proyección de las nuevas obras que ya fueron aprobadas y que formarán parte del desarrollo futuro del club.",
+      {
+       "h": "La calle Savio"
+      },
+      "Uno de los temas de mayor relevancia fue la situación de la calle Savio y las calles linderas al country, terrenos que actualmente pertenecen a la Municipalidad de Moreno. En diciembre de 2028 vencerá la concesión otorgada oportunamente al club por un período de 40 años, por lo que se deberá avanzar en la compra de esos aproximadamente 83.000 metros cuadrados, un tema de especial importancia para el futuro de San Diego.",
+      {
+       "h": "Diálogo abierto"
+      },
+      "La jornada se desarrolló en un clima de cordialidad y diálogo abierto. Los socios tuvieron la oportunidad de realizar sus preguntas y plantear sus inquietudes, que fueron respondidas por el presidente del Directorio, Andrés Fera, el síndico Carlos Quian y los representantes del estudio de abogados que asesora a la institución.",
+      "Al finalizar el encuentro, los asistentes manifestaron su conformidad y agradecieron la predisposición del Directorio para brindar información, responder consultas y mantener abiertos estos espacios de comunicación.",
+      "Una vez más, esta reunión semestral reafirmó la importancia del diálogo, la transparencia y la participación de los socios en los asuntos que hacen al presente y al futuro del Club de Campo San Diego."
+     ]
+    },
+    {
+     "id": "golf",
+     "foto": "/ed/sd/145/notas/golf.webp",
+     "desde": 30,
+     "hasta": 31,
+     "seccion": "Golf",
+     "titulo": "El Master Plan del golf",
+     "tituloCursiva": "se va completando",
+     "bajada": "Desde el 9 de noviembre, la renovación de los doce greens restantes y sus bunkers abre la etapa final de la transformación de la cancha de San Diego.",
+     "cuerpo": [
+      "Cuando en 2023 el Directorio, presidido por Ricardo Borelli, junto con la Comisión de Golf encabezada por Alejandro Altilio, impulsó el Master Plan para la renovación de la cancha, el objetivo fue claro: dotar al Club de un campo acorde al nivel y la calidad que distinguen a nuestra comunidad.",
+      "Con la supervisión constante del Ingeniero Agrónomo Alejandro Canegallo, el proyecto comenzó a materializarse con obras de gran envergadura que hoy muestran resultados concretos. Entre los trabajos más destacados se encuentra la renovación de los 18 fairways con césped TIFway, una de las variedades utilizadas en los mejores campos de golf, además de la construcción del emblemático Green Isla del hoyo 7, convertido en el hoyo insignia de San Diego y reconocido por golfistas de otros clubes que lo visitan especialmente para disfrutar de su diseño y desafío.",
+      "El Master Plan también incluyó la renovación completa de la carpeta de seis greens con césped Tifeagle, junto con la reconstrucción de sus bunkers, incorporando modernos sistemas de drenaje y conchilla como superficie, un estándar presente en las canchas de mayor prestigio.",
+      "Sumémosle también la compra de 4 máquinas fundamentales para que esta cancha pueda lucir como todos deseamos.",
+      {
+       "h": "La etapa final"
+      },
+      "Hoy, bajo la conducción del Directorio presidido por Andrés Fera y con Gonzalo Losa al frente de la Comisión de Golf, el proyecto mantiene el mismo compromiso.",
+      "A partir del 9 de noviembre, comenzará la etapa final, con la renovación de los doce greens restantes y sus respectivos bunkers, replicando el mismo criterio constructivo, además de ejecutar los trabajos de drenaje en los fairways de los hoyos 1 y 3.",
+      "En cada una de estas mejoras se refleja una visión a largo plazo y una firme decisión de invertir en infraestructura deportiva de excelencia.",
+      "Con la finalización del Master Plan, San Diego se consolidará como uno de los campos de golf más importantes de la zona oeste, ofreciendo a los socios una cancha moderna, desafiante y de primer nivel.",
+      "Crecer también significa proyectar el futuro: Club de Campo San Diego continúa invirtiendo para seguir elevando la calidad de sus instalaciones y brindar espacios que enorgullecen a toda su comunidad.",
+      {
+       "h": "Nuevo Pro Shop"
+      },
+      "En breve estará funcionando un nuevo Pro Shop de golf en el que los socios podrán adquirir pelotitas, tees, guantes, juegos de hierros y maderas, indumentaria, carros y, lo más importante, tendrá un taller de arreglo de palos y cambios de grips."
+     ]
+    },
+    {
+     "id": "garden",
+     "foto": "/ed/sd/145/notas/garden.webp",
+     "desde": 34,
+     "hasta": 35,
+     "seccion": "Garden Club",
+     "titulo": "Florales de estación",
+     "tituloCursiva": "y herbáceas perennes",
+     "bajada": "Anuales, bianuales y perennes: cómo se diferencian, cuánto viven y qué especies elegir para tener flores en el jardín de una temporada a otra.",
+     "cuerpo": [
+      "La diferencia entre florales de estación y herbáceas perennes es solo por la clasificación y el ciclo de vida de cada una.",
+      "Las herbáceas perennes son plantas cuyos tallos no son leñosos.",
+      "Las anuales nacen, crecen, florecen para luego semillar y posteriormente mueren.",
+      "Bianuales se llama a aquellas que son plantadas en un año y florecen al siguiente.",
+      "Por su gran producción de flores, las herbáceas necesitan buen suelo. La preparación del mismo es fundamental.",
+      {
+       "h": "Diferencias entre plantas anuales y bianuales"
+      },
+      "Las principales diferencias entre las plantas anuales y las bianuales son:",
+      "<b>Tiempo de vida:</b> las plantas anuales completan su ciclo de vida en un solo año, mientras que las plantas bianuales necesitan dos años para hacerlo.",
+      "<b>Velocidad de crecimiento:</b> las plantas anuales crecen más rápido que las plantas bianuales.",
+      "<b>Floración:</b> las plantas anuales florecen durante todo el año, mientras que las plantas bianuales solo florecen en su segundo año de vida.",
+      "<b>Producción de semillas:</b> las plantas anuales producen semillas en el mismo año en que crecen, mientras que las plantas bianuales lo hacen en su segundo año de vida.",
+      {
+       "h": "Plantas anuales"
+      },
+      "Son plantas que tienen un ciclo vital muy rápido y que viven durante una única temporada. Básicamente, nacen durante la primavera-verano, se desarrollan y florecen.",
+      "Estos son algunos ejemplos: plantas de jardín como la begonia, la amapola, la petunia, el pensamiento y el girasol, y hierbas silvestres, incluso las consideradas “malas hierbas”.",
+      {
+       "h": "Plantas bianuales"
+      },
+      "Las plantas bianuales viven durante dos temporadas, es decir, su ciclo vital es de dos años. La primera temporada está destinada a crecer y desarrollarse y la segunda, durante la primavera, a florecer y dar frutos.",
+      "Dentro de esta categoría hay plantas florales y alimentos; sin embargo, existen en menos cantidad, ya que hay mayor cantidad de especies anuales.",
+      "Algunos tipos de plantas bianuales son el alhelí, el clavel, la margarita, la nomeolvides y la digitalis.",
+      {
+       "h": "Plantas perennes"
+      },
+      "Se conoce como plantas perennes a aquellas que viven más de dos temporadas: hablamos de plantas pequeñas, arbustos de menor y mayor tamaño, así como árboles. Viven varios años y rebrotan desde órganos subterráneos (por ejemplo, las peonías).",
+      "Se dividen en dos grupos: las de hoja perenne, que duran varias temporadas, y las de hoja caduca, donde las hojas se renuevan todos los años.",
+      "Su característica principal es que son plantas que soportan climas hostiles y por lo tanto son muy resistentes. Normalmente suelen perder las flores en invierno, sobreviviendo únicamente las raíces, pero en primavera vuelven a florecer, ya que las plantas perennes dan flor y semillas varias veces en su vida.",
+      "Algunas clases de plantas perennes son la prímula, el lirio, la canna, la margarita africana, la asclepia, ciertos geranios y, obviamente, los árboles y arbustos.",
+      "Las plantas herbáceas son plantas de tallos blandos y verdes, sin tejido leñoso, que pueden ser anuales, bienales o perennes, como el trigo, la zanahoria, la gazania o las peonías."
+     ]
+    }
+   ],
+   "slots": {
+    "1": "/ed/sd/145/p01-1600.webp",
+    "2": "/ed/sd/145/p02-1600.webp",
+    "3": "/ed/sd/145/p03-1600.webp",
+    "4": "/ed/sd/145/p04-1600.webp",
+    "5": "/ed/sd/145/p05-1600.webp",
+    "6": "/ed/sd/145/p06-1600.webp",
+    "7": "/ed/sd/145/p07-1600.webp",
+    "8": "/ed/sd/145/p08-1600.webp",
+    "9": "/ed/sd/145/p09-1600.webp",
+    "10": "/ed/sd/145/p10-1600.webp",
+    "11": "/ed/sd/145/p11-1600.webp",
+    "12": "/ed/sd/145/p12-1600.webp",
+    "13": "/ed/sd/145/p13-1600.webp",
+    "14": "/ed/sd/145/p14-1600.webp",
+    "15": "/ed/sd/145/p15-1600.webp",
+    "16": "/ed/sd/145/p16-1600.webp",
+    "17": "/ed/sd/145/p17-1600.webp",
+    "18": "/ed/sd/145/p18-1600.webp",
+    "19": "/ed/sd/145/p19-1600.webp",
+    "20": "/ed/sd/145/p20-1600.webp",
+    "21": "/ed/sd/145/p21-1600.webp",
+    "22": "/ed/sd/145/p22-1600.webp",
+    "23": "/ed/sd/145/p23-1600.webp",
+    "24": "/ed/sd/145/p24-1600.webp",
+    "25": "/ed/sd/145/p25-1600.webp",
+    "26": "/ed/sd/145/p26-1600.webp",
+    "27": "/ed/sd/145/p27-1600.webp",
+    "28": "/ed/sd/145/p28-1600.webp",
+    "29": "/ed/sd/145/p29-1600.webp",
+    "30": "/ed/sd/145/p30-1600.webp",
+    "31": "/ed/sd/145/p31-1600.webp",
+    "32": "/ed/sd/145/p32-1600.webp",
+    "33": "/ed/sd/145/p33-1600.webp",
+    "34": "/ed/sd/145/p34-1600.webp",
+    "35": "/ed/sd/145/p35-1600.webp",
+    "36": "/ed/sd/145/p36-1600.webp",
+    "37": "/ed/sd/145/p37-1600.webp",
+    "38": "/ed/sd/145/p38-1600.webp",
+    "39": "/ed/sd/145/p39-1600.webp",
+    "40": "/ed/sd/145/p40-1600.webp",
+    "41": "/ed/sd/145/p41-1600.webp",
+    "42": "/ed/sd/145/p42-1600.webp",
+    "43": "/ed/sd/145/p43-1600.webp",
+    "44": "/ed/sd/145/p44-1600.webp"
+   },
+   "avisos": [
+    {
+     "url": "https://www.dework.com.ar/ir/audi-buenos-aires",
+     "marca": "Audi Buenos Aires",
+     "imagen": "/ed/sd/145/p02-800.webp",
+     "pagina": 2
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/ancarola-racca",
+     "marca": "Ancarola & Racca",
+     "imagen": "/ed/sd/145/p03-800.webp",
+     "pagina": 3
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/luis-pasteur",
+     "marca": "Luis Pasteur",
+     "imagen": "/ed/sd/145/p05-800.webp",
+     "pagina": 5
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/tubotherm-grupo-dema",
+     "marca": "Tubotherm · Grupo Dema",
+     "imagen": "/ed/sd/145/p25-800.webp",
+     "pagina": 25
+    },
+    {
+     "url": "https://www.instagram.com/tiernissimacarnicerias/",
+     "marca": "Tiernísima",
+     "imagen": "/ed/sd/145/avisos/p28-tiernisima-800.webp",
+     "pagina": 28
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/panalera-san-diego",
+     "marca": "Pañalera San Diego",
+     "imagen": "/ed/sd/145/avisos/p28-panalera-san-diego-800.webp",
+     "pagina": 28
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/grupo-r",
+     "marca": "Grupo R",
+     "imagen": "/ed/sd/145/p29-800.webp",
+     "pagina": 29
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/tienta-helados",
+     "marca": "Tienta Helados",
+     "imagen": "/ed/sd/145/avisos/p32-tienta-helados-800.webp",
+     "pagina": 32
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/technical-roll",
+     "marca": "Technical Roll",
+     "imagen": "/ed/sd/145/avisos/p33-technical-roll-800.webp",
+     "pagina": 33
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/ferreteria-cerrajeria-san-diego",
+     "marca": "Ferretería & Cerrajería San Diego",
+     "imagen": "/ed/sd/145/avisos/p36-ferreteria-cerrajeria-san-diego-800.webp",
+     "pagina": 36
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/emma-pierangeli",
+     "marca": "Emma Pierangeli",
+     "imagen": "/ed/sd/145/avisos/p36-emma-pierangeli-800.webp",
+     "pagina": 36
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/coldwell-banker-wings",
+     "marca": "Coldwell Banker Wings",
+     "imagen": "/ed/sd/145/p37-800.webp",
+     "pagina": 37
+    }
+   ],
+   "renderer": "dework-estudio",
+   "compartir": {
+    "og": "/ed/sd/145/og-1200x630.jpg",
+    "mes": "Noviembre 2026",
+    "notas": [
+     "Sofía Cairo, la mejor del mundo",
+     "Sofi Cairo: “Los sueños se cumplen”",
+     "El Master Plan del golf se va completando",
+     "Horarios del Poli 2026"
+    ],
+    "titulo": "San Diego La Revista · Edición 145 · Noviembre 2026",
+    "whatsapp": "/ed/sd/145/whatsapp-1080.jpg"
+   },
+   "errorPages": [],
+   "isAllSpread": false,
+   "isSpreadPDF": false,
+   "totalPdfPages": 44,
+   "pageDimensions": {
+    "h": 841.89,
+    "w": 595.276
+   }
+  }
+ },
+ {
   "issue_number": 144,
   "published_at": "2026-10-15T18:56:20.695Z",
   "cover_url": "/ed/sd/144/tapa.jpg",
