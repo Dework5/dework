@@ -9,6 +9,69 @@
   "aprobado": "2026-11-07"
  },
  {
+  "id": "destacada-horarios-1-20261109",
+  "tipo": "historia",
+  "cuando": "2026-11-09T09:00:00-03:00",
+  "imagenes": [
+   "/ig/destacadas/horarios-poli-1.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "destacada-horarios-2-20261109",
+  "tipo": "historia",
+  "cuando": "2026-11-09T09:01:00-03:00",
+  "imagenes": [
+   "/ig/destacadas/horarios-poli-2.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "destacada-horarios-3-20261109",
+  "tipo": "historia",
+  "cuando": "2026-11-09T09:02:00-03:00",
+  "imagenes": [
+   "/ig/destacadas/horarios-poli-3.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "destacada-horarios-4-20261109",
+  "tipo": "historia",
+  "cuando": "2026-11-09T09:03:00-03:00",
+  "imagenes": [
+   "/ig/destacadas/horarios-poli-4.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "destacada-horarios-5-20261109",
+  "tipo": "historia",
+  "cuando": "2026-11-09T09:04:00-03:00",
+  "imagenes": [
+   "/ig/destacadas/horarios-poli-5.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "destacada-actividades-20261109",
+  "tipo": "historia",
+  "cuando": "2026-11-09T12:00:00-03:00",
+  "imagenes": [
+   "/ig/destacadas/actividades.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "destacada-recomendados-20261109",
+  "tipo": "historia",
+  "cuando": "2026-11-09T18:00:00-03:00",
+  "imagenes": [
+   "/ig/destacadas/recomendados-web.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
   "id": "historia-ferreteria-20261116",
   "tipo": "historia",
   "cuando": "2026-11-16T09:00:00-03:00",
