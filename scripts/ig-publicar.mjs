@@ -72,6 +72,14 @@ for (const x of aPublicar) {
   try {
     if (ENSAYO) { console.log(`(ensayo) publicaría ${x.tipo} ${x.id} · ${x.imagenes.join(', ')}`); continue; }
     let contenedor;
+    if (x.tipo === 'comentario') {
+      // comentario de la revista en un posteo ya publicado (p. ej. para mencionar a alguien)
+      const { id } = await api(`/${x.media}/comments`, { message: x.texto });
+      publicadas.push({ id: x.id, media: id, publicada: new Date().toISOString() });
+      fs.writeFileSync(ESTADO, JSON.stringify(publicadas, null, 1) + '\n');
+      console.log(`✓ comentario ${x.id} (${id})`);
+      continue;
+    }
     if (x.tipo === 'historia') {
       ({ id: contenedor } = await api(`/${IG_USER_ID}/media`, { image_url: await urlImagen(x.imagenes[0]), media_type: 'STORIES' }));
     } else if (x.tipo === 'carrusel') {
