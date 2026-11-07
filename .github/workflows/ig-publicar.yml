@@ -1,0 +1,71 @@
+# Publica en Instagram (@countrysandiegolarevista) lo que vence en data/ig-cola.json (solo piezas aprobadas por Vicky).
+# Corre cada media hora. Lo ya publicado se anota en la rama ig-estado (estado.json) para no publicar nada dos veces.
+# Secretos necesarios (Settings → Secrets and variables → Actions): IG_USER_ID, IG_TOKEN.
+name: Publicar en Instagram
+
+on:
+  schedule:
+    - cron: '5,35 * * * *'
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: 'verificar = probar la conexión sin publicar · publicar = publicar lo que venció'
+        type: choice
+        options: [verificar, publicar]
+        default: verificar
+      id:
+        description: 'Opcional: publicar ya esta pieza de la cola (id)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ig-publicar
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Traer lo ya publicado
+        run: |
+          if git fetch -q origin ig-estado 2>/dev/null; then
+            git show origin/ig-estado:estado.json > "$RUNNER_TEMP/estado.json"
+          else
+            echo '[]' > "$RUNNER_TEMP/estado.json"
+          fi
+
+      - name: Publicar
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          MODO: ${{ inputs.modo }}
+          PIEZA: ${{ inputs.id }}
+        run: |
+          ARGS=(--estado "$RUNNER_TEMP/estado.json")
+          if [ "$MODO" = "verificar" ]; then ARGS+=(--verificar); fi
+          if [ -n "$PIEZA" ]; then ARGS+=(--id "$PIEZA"); fi
+          node scripts/ig-publicar.mjs "${ARGS[@]}"
+
+      - name: Guardar lo publicado
+        if: always()
+        run: |
+          git config user.name "dework-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git rev-parse -q --verify origin/ig-estado >/dev/null; then
+            git worktree add -q --detach "$RUNNER_TEMP/est" origin/ig-estado
+          else
+            git worktree add -q --detach "$RUNNER_TEMP/est"
+            git -C "$RUNNER_TEMP/est" checkout -q --orphan ig-estado
+            git -C "$RUNNER_TEMP/est" rm -rq --cached .
+            find "$RUNNER_TEMP/est" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          fi
+          cp "$RUNNER_TEMP/estado.json" "$RUNNER_TEMP/est/estado.json"
+          git -C "$RUNNER_TEMP/est" add estado.json
+          if ! git -C "$RUNNER_TEMP/est" diff --cached --quiet; then
+            git -C "$RUNNER_TEMP/est" commit -qm "Instagram: publicaciones hechas"
+            git -C "$RUNNER_TEMP/est" push -q origin HEAD:refs/heads/ig-estado
+          fi

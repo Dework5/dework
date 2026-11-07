@@ -1,0 +1,308 @@
+[
+ {
+  "id": "historia-ferreteria-20261116",
+  "tipo": "historia",
+  "cuando": "2026-11-16T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/ferreteria.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-grupor-20261117",
+  "tipo": "historia",
+  "cuando": "2026-11-17T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/grupor.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-puntogolf-20261118",
+  "tipo": "historia",
+  "cuando": "2026-11-18T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/puntogolf.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-ecosuper-20261119",
+  "tipo": "historia",
+  "cuando": "2026-11-19T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/ecosuper.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-coldwell-20261119",
+  "tipo": "historia",
+  "cuando": "2026-11-19T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/coldwell.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-emma-20261120",
+  "tipo": "historia",
+  "cuando": "2026-11-20T11:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/emma.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-tienta-20261121",
+  "tipo": "historia",
+  "cuando": "2026-11-21T15:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tienta.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-kiosco-20261122",
+  "tipo": "historia",
+  "cuando": "2026-11-22T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/kiosco.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-pasteur-20261122",
+  "tipo": "historia",
+  "cuando": "2026-11-22T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/pasteur.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-technicalroll-20261123",
+  "tipo": "historia",
+  "cuando": "2026-11-23T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/technicalroll.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-ancarola-20261123",
+  "tipo": "historia",
+  "cuando": "2026-11-23T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/ancarola.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-pintor-20261124",
+  "tipo": "historia",
+  "cuando": "2026-11-24T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/pintor.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-gm-20261125",
+  "tipo": "historia",
+  "cuando": "2026-11-25T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/gm.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-tubotherm-20261126",
+  "tipo": "historia",
+  "cuando": "2026-11-26T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tubotherm.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-tiernisima-20261126",
+  "tipo": "historia",
+  "cuando": "2026-11-26T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tiernisima.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-unic-20261127",
+  "tipo": "historia",
+  "cuando": "2026-11-27T11:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/unic.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-grupor-20261128",
+  "tipo": "historia",
+  "cuando": "2026-11-28T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/grupor.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-panalera-20261129",
+  "tipo": "historia",
+  "cuando": "2026-11-29T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/panalera.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-antonio-20261130",
+  "tipo": "historia",
+  "cuando": "2026-11-30T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/antonio.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-coldwell-20261130",
+  "tipo": "historia",
+  "cuando": "2026-11-30T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/coldwell.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-armando-20261201",
+  "tipo": "historia",
+  "cuando": "2026-12-01T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/armando.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-athenea-20261202",
+  "tipo": "historia",
+  "cuando": "2026-12-02T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/athenea.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-pasteur-20261203",
+  "tipo": "historia",
+  "cuando": "2026-12-03T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/pasteur.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-ancarola-20261204",
+  "tipo": "historia",
+  "cuando": "2026-12-04T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/ancarola.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-musica-20261205",
+  "tipo": "historia",
+  "cuando": "2026-12-05T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/musica.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-perrosygatos-20261206",
+  "tipo": "historia",
+  "cuando": "2026-12-06T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/perrosygatos.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-diego-20261207",
+  "tipo": "historia",
+  "cuando": "2026-12-07T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/diego.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-tubotherm-20261207",
+  "tipo": "historia",
+  "cuando": "2026-12-07T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tubotherm.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-massoluciones-20261208",
+  "tipo": "historia",
+  "cuando": "2026-12-08T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/massoluciones.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-grupor-20261209",
+  "tipo": "historia",
+  "cuando": "2026-12-09T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/grupor.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-coldwell-20261210",
+  "tipo": "historia",
+  "cuando": "2026-12-10T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/coldwell.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-pasteur-20261211",
+  "tipo": "historia",
+  "cuando": "2026-12-11T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/pasteur.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-ancarola-20261212",
+  "tipo": "historia",
+  "cuando": "2026-12-12T10:30:00-03:00",
+  "imagenes": [
+   "/ig/historias/ancarola.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-tubotherm-20261213",
+  "tipo": "historia",
+  "cuando": "2026-12-13T09:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tubotherm.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ }
+]
