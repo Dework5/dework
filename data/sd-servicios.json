@@ -128,6 +128,14 @@
   "imagen": "/servicios/panalera-san-diego.webp"
  },
  {
+  "marca": "Kiosco & Dietética San Diego",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Gastronomía y compras",
+  "whatsapp": "https://wa.me/5491154876612",
+  "imagen": "/servicios/kiosco-dietetica-san-diego.webp"
+ },
+ {
   "marca": "Emma Pierangeli",
   "rubro": "",
   "tel": "",
@@ -160,6 +168,14 @@
   "imagen": "/servicios/punto-golf-shop.webp"
  },
  {
+  "marca": "Sumá tu servicio",
+  "rubro": "",
+  "tel": "",
+  "seccion": "",
+  "whatsapp": "https://wa.me/5491133616566",
+  "imagen": "/servicios/suma-tu-servicio.webp"
+ },
+ {
   "marca": "Luis Pasteur",
   "rubro": "",
   "tel": "",
@@ -190,13 +206,5 @@
   "seccion": "Salud, autos e inmobiliarias",
   "whatsapp": "https://www.instagram.com/victoriagazzorealestate/",
   "imagen": "/servicios/coldwell-banker-wings.webp"
- },
- {
-  "marca": "Sumá tu servicio",
-  "rubro": "",
-  "tel": "",
-  "seccion": "",
-  "whatsapp": "https://wa.me/5491133616566",
-  "imagen": "/servicios/suma-tu-servicio.webp"
  }
 ]
