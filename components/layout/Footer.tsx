@@ -24,7 +24,7 @@ export function Footer() {
           <p className="text-[#D9C29A] text-[10px] tracking-[0.22em] uppercase mb-5">Publicaciones</p>
           <div className="flex flex-col gap-2.5">
             {PUBS.map(p => (
-              <Link key={p.slug} href={`/revistas/${p.slug}`}
+              <Link key={p.slug} href={p.slug === 'san-diego-la-revista' ? '/sandiego' : `/revistas/${p.slug}`}
                 className="text-[#EAE2CF]/80 text-sm hover:text-[#F4EFE4] transition-colors duration-200">{p.name}</Link>
             ))}
           </div>

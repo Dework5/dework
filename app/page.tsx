@@ -24,7 +24,7 @@ export default async function HomePage() {
       <h1 className="sr-only">Dework, agencia gráfica: revistas de clubes y countries</h1>
       <SeccionesMenu secciones={[
         ['#publicaciones', 'Revistas'],
-        ['/revistas/san-diego-la-revista#ultima', 'San Diego La Revista'],
+        ['/sandiego', 'Leer San Diego La Revista'],
         ...((latestIssue as any)?.page_images_json?.avisos?.length > 0 ? [['#anunciantes', 'Anunciantes'] as [string, string]] : []),
         ['/revistas/san-diego-la-revista#servicios', 'Servicios recomendados'],
         ['#contacto', 'Contacto'],
