@@ -1,15 +1,9 @@
 [
  {
-  "marca": "Ecosuper",
-  "rubro": "Supermercado",
-  "tel": "11 2448-1116",
-  "whatsapp": "https://wa.me/5491124481116",
-  "imagen": "/servicios/ecosuper.webp"
- },
- {
   "marca": "Pintor Felipe",
   "rubro": "Pintura profesional · Interiores y exteriores",
   "tel": "11 4162-6490",
+  "seccion": "Para la casa",
   "whatsapp": "https://wa.me/5491141626490",
   "imagen": "/servicios/pintor-felipe.webp"
  },
@@ -17,55 +11,15 @@
   "marca": "Antonio",
   "rubro": "Mantenimiento general",
   "tel": "11 5714-1268",
+  "seccion": "Para la casa",
   "whatsapp": "https://wa.me/5491157141268",
   "imagen": "/servicios/antonio.webp"
- },
- {
-  "marca": "Mas Soluciones",
-  "rubro": "Computación",
-  "tel": "11 5958-7422",
-  "whatsapp": "https://wa.me/5491159587422",
-  "imagen": "/servicios/mas-soluciones.webp"
- },
- {
-  "marca": "Como Perros y Gatos",
-  "rubro": "Pet shop · Peluquería",
-  "tel": "11 6761-3754",
-  "whatsapp": "https://wa.me/5491167613754",
-  "imagen": "/servicios/como-perros-y-gatos.webp"
- },
- {
-  "marca": "Clases de Música",
-  "rubro": "",
-  "tel": "",
-  "whatsapp": "https://wa.me/5491169311288",
-  "imagen": "/servicios/clases-de-musica.webp"
- },
- {
-  "marca": "Athenea Spa San Diego",
-  "rubro": "",
-  "tel": "",
-  "whatsapp": "https://wa.me/5491151387011",
-  "imagen": "/servicios/athenea-spa-san-diego.webp"
- },
- {
-  "marca": "Tiernísima",
-  "rubro": "Carnicerías",
-  "tel": "11 4673-6525",
-  "whatsapp": "https://wa.me/5491146736525",
-  "imagen": "/servicios/tiernisima.webp"
- },
- {
-  "marca": "Grupo R",
-  "rubro": "",
-  "tel": "",
-  "whatsapp": "https://wa.me/5491165205228",
-  "imagen": "/servicios/grupo-r.webp"
  },
  {
   "marca": "Diego",
   "rubro": "Electricista",
   "tel": "11 5740-5874",
+  "seccion": "Para la casa",
   "whatsapp": "https://wa.me/5491157405874",
   "imagen": "/servicios/diego.webp"
  },
@@ -73,48 +27,31 @@
   "marca": "Armando",
   "rubro": "Carpintero",
   "tel": "11 2619-2838",
+  "seccion": "Para la casa",
   "whatsapp": "https://wa.me/5491126192838",
   "imagen": "/servicios/armando.webp"
  },
  {
-  "marca": "Tienta Helados",
+  "marca": "Grupo R",
   "rubro": "",
   "tel": "",
-  "whatsapp": "https://wa.me/5491169549875",
-  "imagen": "/servicios/tienta-helados.webp"
+  "seccion": "Para la casa",
+  "whatsapp": "https://wa.me/5491165205228",
+  "imagen": "/servicios/grupo-r.webp"
  },
  {
-  "marca": "Centro de Estética Graciela Merlín",
-  "rubro": "",
-  "tel": "",
-  "whatsapp": "https://wa.me/5491140836041",
-  "imagen": "/servicios/centro-de-estetica-graciela-merlin.webp"
- },
- {
-  "marca": "Punto Golf Shop",
-  "rubro": "",
-  "tel": "",
-  "whatsapp": "https://wa.me/5491121672165",
-  "imagen": "/servicios/punto-golf-shop.webp"
- },
- {
-  "marca": "Únic Golf SD",
-  "rubro": "Golf SD",
-  "tel": "11 3195-8530",
-  "whatsapp": "https://wa.me/5491131958530",
-  "imagen": "/servicios/unic-golf-sd.webp"
- },
- {
-  "marca": "Pañalera San Diego",
-  "rubro": "",
-  "tel": "",
-  "whatsapp": "https://wa.me/5491124647219",
-  "imagen": "/servicios/panalera-san-diego.webp"
+  "marca": "Mas Soluciones",
+  "rubro": "Computación",
+  "tel": "11 5958-7422",
+  "seccion": "Para la casa",
+  "whatsapp": "https://wa.me/5491159587422",
+  "imagen": "/servicios/mas-soluciones.webp"
  },
  {
   "marca": "Technical Roll",
   "rubro": "",
   "tel": "",
+  "seccion": "Para la casa",
   "whatsapp": "https://wa.me/5491159368076",
   "imagen": "/servicios/technical-roll.webp"
  },
@@ -122,20 +59,119 @@
   "marca": "Ferretería & Cerrajería San Diego",
   "rubro": "",
   "tel": "",
+  "seccion": "Para la casa",
   "whatsapp": "https://www.instagram.com/ferreteriaycerrajeriasandiego/",
   "imagen": "/servicios/ferreteria-cerrajeria-san-diego.webp"
+ },
+ {
+  "marca": "Tubotherm · Grupo Dema",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Para la casa",
+  "whatsapp": "http://grupodema.com.ar/productos/marcas/acqua-system",
+  "imagen": "/servicios/tubotherm-grupo-dema.webp"
+ },
+ {
+  "marca": "Como Perros y Gatos",
+  "rubro": "Pet shop · Peluquería",
+  "tel": "11 6761-3754",
+  "seccion": "Mascotas",
+  "whatsapp": "https://wa.me/5491167613754",
+  "imagen": "/servicios/como-perros-y-gatos.webp"
+ },
+ {
+  "marca": "Athenea Spa San Diego",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Bienestar y belleza",
+  "whatsapp": "https://wa.me/5491151387011",
+  "imagen": "/servicios/athenea-spa-san-diego.webp"
+ },
+ {
+  "marca": "Centro de Estética Graciela Merlín",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Bienestar y belleza",
+  "whatsapp": "https://wa.me/5491140836041",
+  "imagen": "/servicios/centro-de-estetica-graciela-merlin.webp"
+ },
+ {
+  "marca": "Ecosuper",
+  "rubro": "Supermercado",
+  "tel": "11 2448-1116",
+  "seccion": "Gastronomía y compras",
+  "whatsapp": "https://wa.me/5491124481116",
+  "imagen": "/servicios/ecosuper.webp"
+ },
+ {
+  "marca": "Tiernísima",
+  "rubro": "Carnicerías",
+  "tel": "11 4673-6525",
+  "seccion": "Gastronomía y compras",
+  "whatsapp": "https://wa.me/5491146736525",
+  "imagen": "/servicios/tiernisima.webp"
+ },
+ {
+  "marca": "Tienta Helados",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Gastronomía y compras",
+  "whatsapp": "https://wa.me/5491169549875",
+  "imagen": "/servicios/tienta-helados.webp"
+ },
+ {
+  "marca": "Pañalera San Diego",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Gastronomía y compras",
+  "whatsapp": "https://wa.me/5491124647219",
+  "imagen": "/servicios/panalera-san-diego.webp"
  },
  {
   "marca": "Emma Pierangeli",
   "rubro": "",
   "tel": "",
+  "seccion": "Gastronomía y compras",
   "whatsapp": "https://wa.me/5491166133357",
   "imagen": "/servicios/emma-pierangeli.webp"
+ },
+ {
+  "marca": "Clases de Música",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Deporte y tiempo libre",
+  "whatsapp": "https://wa.me/5491169311288",
+  "imagen": "/servicios/clases-de-musica.webp"
+ },
+ {
+  "marca": "Punto Golf Shop",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Deporte y tiempo libre",
+  "whatsapp": "https://wa.me/5491121672165",
+  "imagen": "/servicios/punto-golf-shop.webp"
+ },
+ {
+  "marca": "Únic Golf SD",
+  "rubro": "Golf SD",
+  "tel": "11 3195-8530",
+  "seccion": "Deporte y tiempo libre",
+  "whatsapp": "https://wa.me/5491131958530",
+  "imagen": "/servicios/unic-golf-sd.webp"
+ },
+ {
+  "marca": "Luis Pasteur",
+  "rubro": "",
+  "tel": "",
+  "seccion": "Salud, autos e inmobiliarias",
+  "whatsapp": "https://osluispasteur.com/",
+  "imagen": "/servicios/luis-pasteur.webp"
  },
  {
   "marca": "Audi Buenos Aires",
   "rubro": "",
   "tel": "",
+  "seccion": "Salud, autos e inmobiliarias",
   "whatsapp": "https://www.audi.com.ar/ar/web/es.html",
   "imagen": "/servicios/audi-buenos-aires.webp"
  },
@@ -143,27 +179,15 @@
   "marca": "Ancarola & Racca",
   "rubro": "",
   "tel": "",
+  "seccion": "Salud, autos e inmobiliarias",
   "whatsapp": "https://www.instagram.com/ancarolaracca/",
   "imagen": "/servicios/ancarola-racca.webp"
- },
- {
-  "marca": "Luis Pasteur",
-  "rubro": "",
-  "tel": "",
-  "whatsapp": "https://osluispasteur.com/",
-  "imagen": "/servicios/luis-pasteur.webp"
- },
- {
-  "marca": "Tubotherm · Grupo Dema",
-  "rubro": "",
-  "tel": "",
-  "whatsapp": "http://grupodema.com.ar/productos/marcas/acqua-system",
-  "imagen": "/servicios/tubotherm-grupo-dema.webp"
  },
  {
   "marca": "Coldwell Banker Wings",
   "rubro": "",
   "tel": "",
+  "seccion": "Salud, autos e inmobiliarias",
   "whatsapp": "https://www.instagram.com/victoriagazzorealestate/",
   "imagen": "/servicios/coldwell-banker-wings.webp"
  },
@@ -171,6 +195,7 @@
   "marca": "Sumá tu servicio",
   "rubro": "",
   "tel": "",
+  "seccion": "",
   "whatsapp": "https://wa.me/5491133616566",
   "imagen": "/servicios/suma-tu-servicio.webp"
  }
