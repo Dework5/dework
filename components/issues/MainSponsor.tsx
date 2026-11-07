@@ -21,14 +21,14 @@ export function MainSponsor() {
   }
 
   return (
-    <section id="sponsor" aria-label="Main sponsor" className="scroll-mt-28 md:scroll-mt-32 bg-[#0d0d0d] text-white py-10 md:py-16 px-5 md:px-12">
-      <div className="max-w-6xl mx-auto grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-14 items-center">
+    <section id="sponsor" aria-label="Main sponsor" className="scroll-mt-28 md:scroll-mt-32 bg-[#0d0d0d] text-white py-8 md:py-12 px-5 md:px-12">
+      <div className="max-w-6xl mx-auto grid grid-cols-[1fr_auto] gap-5 md:gap-14 items-center">
         <div>
           <p className="text-dw-gold text-[10px] tracking-[0.35em] uppercase mb-4">Main sponsor</p>
-          <h2 className="font-display font-normal text-4xl md:text-5xl leading-tight mb-4">
+          <h2 className="font-display font-normal text-3xl md:text-5xl leading-tight mb-3 md:mb-4">
             Audi <i className="text-dw-gold">Buenos Aires</i>
           </h2>
-          <p className="text-white/60 text-sm leading-relaxed mb-7 max-w-xs">
+          <p className="text-white/60 text-sm leading-relaxed mb-5 md:mb-7 max-w-xs">
             Acompaña a San Diego La Revista.
           </p>
           <a
@@ -41,7 +41,7 @@ export function MainSponsor() {
           </a>
         </div>
 
-        <div className="relative w-full max-w-[340px] mx-auto md:mx-0 md:justify-self-end aspect-[9/16] bg-black overflow-hidden rounded-md shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+        <div className="relative w-[130px] sm:w-[180px] md:w-[230px] justify-self-end aspect-[9/16] bg-black overflow-hidden rounded-md shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
           <video
             ref={ref}
             src={VIDEO}
@@ -56,7 +56,7 @@ export function MainSponsor() {
           />
           <button
             onClick={alternarSonido}
-            className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-[10px] tracking-[0.2em] uppercase px-3 py-2 rounded-sm hover:bg-black/80"
+            className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[8px] md:text-[9px] tracking-[0.15em] uppercase px-2 py-1.5 rounded-sm hover:bg-black/80"
           >
             {sonido ? 'Silenciar' : 'Activar sonido'}
           </button>
