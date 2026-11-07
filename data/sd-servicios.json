@@ -136,6 +136,14 @@
   "imagen": "/servicios/emma-pierangeli.webp"
  },
  {
+  "marca": "Únic Golf SD",
+  "rubro": "Resto · Golf SD",
+  "tel": "11 3195-8530",
+  "seccion": "Gastronomía y compras",
+  "whatsapp": "https://wa.me/5491131958530",
+  "imagen": "/servicios/unic-golf-sd.webp"
+ },
+ {
   "marca": "Clases de Música",
   "rubro": "",
   "tel": "",
@@ -150,14 +158,6 @@
   "seccion": "Deporte y tiempo libre",
   "whatsapp": "https://wa.me/5491121672165",
   "imagen": "/servicios/punto-golf-shop.webp"
- },
- {
-  "marca": "Únic Golf SD",
-  "rubro": "Golf SD",
-  "tel": "11 3195-8530",
-  "seccion": "Deporte y tiempo libre",
-  "whatsapp": "https://wa.me/5491131958530",
-  "imagen": "/servicios/unic-golf-sd.webp"
  },
  {
   "marca": "Luis Pasteur",
