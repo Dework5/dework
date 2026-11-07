@@ -12,7 +12,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? ''
   const isAdmin  = pathname.startsWith('/admin')
   const isReader = READER_RE.test(pathname)
-  const showChrome = !isAdmin && !isReader
+  const isSalida = pathname.startsWith('/ir/')
+  const showChrome = !isAdmin && !isReader && !isSalida
 
   return (
     <>

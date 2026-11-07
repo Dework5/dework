@@ -7,7 +7,7 @@ import { useRef, useState } from 'react'
 // Original en ediciones/145/entrada/sponsor/.
 const VIDEO = '/sponsor/audi.mp4'
 const POSTER = '/sponsor/audi-poster.jpg'
-const URL_AUDI = 'https://www.audi.com.ar/ar/web/es.html'
+const URL_AUDI = '/ir/audi-buenos-aires' // cuenta el clic y lleva a la web de Audi
 
 export function MainSponsor() {
   const ref = useRef<HTMLVideoElement>(null)
@@ -34,7 +34,7 @@ export function MainSponsor() {
           <a
             href={URL_AUDI}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             className="inline-block text-[10px] tracking-[0.28em] uppercase border border-white/40 px-5 py-3 hover:border-dw-gold hover:text-dw-gold transition-colors"
           >
             Conocé Audi →

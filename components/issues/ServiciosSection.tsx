@@ -9,9 +9,10 @@ function Tarjeta({ s }: { s: Servicio }) {
   const esWa = s.whatsapp.includes('wa.me/')
   return (
     <a
-      href={s.whatsapp}
+      // pasa por /ir/<anunciante> para contar el contacto y de ahí abre su WhatsApp, web o Instagram
+      href={`/ir/${s.imagen.replace(/^\/servicios\//, '').replace(/\.webp$/, '')}`}
       target="_blank"
-      rel="noopener noreferrer"
+      rel="noopener"
       aria-label={esWa ? `Escribir por WhatsApp a ${s.marca}` : `Ver más de ${s.marca}`}
       className="group block"
     >

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Bodoni_Moda, Libre_Caslon_Text } from 'next/font/google'
 import './globals.css'
 import { SiteShell } from '@/components/layout/SiteShell'
+import { Analytics } from '@vercel/analytics/next'
 
 // Misma tipografía que la revista (diseño "Club")
 const caslon = Libre_Caslon_Text({
@@ -38,6 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${caslon.variable} ${bodoni.variable}`}>
       <body className="font-body bg-dw-black text-dw-text antialiased">
         <SiteShell>{children}</SiteShell>
+        {/* Medición de visitas (Vercel Web Analytics): las visitas a /ir/<anunciante> cuentan los contactos de cada uno */}
+        <Analytics />
       </body>
     </html>
   )
