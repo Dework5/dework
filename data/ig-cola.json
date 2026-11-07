@@ -9,6 +9,15 @@
   "aprobado": "2026-11-07"
  },
  {
+  "id": "sabado-poli-20261107",
+  "tipo": "historia",
+  "cuando": "2026-11-07T16:00:00-03:00",
+  "imagenes": [
+   "/ig/destacadas/horarios-poli-4.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
   "id": "domingo-poli-20261108",
   "tipo": "historia",
   "cuando": "2026-11-08T10:00:00-03:00",
