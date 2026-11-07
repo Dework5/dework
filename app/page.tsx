@@ -9,6 +9,7 @@ import { StatsSection } from '@/components/home/StatsSection'
 import { ContactSection } from '@/components/home/ContactSection'
 import { AnunciantesSection } from '@/components/home/AnunciantesSection'
 import { SeccionesMenu } from '@/components/issues/SeccionesMenu'
+import { MainSponsor } from '@/components/issues/MainSponsor'
 
 async function getData() {
   const publications = PUBLICACIONES
@@ -30,6 +31,7 @@ export default async function HomePage() {
       ]} />
       <HeroSection publications={publications} />
       <MarqueeStrip publications={publications} />
+      <MainSponsor />
       <PublicationsSection publications={publications} />
       {(latestIssue as any)?.page_images_json?.avisos?.length > 0 && (
         <AnunciantesSection
