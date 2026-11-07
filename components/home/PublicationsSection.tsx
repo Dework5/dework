@@ -75,7 +75,8 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                   style={{ backgroundImage: PATTERNS[0] }} />
               )}
 
-              <Link href={`/revistas/${main.slug}`} className="absolute inset-0 p-8 flex flex-col justify-between">
+              {/* la tapa lleva directo a leer la última edición (sin la página de en medio) */}
+              <Link href={main.latest_issue?.issue_number ? `/revistas/${main.slug}/${main.latest_issue.issue_number}` : `/revistas/${main.slug}`} className="absolute inset-0 p-8 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                   <span />
                 </div>
