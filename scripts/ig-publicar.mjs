@@ -76,8 +76,10 @@ for (const x of aPublicar) {
       ({ id: contenedor } = await api(`/${IG_USER_ID}/media`, { image_url: await urlImagen(x.imagenes[0]), media_type: 'STORIES' }));
     } else if (x.tipo === 'carrusel') {
       const hijos = [];
-      for (const rel of x.imagenes) {
-        const { id } = await api(`/${IG_USER_ID}/media`, { image_url: await urlImagen(rel), is_carousel_item: 'true' });
+      for (const [i, rel] of x.imagenes.entries()) {
+        // etiquetas de personas en esa placa: [{ placa: 0, usuario: 'soficairo_', x: 0.5, y: 0.4 }]
+        const tags = (x.etiquetas ?? []).filter(t => t.placa === i).map(t => ({ username: t.usuario, x: t.x ?? 0.5, y: t.y ?? 0.5 }));
+        const { id } = await api(`/${IG_USER_ID}/media`, { image_url: await urlImagen(rel), is_carousel_item: 'true', ...(tags.length ? { user_tags: JSON.stringify(tags) } : {}) });
         await esperarListo(id); hijos.push(id);
       }
       ({ id: contenedor } = await api(`/${IG_USER_ID}/media`, { media_type: 'CAROUSEL', children: hijos.join(','), caption: x.texto ?? '' }));
