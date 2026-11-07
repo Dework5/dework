@@ -18,6 +18,32 @@
   "aprobado": "2026-11-07"
  },
  {
+  "id": "historia-ya-salio-145",
+  "tipo": "historia",
+  "cuando": "2026-11-07T19:00:00-03:00",
+  "imagenes": [
+   "/ig/web/ya-salio-145.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "carrusel-ya-salio-145",
+  "tipo": "carrusel",
+  "cuando": "2026-11-07T19:01:00-03:00",
+  "imagenes": [
+   "/ig/notas/yasalio/01.jpg",
+   "/ig/notas/yasalio/02.jpg",
+   "/ig/notas/yasalio/03.jpg",
+   "/ig/notas/yasalio/04.jpg",
+   "/ig/notas/yasalio/05.jpg",
+   "/ig/notas/yasalio/06.jpg",
+   "/ig/notas/yasalio/07.jpg",
+   "/ig/notas/yasalio/08.jpg"
+  ],
+  "texto": "📖✨ ¡Ya salió San Diego La Revista n° 145!\n\nUna edición especial con Sofía Cairo, la mejor jugadora de hockey del mundo, que se crió en nuestro club. 🏑🏆 Además: un ping pong exclusivo con Sofi, el Master Plan del golf, el Garden Club, los horarios del Poli, los resultados de tenis y pádel, y todos los servicios recomendados de San Diego.\n\n👉 Leela gratis en dework.com.ar/sandiego (link en la bio)\n\n#SanDiegoLaRevista #CountrySanDiego #SofiaCairo #LasLeonas #Pilar",
+  "aprobado": "2026-11-07"
+ },
+ {
   "id": "domingo-poli-20261108",
   "tipo": "historia",
   "cuando": "2026-11-08T10:00:00-03:00",
