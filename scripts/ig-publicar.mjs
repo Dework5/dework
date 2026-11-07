@@ -17,8 +17,9 @@ const AHORA = arg('--ahora') ? new Date(arg('--ahora')) : new Date();
 const SOLO = arg('--id');
 const VERIFICAR = process.argv.includes('--verificar');
 const SITIO = process.env.SITIO ?? 'https://www.dework.com.ar';
-const GRAPH = 'https://graph.facebook.com/' + (process.env.GRAPH_VERSION ?? 'v21.0');
 const { IG_USER_ID, IG_TOKEN } = process.env;
+// Las claves del "inicio de sesión con Instagram" empiezan con IG y van a graph.instagram.com; las de Facebook, a graph.facebook.com
+const GRAPH = (IG_TOKEN?.startsWith('IG') ? 'https://graph.instagram.com/' : 'https://graph.facebook.com/') + (process.env.GRAPH_VERSION ?? 'v21.0');
 const ATRASO_MAX = 6 * 60 * 60 * 1000; // si algo se atrasó más de 6 horas, no se publica solo (se avisa)
 
 const DIR = path.dirname(new URL(import.meta.url).pathname);
