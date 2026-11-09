@@ -89,6 +89,8 @@ export function ServiciosSection() {
     <section id="servicios" className="scroll-mt-28 md:scroll-mt-32 bg-dw-black py-14 md:py-24 px-5 md:px-10">
       <div className="max-w-7xl mx-auto">
         <div className="mb-10 md:mb-14 text-center">
+          {/* sello «Los Recomendados · Guía de servicios · San Diego La Revista» */}
+          <img src="/sello-los-recomendados.png" alt="Los Recomendados · Guía de servicios San Diego La Revista" width={400} height={400} className="w-28 h-28 md:w-36 md:h-36 mx-auto mb-5 drop-shadow-[0_6px_16px_rgba(22,54,43,0.25)]" />
           <h2 className="font-display text-4xl md:text-6xl text-dw-white font-normal mb-4">
             Servicios <i className="text-dw-gold">recomendados</i>
           </h2>

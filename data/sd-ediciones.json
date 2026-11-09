@@ -2,7 +2,7 @@
  {
   "issue_number": 145,
   "title": "San Diego La Revista · Edición n° 145",
-  "published_at": "2026-11-07T19:12:41.423Z",
+  "published_at": "2026-11-09T02:31:40.710Z",
   "cover_url": "/ed/sd/145/tapa.jpg",
   "pdf_url": "/ed/sd/145/San-Diego-La-Revista-145.pdf",
   "page_count": 44,
@@ -404,19 +404,11 @@
       "y": 0.3928,
       "w": 0.1581,
       "h": 0.2245,
-      "url": "https://www.dework.com.ar/ir/unic-golf-sd",
-      "title": "Únic Golf SD"
-     },
-     {
-      "x": 0.4209,
-      "y": 0.3928,
-      "w": 0.1581,
-      "h": 0.2245,
       "url": "https://www.dework.com.ar/ir/clases-de-musica",
       "title": "Clases de Música"
      },
      {
-      "x": 0.5933,
+      "x": 0.4209,
       "y": 0.3928,
       "w": 0.1581,
       "h": 0.2245,
@@ -424,7 +416,7 @@
       "title": "Punto Golf Shop"
      },
      {
-      "x": 0.7657,
+      "x": 0.5933,
       "y": 0.3928,
       "w": 0.1581,
       "h": 0.2245,
@@ -940,13 +932,6 @@
         "PAÑALERA SAN DIEGO",
         "Todo para tu bebé",
         "<b>11 2464-7219</b>"
-       ]
-      },
-      {
-       "servicio": [
-        "ÚNIC",
-        "Resto · Golf SD",
-        "<b>11 3195-8530</b>"
        ]
       },
       {
