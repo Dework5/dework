@@ -170,6 +170,43 @@
   "aprobado": "2026-11-07"
  },
  {
+  "id": "carrusel-sofia-145",
+  "tipo": "carrusel",
+  "cuando": "2026-11-11T19:00:00-03:00",
+  "imagenes": [
+   "/ig/notas/sofia/01.jpg",
+   "/ig/notas/sofia/02.jpg",
+   "/ig/notas/sofia/03.jpg",
+   "/ig/notas/sofia/04.jpg",
+   "/ig/notas/sofia/05.jpg",
+   "/ig/notas/sofia/06.jpg"
+  ],
+  "texto": "🏑🏆 Sofía Cairo, la mejor del mundo\n\nConvirtió el penal del bronce en París 2024 y el que coronó a Las Leonas campeonas del mundo en Amstelveen. En octubre, la Federación Internacional de Hockey eligió a @soficairo_ la mejor jugadora del planeta. Y se crió acá, en San Diego. 💚\n\n“Es un orgullo y un privilegio enorme. Es lo que soñé siempre desde chiquita.”\n\n📖 La historia completa, con fotos y un ping pong exclusivo, en San Diego La Revista n° 145.\n👉 Leela gratis en dework.com.ar/sandiego (link en la bio)\n\n#SanDiegoLaRevista #CountrySanDiego #SofiaCairo #LasLeonas #Hockey #Pilar",
+  "etiquetas": [
+   {
+    "placa": 0,
+    "usuario": "soficairo_"
+   },
+   {
+    "placa": 1,
+    "usuario": "soficairo_"
+   },
+   {
+    "placa": 2,
+    "usuario": "soficairo_"
+   },
+   {
+    "placa": 3,
+    "usuario": "soficairo_"
+   },
+   {
+    "placa": 4,
+    "usuario": "soficairo_"
+   }
+  ],
+  "aprobado": "2026-11-09"
+ },
+ {
   "id": "hoy-jueves-20261112",
   "tipo": "historia",
   "cuando": "2026-11-12T08:30:00-03:00",
@@ -258,6 +295,43 @@
    "/ig/historias/puntogolf.jpg"
   ],
   "aprobado": "2026-11-07"
+ },
+ {
+  "id": "carrusel-pingpong-145",
+  "tipo": "carrusel",
+  "cuando": "2026-11-18T19:00:00-03:00",
+  "imagenes": [
+   "/ig/notas/pingpong/01.jpg",
+   "/ig/notas/pingpong/02.jpg",
+   "/ig/notas/pingpong/03.jpg",
+   "/ig/notas/pingpong/04.jpg",
+   "/ig/notas/pingpong/05.jpg",
+   "/ig/notas/pingpong/06.jpg"
+  ],
+  "texto": "🏑💬 Ping pong exclusivo con Sofi Cairo (@soficairo_)\n\nSu infancia en San Diego, el último penal de la final, la noche de Doha y lo que más extraña cuando está lejos de casa. Una charla íntima con la mejor jugadora del mundo, que se crió en nuestro club. 💚\n\n“Doy fe que los sueños se cumplen.”\n\n📖 Leé la entrevista completa en San Diego La Revista n° 145\n👉 Gratis en dework.com.ar/sandiego (link en la bio)\n\n#SanDiegoLaRevista #CountrySanDiego #SofiaCairo #LasLeonas #Hockey #Pilar",
+  "etiquetas": [
+   {
+    "placa": 0,
+    "usuario": "soficairo_"
+   },
+   {
+    "placa": 1,
+    "usuario": "soficairo_"
+   },
+   {
+    "placa": 2,
+    "usuario": "soficairo_"
+   },
+   {
+    "placa": 3,
+    "usuario": "soficairo_"
+   },
+   {
+    "placa": 4,
+    "usuario": "soficairo_"
+   }
+  ],
+  "aprobado": "2026-11-09"
  },
  {
   "id": "hoy-jueves-20261119",
@@ -413,6 +487,20 @@
   "aprobado": "2026-11-07"
  },
  {
+  "id": "carrusel-golf-145",
+  "tipo": "carrusel",
+  "cuando": "2026-11-25T19:00:00-03:00",
+  "imagenes": [
+   "/ig/notas/golf/01.jpg",
+   "/ig/notas/golf/02.jpg",
+   "/ig/notas/golf/03.jpg",
+   "/ig/notas/golf/04.jpg",
+   "/ig/notas/golf/05.jpg"
+  ],
+  "texto": "⛳ El Master Plan del golf se va completando\n\nDesde el 9 de noviembre arranca la etapa final: la renovación de los doce greens restantes y sus bunkers. Fairways nuevos, greens con Tifeagle, drenajes y un Pro Shop que llega pronto. Así se transforma la cancha de San Diego. 💚\n\n📖 Toda la info en San Diego La Revista n° 145\n👉 Leela gratis en dework.com.ar/sandiego (link en la bio)\n\n#SanDiegoLaRevista #CountrySanDiego #Golf #MasterPlan #Pilar",
+  "aprobado": "2026-11-09"
+ },
+ {
   "id": "hoy-jueves-20261126",
   "tipo": "historia",
   "cuando": "2026-11-26T08:30:00-03:00",
@@ -557,6 +645,22 @@
   "aprobado": "2026-11-07"
  },
  {
+  "id": "carrusel-garden-145",
+  "tipo": "carrusel",
+  "cuando": "2026-12-02T19:00:00-03:00",
+  "imagenes": [
+   "/ig/notas/garden/01.jpg",
+   "/ig/notas/garden/02.jpg",
+   "/ig/notas/garden/03.jpg",
+   "/ig/notas/garden/04.jpg",
+   "/ig/notas/garden/05.jpg",
+   "/ig/notas/garden/06.jpg",
+   "/ig/notas/garden/07.jpg"
+  ],
+  "texto": "🌸🌻 Florales de estación y herbáceas perennes\n\nAnuales, bianuales y perennes: cómo se diferencian, cuánto viven y qué especies elegir para tener el jardín florecido de una temporada a otra. La guía del Garden Club, ideal para esta primavera. 🌷\n\n📖 Leela completa en San Diego La Revista n° 145\n👉 Gratis en dework.com.ar/sandiego (link en la bio)\n\n📷 Fotos: Wikimedia Commons (CC BY-SA)\n#SanDiegoLaRevista #CountrySanDiego #GardenClub #Jardin #Primavera #Pilar",
+  "aprobado": "2026-11-09"
+ },
+ {
   "id": "hoy-jueves-20261203",
   "tipo": "historia",
   "cuando": "2026-12-03T08:30:00-03:00",
@@ -690,6 +794,21 @@
    "/ig/historias/grupor.jpg"
   ],
   "aprobado": "2026-11-07"
+ },
+ {
+  "id": "carrusel-tenis-145",
+  "tipo": "carrusel",
+  "cuando": "2026-12-09T19:00:00-03:00",
+  "imagenes": [
+   "/ig/notas/tenis/01.jpg",
+   "/ig/notas/tenis/02.jpg",
+   "/ig/notas/tenis/03.jpg",
+   "/ig/notas/tenis/04.jpg",
+   "/ig/notas/tenis/05.jpg",
+   "/ig/notas/tenis/06.jpg"
+  ],
+  "texto": "🎾 Tenis y pádel: resultados de nuestros equipos\n\nCitenis, Liga CETI, Liga del Oeste y Cipadel: así les fue a los equipos de San Diego. ¡Felicitaciones a todas! 💪\n\n📖 Todos los resultados en San Diego La Revista n° 145\n👉 Leela gratis en dework.com.ar/sandiego (link en la bio)\n\n📷 Resultados y fotos: @escuela.detenisypadel\n#SanDiegoLaRevista #CountrySanDiego #Tenis #Padel #Pilar",
+  "aprobado": "2026-11-09"
  },
  {
   "id": "hoy-jueves-20261210",
