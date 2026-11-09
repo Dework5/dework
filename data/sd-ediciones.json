@@ -2,7 +2,7 @@
  {
   "issue_number": 145,
   "title": "San Diego La Revista · Edición n° 145",
-  "published_at": "2026-11-09T21:58:08.459Z",
+  "published_at": "2026-11-09T22:16:33.882Z",
   "cover_url": "/ed/sd/145/tapa.jpg",
   "pdf_url": "/ed/sd/145/San-Diego-La-Revista-145.pdf",
   "page_count": 44,
@@ -1045,14 +1045,16 @@
     {
      "url": "https://www.instagram.com/tiernissimacarnicerias/",
      "marca": "Tiernísima",
-     "imagen": "/ed/sd/145/avisos/p28-tiernisima-800.webp",
-     "pagina": 28
+     "imagen": "/ed/sd/145/avisos/p28-tiernisima-vertical-800.webp",
+     "pagina": 28,
+     "formato": "vertical"
     },
     {
      "url": "https://www.dework.com.ar/ir/panalera-san-diego",
      "marca": "Pañalera San Diego",
-     "imagen": "/ed/sd/145/avisos/p28-panalera-san-diego-800.webp",
-     "pagina": 28
+     "imagen": "/ed/sd/145/avisos/p28-panalera-san-diego-vertical-800.webp",
+     "pagina": 28,
+     "formato": "vertical"
     },
     {
      "url": "https://www.dework.com.ar/ir/grupo-r",
@@ -1061,28 +1063,46 @@
      "pagina": 29
     },
     {
+     "url": "https://www.dework.com.ar/ir/punto-golf-shop",
+     "marca": "Punto Golf Shop",
+     "imagen": "/ed/sd/145/avisos/p31-punto-golf-shop-vertical-800.webp",
+     "pagina": 31,
+     "formato": "vertical"
+    },
+    {
      "url": "https://www.dework.com.ar/ir/tienta-helados",
      "marca": "Tienta Helados",
-     "imagen": "/ed/sd/145/avisos/p32-tienta-helados-800.webp",
-     "pagina": 32
+     "imagen": "/ed/sd/145/avisos/p32-tienta-helados-vertical-800.webp",
+     "pagina": 32,
+     "formato": "vertical"
     },
     {
      "url": "https://www.dework.com.ar/ir/technical-roll",
      "marca": "Technical Roll",
-     "imagen": "/ed/sd/145/avisos/p33-technical-roll-800.webp",
-     "pagina": 33
+     "imagen": "/ed/sd/145/avisos/p33-technical-roll-vertical-800.webp",
+     "pagina": 33,
+     "formato": "vertical"
+    },
+    {
+     "url": "https://www.dework.com.ar/ir/centro-de-estetica-graciela-merlin",
+     "marca": "Centro de Estética Graciela Merlín",
+     "imagen": "/ed/sd/145/avisos/p33-centro-de-estetica-graciela-merlin-vertical-800.webp",
+     "pagina": 33,
+     "formato": "vertical"
     },
     {
      "url": "https://www.dework.com.ar/ir/ferreteria-cerrajeria-san-diego",
      "marca": "Ferretería & Cerrajería San Diego",
-     "imagen": "/ed/sd/145/avisos/p36-ferreteria-cerrajeria-san-diego-800.webp",
-     "pagina": 36
+     "imagen": "/ed/sd/145/avisos/p36-ferreteria-cerrajeria-san-diego-vertical-800.webp",
+     "pagina": 36,
+     "formato": "vertical"
     },
     {
      "url": "https://www.dework.com.ar/ir/emma-pierangeli",
      "marca": "Emma Pierangeli",
-     "imagen": "/ed/sd/145/avisos/p36-emma-pierangeli-800.webp",
-     "pagina": 36
+     "imagen": "/ed/sd/145/avisos/p36-emma-pierangeli-vertical-800.webp",
+     "pagina": 36,
+     "formato": "vertical"
     },
     {
      "url": "https://www.dework.com.ar/ir/coldwell-banker-wings",
