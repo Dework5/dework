@@ -58,7 +58,7 @@ export default function NoteReader({ nota, siguiente, onClose, onAbrir }: Props)
 
       <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto overscroll-contain">
         {nota.foto && (
-          <img src={nota.foto} alt="" className="w-full block object-cover" style={{ maxHeight: '62vh' }} />
+          <img src={nota.foto} alt="" className="w-full block object-cover" style={{ maxHeight: '62vh', objectPosition: (nota as any).fotoPos ?? 'center' }} />
         )}
         <article className="mx-auto px-6 pt-8 pb-16" style={{ maxWidth: 640 }}>
           <div className="flex items-center gap-3 mb-4">

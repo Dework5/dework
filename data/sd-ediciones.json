@@ -2,7 +2,7 @@
  {
   "issue_number": 145,
   "title": "San Diego La Revista · Edición n° 145",
-  "published_at": "2026-11-09T02:31:40.710Z",
+  "published_at": "2026-11-09T02:39:38.679Z",
   "cover_url": "/ed/sd/145/tapa.jpg",
   "pdf_url": "/ed/sd/145/San-Diego-La-Revista-145.pdf",
   "page_count": 44,
@@ -481,6 +481,7 @@
     {
      "id": "sofia",
      "foto": "/ed/sd/145/notas/sofia.webp",
+     "fotoPos": "center 35%",
      "desde": 6,
      "hasta": 15,
      "seccion": "Hockey",
@@ -539,6 +540,7 @@
     {
      "id": "pingpong",
      "foto": "/ed/sd/145/notas/pingpong.webp",
+     "fotoPos": "center 22%",
      "desde": 16,
      "hasta": 21,
      "seccion": "Ping pong exclusivo",
