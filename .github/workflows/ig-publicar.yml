@@ -1,11 +1,11 @@
 # Publica en Instagram (@countrysandiegolarevista) lo que vence en data/ig-cola.json (solo piezas aprobadas por Vicky).
-# Corre cada media hora. Lo ya publicado se anota en la rama ig-estado (estado.json) para no publicar nada dos veces.
+# Corre cada 10 minutos (GitHub saltea muchos disparos programados; con más intentos sale más cerca de la hora). Lo ya publicado se anota en la rama ig-estado (estado.json) para no publicar nada dos veces.
 # Secretos necesarios (Settings → Secrets and variables → Actions): IG_USER_ID, IG_TOKEN.
 name: Publicar en Instagram
 
 on:
   schedule:
-    - cron: '5,35 * * * *'
+    - cron: '7,17,27,37,47,57 * * * *'
   workflow_dispatch:
     inputs:
       modo:

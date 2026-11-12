@@ -91,6 +91,9 @@ for (const x of aPublicar) {
         await esperarListo(id); hijos.push(id);
       }
       ({ id: contenedor } = await api(`/${IG_USER_ID}/media`, { media_type: 'CAROUSEL', children: hijos.join(','), caption: x.texto ?? '' }));
+    } else if (x.tipo === 'post') {
+      // una sola imagen en el feed, con su texto
+      ({ id: contenedor } = await api(`/${IG_USER_ID}/media`, { image_url: await urlImagen(x.imagenes[0]), caption: x.texto ?? '' }));
     } else throw new Error('tipo desconocido: ' + x.tipo);
     await esperarListo(contenedor);
     const { id: media } = await api(`/${IG_USER_ID}/media_publish`, { creation_id: contenedor });

@@ -225,81 +225,27 @@
   "aprobado": "2026-11-07"
  },
  {
-  "id": "hoy-sabado-20261114",
+  "id": "historia-grupor-20261113",
   "tipo": "historia",
-  "cuando": "2026-11-14T08:30:00-03:00",
-  "imagenes": [
-   "/ig/hoy/sabado.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "hoy-domingo-20261115",
-  "tipo": "historia",
-  "cuando": "2026-11-15T08:30:00-03:00",
-  "imagenes": [
-   "/ig/hoy/domingo.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "hoy-lunes-20261116",
-  "tipo": "historia",
-  "cuando": "2026-11-16T08:30:00-03:00",
-  "imagenes": [
-   "/ig/hoy/lunes.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-ferreteria-20261116",
-  "tipo": "historia",
-  "cuando": "2026-11-16T09:00:00-03:00",
-  "imagenes": [
-   "/ig/historias/ferreteria.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "hoy-martes-20261117",
-  "tipo": "historia",
-  "cuando": "2026-11-17T08:30:00-03:00",
-  "imagenes": [
-   "/ig/hoy/martes.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-grupor-20261117",
-  "tipo": "historia",
-  "cuando": "2026-11-17T09:00:00-03:00",
+  "cuando": "2026-11-13T10:00:00-03:00",
   "imagenes": [
    "/ig/historias/grupor.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
-  "id": "hoy-miercoles-20261118",
+  "id": "historia-ferreteria-20261113",
   "tipo": "historia",
-  "cuando": "2026-11-18T08:30:00-03:00",
+  "cuando": "2026-11-13T18:00:00-03:00",
   "imagenes": [
-   "/ig/hoy/miercoles.jpg"
+   "/ig/historias/ferreteria.jpg"
   ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-puntogolf-20261118",
-  "tipo": "historia",
-  "cuando": "2026-11-18T10:30:00-03:00",
-  "imagenes": [
-   "/ig/historias/puntogolf.jpg"
-  ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
   "id": "carrusel-pingpong-145",
   "tipo": "carrusel",
-  "cuando": "2026-11-18T19:00:00-03:00",
+  "cuando": "2026-11-13T19:00:00-03:00",
   "imagenes": [
    "/ig/notas/pingpong/01.jpg",
    "/ig/notas/pingpong/02.jpg",
@@ -334,162 +280,100 @@
   "aprobado": "2026-11-09"
  },
  {
-  "id": "hoy-jueves-20261119",
+  "id": "hoy-sabado-20261114",
   "tipo": "historia",
-  "cuando": "2026-11-19T08:30:00-03:00",
-  "imagenes": [
-   "/ig/hoy/jueves.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-ecosuper-20261119",
-  "tipo": "historia",
-  "cuando": "2026-11-19T10:00:00-03:00",
-  "imagenes": [
-   "/ig/historias/ecosuper.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-coldwell-20261119",
-  "tipo": "historia",
-  "cuando": "2026-11-19T10:30:00-03:00",
-  "imagenes": [
-   "/ig/historias/coldwell.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "hoy-viernes-20261120",
-  "tipo": "historia",
-  "cuando": "2026-11-20T08:30:00-03:00",
-  "imagenes": [
-   "/ig/hoy/viernes.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-emma-20261120",
-  "tipo": "historia",
-  "cuando": "2026-11-20T11:30:00-03:00",
-  "imagenes": [
-   "/ig/historias/emma.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "hoy-sabado-20261121",
-  "tipo": "historia",
-  "cuando": "2026-11-21T08:30:00-03:00",
+  "cuando": "2026-11-14T08:30:00-03:00",
   "imagenes": [
    "/ig/hoy/sabado.jpg"
   ],
   "aprobado": "2026-11-07"
  },
  {
-  "id": "historia-tienta-20261121",
+  "id": "historia-coldwell-20261114",
   "tipo": "historia",
-  "cuando": "2026-11-21T15:00:00-03:00",
+  "cuando": "2026-11-14T10:00:00-03:00",
   "imagenes": [
-   "/ig/historias/tienta.jpg"
+   "/ig/historias/coldwell.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
-  "id": "hoy-domingo-20261122",
+  "id": "post-grupor-145",
+  "tipo": "post",
+  "cuando": "2026-11-14T12:00:00-03:00",
+  "imagenes": [
+   "/ig/feed/grupor.jpg"
+  ],
+  "texto": "✨ Recomendado en San Diego: Grupo R\nFumigación y control de plagas\n\n📲 Pedí tu turno por WhatsApp: 11 6520-5228\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-puntogolf-20261114",
   "tipo": "historia",
-  "cuando": "2026-11-22T08:30:00-03:00",
+  "cuando": "2026-11-14T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/puntogolf.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "hoy-domingo-20261115",
+  "tipo": "historia",
+  "cuando": "2026-11-15T08:30:00-03:00",
   "imagenes": [
    "/ig/hoy/domingo.jpg"
   ],
   "aprobado": "2026-11-07"
  },
  {
-  "id": "historia-kiosco-20261122",
+  "id": "historia-pasteur-20261115",
   "tipo": "historia",
-  "cuando": "2026-11-22T10:00:00-03:00",
-  "imagenes": [
-   "/ig/historias/kiosco.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-pasteur-20261122",
-  "tipo": "historia",
-  "cuando": "2026-11-22T18:00:00-03:00",
+  "cuando": "2026-11-15T10:00:00-03:00",
   "imagenes": [
    "/ig/historias/pasteur.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
-  "id": "hoy-lunes-20261123",
+  "id": "historia-ecosuper-20261115",
   "tipo": "historia",
-  "cuando": "2026-11-23T08:30:00-03:00",
+  "cuando": "2026-11-15T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/ecosuper.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "hoy-lunes-20261116",
+  "tipo": "historia",
+  "cuando": "2026-11-16T08:30:00-03:00",
   "imagenes": [
    "/ig/hoy/lunes.jpg"
   ],
   "aprobado": "2026-11-07"
  },
  {
-  "id": "historia-technicalroll-20261123",
+  "id": "historia-emma-20261116",
   "tipo": "historia",
-  "cuando": "2026-11-23T09:00:00-03:00",
+  "cuando": "2026-11-16T10:00:00-03:00",
   "imagenes": [
-   "/ig/historias/technicalroll.jpg"
+   "/ig/historias/emma.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
-  "id": "historia-ancarola-20261123",
+  "id": "historia-tubotherm-20261116",
   "tipo": "historia",
-  "cuando": "2026-11-23T10:30:00-03:00",
+  "cuando": "2026-11-16T18:00:00-03:00",
   "imagenes": [
-   "/ig/historias/ancarola.jpg"
+   "/ig/historias/tubotherm.jpg"
   ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "hoy-martes-20261124",
-  "tipo": "historia",
-  "cuando": "2026-11-24T08:30:00-03:00",
-  "imagenes": [
-   "/ig/hoy/martes.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-pintor-20261124",
-  "tipo": "historia",
-  "cuando": "2026-11-24T09:00:00-03:00",
-  "imagenes": [
-   "/ig/historias/pintor.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "hoy-miercoles-20261125",
-  "tipo": "historia",
-  "cuando": "2026-11-25T08:30:00-03:00",
-  "imagenes": [
-   "/ig/hoy/miercoles.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-gm-20261125",
-  "tipo": "historia",
-  "cuando": "2026-11-25T10:30:00-03:00",
-  "imagenes": [
-   "/ig/historias/gm.jpg"
-  ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
   "id": "carrusel-golf-145",
   "tipo": "carrusel",
-  "cuando": "2026-11-25T19:00:00-03:00",
+  "cuando": "2026-11-16T19:00:00-03:00",
   "imagenes": [
    "/ig/notas/golf/01.jpg",
    "/ig/notas/golf/02.jpg",
@@ -501,6 +385,310 @@
   "aprobado": "2026-11-09"
  },
  {
+  "id": "hoy-martes-20261117",
+  "tipo": "historia",
+  "cuando": "2026-11-17T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/martes.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-grupor-20261117",
+  "tipo": "historia",
+  "cuando": "2026-11-17T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/grupor.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "post-coldwell-145",
+  "tipo": "post",
+  "cuando": "2026-11-17T12:00:00-03:00",
+  "imagenes": [
+   "/ig/feed/coldwell.jpg"
+  ],
+  "texto": "✨ Recomendado en San Diego: Coldwell Banker Wings\nCompra, venta y alquiler en San Diego\n\n📲 Consultá por WhatsApp: 11 3361-6566\n👉 @victoriagazzorealestate\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-kiosco-20261117",
+  "tipo": "historia",
+  "cuando": "2026-11-17T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/kiosco.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "hoy-miercoles-20261118",
+  "tipo": "historia",
+  "cuando": "2026-11-18T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/miercoles.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-ancarola-20261118",
+  "tipo": "historia",
+  "cuando": "2026-11-18T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/ancarola.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-tiernisima-20261118",
+  "tipo": "historia",
+  "cuando": "2026-11-18T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tiernisima.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "hoy-jueves-20261119",
+  "tipo": "historia",
+  "cuando": "2026-11-19T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/jueves.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-athenea-20261119",
+  "tipo": "historia",
+  "cuando": "2026-11-19T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/athenea.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-panalera-20261119",
+  "tipo": "historia",
+  "cuando": "2026-11-19T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/panalera.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "carrusel-garden-145",
+  "tipo": "carrusel",
+  "cuando": "2026-11-19T19:00:00-03:00",
+  "imagenes": [
+   "/ig/notas/garden/01.jpg",
+   "/ig/notas/garden/02.jpg",
+   "/ig/notas/garden/03.jpg",
+   "/ig/notas/garden/04.jpg",
+   "/ig/notas/garden/05.jpg",
+   "/ig/notas/garden/06.jpg",
+   "/ig/notas/garden/07.jpg"
+  ],
+  "texto": "🌸🌻 Florales de estación y herbáceas perennes\n\nAnuales, bianuales y perennes: cómo se diferencian, cuánto viven y qué especies elegir para tener el jardín florecido de una temporada a otra. La guía del Garden Club, ideal para esta primavera. 🌷\n\n📖 Leela completa en San Diego La Revista n° 145\n👉 Gratis en dework.com.ar/sandiego (link en la bio)\n\n📷 Fotos: Wikimedia Commons (CC BY-SA)\n#SanDiegoLaRevista #CountrySanDiego #GardenClub #Jardin #Primavera #Pilar",
+  "aprobado": "2026-11-09"
+ },
+ {
+  "id": "hoy-viernes-20261120",
+  "tipo": "historia",
+  "cuando": "2026-11-20T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/viernes.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-pintor-20261120",
+  "tipo": "historia",
+  "cuando": "2026-11-20T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/pintor.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-gm-20261120",
+  "tipo": "historia",
+  "cuando": "2026-11-20T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/gm.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "hoy-sabado-20261121",
+  "tipo": "historia",
+  "cuando": "2026-11-21T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/sabado.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-antonio-20261121",
+  "tipo": "historia",
+  "cuando": "2026-11-21T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/antonio.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "post-pasteur-145",
+  "tipo": "post",
+  "cuando": "2026-11-21T12:00:00-03:00",
+  "imagenes": [
+   "/ig/feed/pasteur.jpg"
+  ],
+  "texto": "✨ Recomendado en San Diego: Luis Pasteur\nosluispasteur.com\n\n📞 Consultá: 0810 333 7278\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-technicalroll-20261121",
+  "tipo": "historia",
+  "cuando": "2026-11-21T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/technicalroll.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "hoy-domingo-20261122",
+  "tipo": "historia",
+  "cuando": "2026-11-22T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/domingo.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-tienta-20261122",
+  "tipo": "historia",
+  "cuando": "2026-11-22T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tienta.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-diego-20261122",
+  "tipo": "historia",
+  "cuando": "2026-11-22T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/diego.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "hoy-lunes-20261123",
+  "tipo": "historia",
+  "cuando": "2026-11-23T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/lunes.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-coldwell-20261123",
+  "tipo": "historia",
+  "cuando": "2026-11-23T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/coldwell.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-ferreteria-20261123",
+  "tipo": "historia",
+  "cuando": "2026-11-23T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/ferreteria.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "carrusel-tenis-145",
+  "tipo": "carrusel",
+  "cuando": "2026-11-23T19:00:00-03:00",
+  "imagenes": [
+   "/ig/notas/tenis/01.jpg",
+   "/ig/notas/tenis/02.jpg",
+   "/ig/notas/tenis/03.jpg",
+   "/ig/notas/tenis/04.jpg",
+   "/ig/notas/tenis/05.jpg",
+   "/ig/notas/tenis/06.jpg"
+  ],
+  "texto": "🎾 Tenis y pádel: resultados de nuestros equipos\n\nCitenis, Liga CETI, Liga del Oeste y Cipadel: así les fue a los equipos de San Diego. ¡Felicitaciones a todas! 💪\n\n📖 Todos los resultados en San Diego La Revista n° 145\n👉 Leela gratis en dework.com.ar/sandiego (link en la bio)\n\n📷 Resultados y fotos: @escuela.detenisypadel\n#SanDiegoLaRevista #CountrySanDiego #Tenis #Padel #Pilar",
+  "aprobado": "2026-11-09"
+ },
+ {
+  "id": "hoy-martes-20261124",
+  "tipo": "historia",
+  "cuando": "2026-11-24T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/martes.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-armando-20261124",
+  "tipo": "historia",
+  "cuando": "2026-11-24T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/armando.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "post-tubotherm-145",
+  "tipo": "post",
+  "cuando": "2026-11-24T12:00:00-03:00",
+  "imagenes": [
+   "/ig/feed/tubotherm.jpg"
+  ],
+  "texto": "✨ Recomendado en San Diego: Tubotherm · Grupo Dema\ngrupodema.com.ar\n\n🌐 Conocé más: tubotherm.com.ar\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-puntogolf-20261124",
+  "tipo": "historia",
+  "cuando": "2026-11-24T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/puntogolf.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "hoy-miercoles-20261125",
+  "tipo": "historia",
+  "cuando": "2026-11-25T08:30:00-03:00",
+  "imagenes": [
+   "/ig/hoy/miercoles.jpg"
+  ],
+  "aprobado": "2026-11-07"
+ },
+ {
+  "id": "historia-pasteur-20261125",
+  "tipo": "historia",
+  "cuando": "2026-11-25T10:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/pasteur.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-massoluciones-20261125",
+  "tipo": "historia",
+  "cuando": "2026-11-25T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/massoluciones.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
   "id": "hoy-jueves-20261126",
   "tipo": "historia",
   "cuando": "2026-11-26T08:30:00-03:00",
@@ -510,22 +698,22 @@
   "aprobado": "2026-11-07"
  },
  {
-  "id": "historia-tubotherm-20261126",
-  "tipo": "historia",
-  "cuando": "2026-11-26T09:00:00-03:00",
-  "imagenes": [
-   "/ig/historias/tubotherm.jpg"
-  ],
-  "aprobado": "2026-11-07"
- },
- {
-  "id": "historia-tiernisima-20261126",
+  "id": "historia-emma-20261126",
   "tipo": "historia",
   "cuando": "2026-11-26T10:00:00-03:00",
   "imagenes": [
-   "/ig/historias/tiernisima.jpg"
+   "/ig/historias/emma.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-tubotherm-20261126",
+  "tipo": "historia",
+  "cuando": "2026-11-26T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tubotherm.jpg"
+  ],
+  "aprobado": "2026-11-12"
  },
  {
   "id": "hoy-viernes-20261127",
@@ -537,13 +725,22 @@
   "aprobado": "2026-11-07"
  },
  {
-  "id": "historia-emma-20261127",
+  "id": "historia-perrosygatos-20261127",
   "tipo": "historia",
-  "cuando": "2026-11-27T11:30:00-03:00",
+  "cuando": "2026-11-27T10:00:00-03:00",
   "imagenes": [
-   "/ig/historias/emma.jpg"
+   "/ig/historias/perrosygatos.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-tienta-20261127",
+  "tipo": "historia",
+  "cuando": "2026-11-27T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/tienta.jpg"
+  ],
+  "aprobado": "2026-11-12"
  },
  {
   "id": "hoy-sabado-20261128",
@@ -555,13 +752,32 @@
   "aprobado": "2026-11-07"
  },
  {
-  "id": "historia-grupor-20261128",
+  "id": "historia-ancarola-20261128",
   "tipo": "historia",
-  "cuando": "2026-11-28T09:00:00-03:00",
+  "cuando": "2026-11-28T10:00:00-03:00",
   "imagenes": [
-   "/ig/historias/grupor.jpg"
+   "/ig/historias/ancarola.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "post-ancarola-145",
+  "tipo": "post",
+  "cuando": "2026-11-28T12:00:00-03:00",
+  "imagenes": [
+   "/ig/feed/ancarola.jpg"
+  ],
+  "texto": "✨ Recomendado en San Diego: Ancarola & Racca\nNegocios inmobiliarios\n\n📲 Consultá en Instagram\n👉 @ancarolaracca\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-musica-20261128",
+  "tipo": "historia",
+  "cuando": "2026-11-28T18:00:00-03:00",
+  "imagenes": [
+   "/ig/historias/musica.jpg"
+  ],
+  "aprobado": "2026-11-12"
  },
  {
   "id": "hoy-domingo-20261129",
@@ -573,13 +789,22 @@
   "aprobado": "2026-11-07"
  },
  {
-  "id": "historia-panalera-20261129",
+  "id": "historia-tiernisima-20261129",
   "tipo": "historia",
   "cuando": "2026-11-29T10:00:00-03:00",
   "imagenes": [
+   "/ig/historias/tiernisima.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-panalera-20261129",
+  "tipo": "historia",
+  "cuando": "2026-11-29T18:00:00-03:00",
+  "imagenes": [
    "/ig/historias/panalera.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
   "id": "hoy-lunes-20261130",
@@ -591,22 +816,22 @@
   "aprobado": "2026-11-07"
  },
  {
-  "id": "historia-antonio-20261130",
+  "id": "historia-gm-20261130",
   "tipo": "historia",
-  "cuando": "2026-11-30T09:00:00-03:00",
+  "cuando": "2026-11-30T10:00:00-03:00",
   "imagenes": [
-   "/ig/historias/antonio.jpg"
+   "/ig/historias/gm.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
-  "id": "historia-coldwell-20261130",
+  "id": "historia-technicalroll-20261130",
   "tipo": "historia",
-  "cuando": "2026-11-30T10:30:00-03:00",
+  "cuando": "2026-11-30T18:00:00-03:00",
   "imagenes": [
-   "/ig/historias/coldwell.jpg"
+   "/ig/historias/technicalroll.jpg"
   ],
-  "aprobado": "2026-11-07"
+  "aprobado": "2026-11-12"
  },
  {
   "id": "hoy-martes-20261201",
@@ -643,22 +868,6 @@
    "/ig/historias/athenea.jpg"
   ],
   "aprobado": "2026-11-07"
- },
- {
-  "id": "carrusel-garden-145",
-  "tipo": "carrusel",
-  "cuando": "2026-12-02T19:00:00-03:00",
-  "imagenes": [
-   "/ig/notas/garden/01.jpg",
-   "/ig/notas/garden/02.jpg",
-   "/ig/notas/garden/03.jpg",
-   "/ig/notas/garden/04.jpg",
-   "/ig/notas/garden/05.jpg",
-   "/ig/notas/garden/06.jpg",
-   "/ig/notas/garden/07.jpg"
-  ],
-  "texto": "🌸🌻 Florales de estación y herbáceas perennes\n\nAnuales, bianuales y perennes: cómo se diferencian, cuánto viven y qué especies elegir para tener el jardín florecido de una temporada a otra. La guía del Garden Club, ideal para esta primavera. 🌷\n\n📖 Leela completa en San Diego La Revista n° 145\n👉 Gratis en dework.com.ar/sandiego (link en la bio)\n\n📷 Fotos: Wikimedia Commons (CC BY-SA)\n#SanDiegoLaRevista #CountrySanDiego #GardenClub #Jardin #Primavera #Pilar",
-  "aprobado": "2026-11-09"
  },
  {
   "id": "hoy-jueves-20261203",
@@ -794,21 +1003,6 @@
    "/ig/historias/grupor.jpg"
   ],
   "aprobado": "2026-11-07"
- },
- {
-  "id": "carrusel-tenis-145",
-  "tipo": "carrusel",
-  "cuando": "2026-12-09T19:00:00-03:00",
-  "imagenes": [
-   "/ig/notas/tenis/01.jpg",
-   "/ig/notas/tenis/02.jpg",
-   "/ig/notas/tenis/03.jpg",
-   "/ig/notas/tenis/04.jpg",
-   "/ig/notas/tenis/05.jpg",
-   "/ig/notas/tenis/06.jpg"
-  ],
-  "texto": "🎾 Tenis y pádel: resultados de nuestros equipos\n\nCitenis, Liga CETI, Liga del Oeste y Cipadel: así les fue a los equipos de San Diego. ¡Felicitaciones a todas! 💪\n\n📖 Todos los resultados en San Diego La Revista n° 145\n👉 Leela gratis en dework.com.ar/sandiego (link en la bio)\n\n📷 Resultados y fotos: @escuela.detenisypadel\n#SanDiegoLaRevista #CountrySanDiego #Tenis #Padel #Pilar",
-  "aprobado": "2026-11-09"
  },
  {
   "id": "hoy-jueves-20261210",
