@@ -6,6 +6,9 @@ name: Publicar en Instagram
 on:
   schedule:
     - cron: '7,17,27,37,47,57 * * * *'
+  # despertador en la nube (rutina de Claude): empuja un commit a esta rama a las 8, 10, 12, 18 y 19 h
+  push:
+    branches: ['claude/ig-reloj']
   workflow_dispatch:
     inputs:
       modo:
@@ -29,6 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: master
 
       - name: Traer lo ya publicado
         run: |
