@@ -298,13 +298,12 @@
   "aprobado": "2026-11-12"
  },
  {
-  "id": "post-grupor-145",
-  "tipo": "post",
+  "id": "historia-aviso-grupor-145",
+  "tipo": "historia",
   "cuando": "2026-11-14T12:00:00-03:00",
   "imagenes": [
-   "/ig/feed/grupor.jpg"
+   "/ig/historias-aviso/grupor.jpg"
   ],
-  "texto": "✨ Recomendado en San Diego: Grupo R\nFumigación y control de plagas\n\n📲 Pedí tu turno por WhatsApp: 11 6520-5228\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
   "aprobado": "2026-11-12"
  },
  {
@@ -403,13 +402,12 @@
   "aprobado": "2026-11-12"
  },
  {
-  "id": "post-coldwell-145",
-  "tipo": "post",
+  "id": "historia-aviso-coldwell-145",
+  "tipo": "historia",
   "cuando": "2026-11-17T12:00:00-03:00",
   "imagenes": [
-   "/ig/feed/coldwell.jpg"
+   "/ig/historias-aviso/coldwell.jpg"
   ],
-  "texto": "✨ Recomendado en San Diego: Coldwell Banker Wings\nCompra, venta y alquiler en San Diego\n\n📲 Consultá por WhatsApp: 11 3361-6566\n👉 @victoriagazzorealestate\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
   "aprobado": "2026-11-12"
  },
  {
@@ -537,13 +535,12 @@
   "aprobado": "2026-11-12"
  },
  {
-  "id": "post-pasteur-145",
-  "tipo": "post",
+  "id": "historia-aviso-pasteur-145",
+  "tipo": "historia",
   "cuando": "2026-11-21T12:00:00-03:00",
   "imagenes": [
-   "/ig/feed/pasteur.jpg"
+   "/ig/historias-aviso/pasteur.jpg"
   ],
-  "texto": "✨ Recomendado en San Diego: Luis Pasteur\nosluispasteur.com\n\n📞 Consultá: 0810 333 7278\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
   "aprobado": "2026-11-12"
  },
  {
@@ -643,13 +640,12 @@
   "aprobado": "2026-11-12"
  },
  {
-  "id": "post-tubotherm-145",
-  "tipo": "post",
+  "id": "historia-aviso-tubotherm-145",
+  "tipo": "historia",
   "cuando": "2026-11-24T12:00:00-03:00",
   "imagenes": [
-   "/ig/feed/tubotherm.jpg"
+   "/ig/historias-aviso/tubotherm.jpg"
   ],
-  "texto": "✨ Recomendado en San Diego: Tubotherm · Grupo Dema\ngrupodema.com.ar\n\n🌐 Conocé más: tubotherm.com.ar\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
   "aprobado": "2026-11-12"
  },
  {
@@ -761,16 +757,6 @@
   "aprobado": "2026-11-12"
  },
  {
-  "id": "post-ancarola-145",
-  "tipo": "post",
-  "cuando": "2026-11-28T12:00:00-03:00",
-  "imagenes": [
-   "/ig/feed/ancarola.jpg"
-  ],
-  "texto": "✨ Recomendado en San Diego: Ancarola & Racca\nNegocios inmobiliarios\n\n📲 Consultá en Instagram\n👉 @ancarolaracca\n\nEncontralo en la revista n° 145 y en los Servicios Recomendados 👉 dework.com.ar/sandiego\n\n#SanDiegoLaRevista #SanDiegoCountryClub #CountrySanDiego #LosRecomendados",
-  "aprobado": "2026-11-12"
- },
- {
   "id": "historia-musica-20261128",
   "tipo": "historia",
   "cuando": "2026-11-28T18:00:00-03:00",
@@ -821,6 +807,15 @@
   "cuando": "2026-11-30T10:00:00-03:00",
   "imagenes": [
    "/ig/historias/gm.jpg"
+  ],
+  "aprobado": "2026-11-12"
+ },
+ {
+  "id": "historia-aviso-ancarola-145",
+  "tipo": "historia",
+  "cuando": "2026-11-30T12:00:00-03:00",
+  "imagenes": [
+   "/ig/historias-aviso/ancarola.jpg"
   ],
   "aprobado": "2026-11-12"
  },
